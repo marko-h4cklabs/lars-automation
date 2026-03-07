@@ -13,6 +13,7 @@ import { TemplateSelector } from './TemplateSelector'
 import { VoicePanel } from './VoicePanel'
 import { QualificationBar } from './QualificationBar'
 import { SummaryBox } from './SummaryBox'
+import { FollowUpPanel } from './FollowUpPanel'
 import type { Conversation, Lead, Message, LeadStage } from '@/types'
 
 type ConversationDetail = Conversation & { lead: Lead }
@@ -291,6 +292,7 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
             collectedFields={conversation.qualified_fields_collected || {}}
           />
           <SummaryBox conversationId={conversationId} />
+          <FollowUpPanel conversationId={conversationId} />
         </div>
       </div>
     </div>
