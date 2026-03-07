@@ -1,16 +1,64 @@
 'use client'
 
-import { X, Flame, Calendar, Bot, Moon } from 'lucide-react'
+import { useState } from 'react'
+import { X, Flame, Calendar, Bot, Moon, AlertTriangle, Filter } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
+import { useNotifications } from '@/hooks/useNotifications'
+import { NotificationType } from '@/types'
+import type { Notification } from '@/types'
 
 interface NotificationPanelProps {
   open: boolean
   onClose: () => void
 }
 
+const typeFilters: { label: string; value: NotificationType | 'all' }[] = [
+  { label: 'All', value: 'all' },
+  { label: 'Hot', value: NotificationType.HotLead },
+  { label: 'Booked', value: NotificationType.CallBooked },
+  { label: 'DQ', value: NotificationType.Disqualified },
+  { label: 'AI', value: NotificationType.AITakeover },
+  { label: 'Offline', value: NotificationType.SetterOffline },
+]
+
+function groupByDate(notifications: Notification[]) {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 86400000)
+
+  const groups: { label: string; items: Notification[] }[] = [
+    { label: 'TODAY', items: [] },
+    { label: 'YESTERDAY', items: [] },
+    { label: 'EARLIER', items: [] },
+  ]
+
+  for (const n of notifications) {
+    const d = new Date(n.created_at)
+    if (d >= today) {
+      groups[0].items.push(n)
+    } else if (d >= yesterday) {
+      groups[1].items.push(n)
+    } else {
+      groups[2].items.push(n)
+    }
+  }
+
+  return groups.filter((g) => g.items.length > 0)
+}
+
 export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
+  const { notifications, markAsRead, markAllAsRead } = useNotifications()
+  const [activeFilter, setActiveFilter] = useState<NotificationType | 'all'>('all')
+
   if (!open) return null
+
+  const filtered =
+    activeFilter === 'all'
+      ? notifications
+      : notifications.filter((n) => n.type === activeFilter)
+
+  const groups = groupByDate(filtered)
 
   return (
     <>
@@ -32,23 +80,61 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
           </button>
         </div>
 
-        {/* Mark all read */}
-        <div className="px-4 py-2 border-b border-[#1a1a1a]">
-          <button className="text-[#00ff88] text-[10px] font-mono uppercase tracking-wider hover:text-[#00cc6a] transition-colors">
+        {/* Controls: mark all + filter */}
+        <div className="px-4 py-2 border-b border-[#1a1a1a] flex items-center justify-between">
+          <button
+            onClick={markAllAsRead}
+            className="text-[#00ff88] text-[10px] font-mono uppercase tracking-wider hover:text-[#00cc6a] transition-colors"
+          >
             Mark all read
           </button>
+          <Filter className="w-3 h-3 text-[#444]" />
+        </div>
+
+        {/* Type filters */}
+        <div className="px-4 py-2 border-b border-[#1a1a1a] flex gap-1 flex-wrap">
+          {typeFilters.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setActiveFilter(f.value)}
+              className={cn(
+                'px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider transition-colors',
+                activeFilter === f.value
+                  ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
+                  : 'text-[#555] hover:text-[#888] border border-[#1a1a1a]'
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         {/* Notifications list */}
         <ScrollArea className="flex-1">
-          <div className="px-4 py-3">
-            {/* Empty state */}
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="text-[#222] mb-3">
-                <Bell className="w-8 h-8" />
+          <div className="px-3 py-2">
+            {groups.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="text-[#222] mb-3">
+                  <BellIcon className="w-8 h-8" />
+                </div>
+                <p className="text-[#444] font-mono text-xs">No notifications yet</p>
               </div>
-              <p className="text-[#444] font-mono text-xs">No notifications yet</p>
-            </div>
+            ) : (
+              groups.map((group) => (
+                <div key={group.label} className="mb-3">
+                  <p className="text-[#333] text-[9px] font-mono uppercase tracking-widest px-2 py-1.5">
+                    {group.label}
+                  </p>
+                  {group.items.map((n) => (
+                    <NotificationItem
+                      key={n.id}
+                      notification={n}
+                      onMarkRead={() => markAsRead(n.id)}
+                    />
+                  ))}
+                </div>
+              ))
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -56,45 +142,60 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
   )
 }
 
-// Notification item component for future use
-export function NotificationItem({
-  type,
-  message,
-  time,
-  read,
+function NotificationItem({
+  notification,
+  onMarkRead,
 }: {
-  type: string
-  message: string
-  time: string
-  read: boolean
+  notification: Notification
+  onMarkRead: () => void
 }) {
   const icons: Record<string, React.ReactNode> = {
     hot_lead: <Flame className="w-3.5 h-3.5 text-[#ff4500]" />,
     call_booked: <Calendar className="w-3.5 h-3.5 text-[#00ff88]" />,
     ai_takeover: <Bot className="w-3.5 h-3.5 text-amber-400" />,
     setter_offline: <Moon className="w-3.5 h-3.5 text-[#666]" />,
+    disqualified: <AlertTriangle className="w-3.5 h-3.5 text-[#666]" />,
   }
 
+  const timeAgo = formatTimeAgo(notification.created_at)
+
   return (
-    <div
+    <button
+      onClick={onMarkRead}
       className={cn(
-        'flex items-start gap-3 px-3 py-2.5 rounded cursor-pointer transition-colors',
-        read ? 'opacity-60' : 'bg-[#111]',
+        'flex items-start gap-3 px-2 py-2.5 rounded cursor-pointer transition-colors w-full text-left',
+        notification.read ? 'opacity-60' : 'bg-[#111]',
         'hover:bg-[#1a1a1a]'
       )}
     >
-      <div className="mt-0.5 shrink-0">{icons[type] || icons.hot_lead}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[#f0f0f0] text-xs font-mono leading-relaxed">{message}</p>
-        <p className="text-[#444] text-[10px] font-mono mt-1">{time}</p>
+      <div className="mt-0.5 shrink-0">
+        {icons[notification.type] || icons.hot_lead}
       </div>
-      {!read && <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] mt-1.5 shrink-0" />}
-    </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[#f0f0f0] text-xs font-mono leading-relaxed">
+          {notification.message}
+        </p>
+        <p className="text-[#444] text-[10px] font-mono mt-1">{timeAgo}</p>
+      </div>
+      {!notification.read && (
+        <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] mt-1.5 shrink-0" />
+      )}
+    </button>
   )
 }
 
-// Re-export for the panel's empty state
-function Bell(props: React.SVGProps<SVGSVGElement> & { className?: string }) {
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now()
+  const then = new Date(dateStr).getTime()
+  const diff = Math.floor((now - then) / 1000)
+
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
+function BellIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

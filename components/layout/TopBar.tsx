@@ -1,9 +1,12 @@
 'use client'
 
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { useAppStore } from '@/store/appStore'
+import type { LiveMetrics } from '@/types'
 
 const pageTitles: Record<string, string> = {
   '/inbox': 'Inbox',
@@ -25,27 +28,83 @@ interface TopBarProps {
 
 export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
   const pathname = usePathname()
+  const isConnected = useAppStore((s) => s.isRealtimeConnected)
+  const [metrics, setMetrics] = useState<LiveMetrics | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const title = Object.entries(pageTitles).find(
     ([path]) => pathname === path || pathname?.startsWith(path + '/')
   )?.[1] || 'BlackOps'
 
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const res = await fetch('/api/metrics/live')
+      if (res.ok) {
+        const data = await res.json()
+        setMetrics(data)
+      }
+    } catch {
+      // Silently fail — metrics are non-critical
+    }
+  }, [])
+
+  // Poll metrics every 30s
+  useEffect(() => {
+    fetchMetrics()
+    intervalRef.current = setInterval(fetchMetrics, 30000)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [fetchMetrics])
+
   return (
     <header className="h-12 bg-[#0d0d0d] border-b border-[#1a1a1a] flex items-center justify-between px-5 shrink-0">
-      {/* Page title */}
-      <h1 className="text-[#f0f0f0] font-mono text-sm uppercase tracking-wider">
-        {title}
-      </h1>
+      {/* Page title + connection status */}
+      <div className="flex items-center gap-2.5">
+        <h1 className="text-[#f0f0f0] font-mono text-sm uppercase tracking-wider">
+          {title}
+        </h1>
+        <div
+          className={cn(
+            'w-1.5 h-1.5 rounded-full',
+            isConnected ? 'bg-[#00ff88]' : 'bg-[#ff4500]'
+          )}
+          title={isConnected ? 'Realtime connected' : 'Realtime disconnected'}
+        />
+      </div>
 
       {/* Live metrics strip */}
       <div className="hidden lg:flex items-center gap-4 text-[10px] font-mono text-[#555] uppercase tracking-wider">
-        <MetricPill label="Active Leads" value="--" />
+        <MetricPill
+          label="Active Leads"
+          value={metrics ? String(metrics.activeLeads) : '--'}
+        />
         <span className="text-[#222]">|</span>
-        <MetricPill label="Queued" value="--" />
+        <MetricPill
+          label="Queued"
+          value={metrics ? String(metrics.queuedMessages) : '--'}
+        />
         <span className="text-[#222]">|</span>
-        <MetricPill label="Setters" value="--/--" />
+        <MetricPill
+          label="Setters"
+          value={
+            metrics
+              ? `${metrics.onlineSetters}/${metrics.totalSetters}`
+              : '--/--'
+          }
+        />
         <span className="text-[#222]">|</span>
-        <MetricPill label="AI" value="ON" valueColor="text-[#00ff88]" />
+        <MetricPill
+          label="AI"
+          value={metrics?.aiActive ? 'ON' : 'OFF'}
+          valueColor={metrics?.aiActive ? 'text-[#00ff88]' : 'text-[#ff4500]'}
+        />
+        <span className="text-[#222]">|</span>
+        <MetricPill
+          label="Booked"
+          value={metrics ? String(metrics.todayBooked) : '--'}
+          valueColor="text-[#00ff88]"
+        />
       </div>
 
       {/* Right side */}

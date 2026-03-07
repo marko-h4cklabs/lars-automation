@@ -5,6 +5,8 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { NotificationPanel } from '@/components/notifications/NotificationPanel'
 import { ToastProvider } from '@/components/ui/toast-notification'
+import { useRealtime } from '@/hooks/useRealtime'
+import { useAppStore } from '@/store/appStore'
 
 export default function DashboardLayout({
   children,
@@ -12,6 +14,10 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const unreadCount = useAppStore((s) => s.unreadNotifications)
+
+  // Initialize realtime subscriptions
+  useRealtime()
 
   return (
     <div className="flex h-screen bg-[#080808] overflow-hidden">
@@ -25,7 +31,7 @@ export default function DashboardLayout({
         {/* Top bar */}
         <TopBar
           onToggleNotifications={() => setNotificationsOpen(!notificationsOpen)}
-          unreadCount={0}
+          unreadCount={unreadCount}
         />
 
         {/* Content */}
