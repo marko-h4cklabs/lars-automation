@@ -1,52 +1,19 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
 
 // ═══════════════════════════════════════
 // Client-side Supabase client (React components, hooks)
 // ═══════════════════════════════════════
 
 export function createBrowserSupabaseClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// ═══════════════════════════════════════
-// Server-side Supabase client (Server Components, Route Handlers)
-// Uses cookies for auth session — respects RLS
-// ═══════════════════════════════════════
+  if (!url || !key) {
+    throw new Error('Missing Supabase environment variables')
+  }
 
-export async function createServerSupabaseClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch {
-            // Server Component — cookie set ignored
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: '', ...options })
-          } catch {
-            // Server Component — cookie remove ignored
-          }
-        },
-      },
-    }
-  )
+  return createBrowserClient(url, key)
 }
 
 // ═══════════════════════════════════════
