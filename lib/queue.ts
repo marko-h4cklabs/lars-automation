@@ -29,16 +29,34 @@ export interface QueuePayload {
 }
 
 export async function pushMessage(payload: QueuePayload): Promise<void> {
-  // Push to Redis list for backup
+  const MAX_RETRIES = 3
+
+  // Push to Redis list for backup (always succeeds first)
   await redis.lpush(MESSAGE_QUEUE, JSON.stringify(payload))
 
-  // Schedule processing via QStash (guaranteed delivery with retries)
+  // Schedule processing via QStash with retry logic
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-  await qstash.publishJSON({
-    url: `${appUrl}/api/workers/process`,
-    body: payload,
-    retries: 3,
-  })
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      await qstash.publishJSON({
+        url: `${appUrl}/api/workers/process`,
+        body: payload,
+        retries: 3,
+      })
+      return // Success
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      // Exponential backoff: 100ms, 400ms, 900ms
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((r) => setTimeout(r, (attempt + 1) ** 2 * 100))
+      }
+    }
+  }
+
+  // All retries failed — message is still in Redis for manual recovery
+  console.error('QStash publish failed after retries:', lastError?.message)
 }
 
 // Bundle management for smart delay
