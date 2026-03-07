@@ -40,7 +40,7 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   role user_role NOT NULL DEFAULT 'setter',
-  telegram_chat_id TEXT,
+  slack_user_id TEXT,
   status user_status NOT NULL DEFAULT 'offline',
   avatar_url TEXT,
   last_seen TIMESTAMPTZ,
@@ -294,7 +294,7 @@ CREATE TABLE notifications (
   conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
   message TEXT NOT NULL DEFAULT '',
   read BOOLEAN NOT NULL DEFAULT FALSE,
-  telegram_sent BOOLEAN NOT NULL DEFAULT FALSE,
+  slack_sent BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

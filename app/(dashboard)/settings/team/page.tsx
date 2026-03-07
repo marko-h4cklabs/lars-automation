@@ -11,7 +11,7 @@ interface TeamMember {
   role: string
   is_active: boolean
   last_seen_at: string | null
-  telegram_chat_id: string | null
+  slack_user_id: string | null
   created_at: string
 }
 
@@ -19,8 +19,8 @@ export default function TeamPage() {
   const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [showInvite, setShowInvite] = useState(false)
-  const [editTelegramId, setEditTelegramId] = useState<string | null>(null)
-  const [telegramInput, setTelegramInput] = useState('')
+  const [editSlackId, setEditSlackId] = useState<string | null>(null)
+  const [slackInput, setSlackInput] = useState('')
   const [saving, setSaving] = useState(false)
 
   const fetchMembers = async () => {
@@ -68,17 +68,17 @@ export default function TeamPage() {
     }
   }
 
-  const saveTelegram = async (userId: string) => {
+  const saveSlack = async (userId: string) => {
     setSaving(true)
     try {
       await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ section: 'team', userId, telegram_chat_id: telegramInput || null }),
+        body: JSON.stringify({ section: 'team', userId, slack_user_id: slackInput || null }),
       })
-      setMembers((prev) => prev.map((m) => m.id === userId ? { ...m, telegram_chat_id: telegramInput || null } : m))
-      setEditTelegramId(null)
-      setTelegramInput('')
+      setMembers((prev) => prev.map((m) => m.id === userId ? { ...m, slack_user_id: slackInput || null } : m))
+      setEditSlackId(null)
+      setSlackInput('')
     } finally {
       setSaving(false)
     }
@@ -116,7 +116,7 @@ export default function TeamPage() {
               <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Role</th>
               <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Status</th>
               <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Last Seen</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Telegram ID</th>
+              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Slack ID</th>
               <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Actions</th>
             </tr>
           </thead>
@@ -158,27 +158,27 @@ export default function TeamPage() {
                   </span>
                 </td>
                 <td className="px-3 py-2">
-                  {editTelegramId === m.id ? (
+                  {editSlackId === m.id ? (
                     <div className="flex items-center gap-1">
                       <input
-                        value={telegramInput}
-                        onChange={(e) => setTelegramInput(e.target.value)}
-                        placeholder="Chat ID"
+                        value={slackInput}
+                        onChange={(e) => setSlackInput(e.target.value)}
+                        placeholder="Slack ID"
                         className="w-24 bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-[9px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
                       />
-                      <button onClick={() => saveTelegram(m.id)} className="text-[#00ff88] hover:text-[#00ff88]/80">
+                      <button onClick={() => saveSlack(m.id)} className="text-[#00ff88] hover:text-[#00ff88]/80">
                         <ShieldCheck className="w-3 h-3" />
                       </button>
-                      <button onClick={() => { setEditTelegramId(null); setTelegramInput('') }} className="text-[#444] hover:text-[#888]">
+                      <button onClick={() => { setEditSlackId(null); setSlackInput('') }} className="text-[#444] hover:text-[#888]">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
                   ) : (
                     <button
-                      onClick={() => { setEditTelegramId(m.id); setTelegramInput(m.telegram_chat_id || '') }}
+                      onClick={() => { setEditSlackId(m.id); setSlackInput(m.slack_user_id || '') }}
                       className="text-[9px] font-mono text-[#666] hover:text-[#ccc]"
                     >
-                      {m.telegram_chat_id || 'Set...'}
+                      {m.slack_user_id || 'Set...'}
                     </button>
                   )}
                 </td>

@@ -11,7 +11,7 @@ import type { QueuePayload } from '@/lib/queue'
 import { transcribeVoice } from '@/lib/voice'
 import { triageLead } from '@/lib/workers/triage'
 import { calculateAssignment } from '@/lib/workers/distribution'
-import { sendHotLeadAlert } from '@/lib/telegram'
+import { sendHotLeadAlert } from '@/lib/slack'
 import {
   LeadStage,
   LeadSource,
@@ -334,10 +334,10 @@ export async function POST(request: NextRequest) {
         conversation_id: conversation.id,
         message: `🔥 Hot lead! @${username} scored ${triageResult.heat_score}/100`,
         read: false,
-        telegram_sent: false,
+        slack_sent: false,
       })
 
-      // Telegram alert (fire-and-forget)
+      // Slack alert (fire-and-forget)
       sendHotLeadAlert(
         username,
         triageResult.heat_score,
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest) {
         conversation_id: conversation.id,
         message: `New message from @${username}`,
         read: false,
-        telegram_sent: false,
+        slack_sent: false,
       })
     }
 

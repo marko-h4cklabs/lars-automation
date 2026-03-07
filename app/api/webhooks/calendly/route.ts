@@ -90,11 +90,11 @@ export async function POST(request: NextRequest) {
         conversation_id: conversation?.id || null,
         message: `Call booked! ${name || 'A lead'} scheduled${scheduledAt ? ` for ${new Date(scheduledAt).toLocaleDateString()}` : ''}`,
         read: false,
-        telegram_sent: false,
+        slack_sent: false,
       })
 
-      // Send Telegram notification (fire-and-forget)
-      sendTelegramNotification(name, scheduledAt).catch(() => {})
+      // Send Slack notification (fire-and-forget)
+      sendSlackNotification(name, scheduledAt).catch(() => {})
     }
 
     logWebhookEvent('webhook.calendly.invitee_created', 'lead', leadId || 'unknown', {
@@ -111,19 +111,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function sendTelegramNotification(
+async function sendSlackNotification(
   name: string | undefined,
   scheduledAt: string | undefined
 ) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
-  if (!botToken || !chatId) return
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL
+  if (!webhookUrl) return
 
-  const text = `🎯 CALL BOOKED!\n${name || 'Unknown lead'}${scheduledAt ? `\n📅 ${new Date(scheduledAt).toLocaleString()}` : ''}`
+  const text = `🎯 *CALL BOOKED!*\n${name || 'Unknown lead'}${scheduledAt ? `\n📅 ${new Date(scheduledAt).toLocaleString()}` : ''}`
 
-  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+  await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    body: JSON.stringify({ text }),
   })
 }

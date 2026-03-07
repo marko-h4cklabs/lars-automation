@@ -124,7 +124,7 @@ export interface User {
   email: string
   name: string
   role: UserRole
-  telegram_chat_id: string | null
+  slack_user_id: string | null
   status: UserStatus
   avatar_url: string | null
   last_seen: string | null
@@ -336,7 +336,7 @@ export interface Notification {
   conversation_id: string | null
   message: string
   read: boolean
-  telegram_sent: boolean
+  slack_sent: boolean
   created_at: string
 }
 

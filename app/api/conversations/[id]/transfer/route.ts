@@ -49,7 +49,7 @@ export async function POST(
       conversation_id: id,
       message: `@${leadData?.username || 'Lead'} transferred to AI autopilot`,
       read: false,
-      telegram_sent: false,
+      slack_sent: false,
     })
   }
 

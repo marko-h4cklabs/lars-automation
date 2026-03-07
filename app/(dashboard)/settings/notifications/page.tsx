@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils'
 
 interface NotifSettings {
   id?: string
-  telegram_bot_token: string
-  telegram_chat_id: string
+  slack_webhook_url: string
+  slack_channel: string
   hot_lead_mode: string
   hot_lead_threshold: number
   call_booked_mode: string
@@ -18,16 +18,16 @@ interface NotifSettings {
 }
 
 const MODE_OPTIONS = [
-  { value: 'telegram_and_app', label: 'Telegram + In-app' },
+  { value: 'slack_and_app', label: 'Slack + In-app' },
   { value: 'app_only', label: 'In-app only' },
   { value: 'off', label: 'Off' },
 ]
 
 export default function NotificationsPage() {
   const [settings, setSettings] = useState<NotifSettings>({
-    telegram_bot_token: '', telegram_chat_id: '',
-    hot_lead_mode: 'telegram_and_app', hot_lead_threshold: 80,
-    call_booked_mode: 'telegram_and_app', setter_offline_mode: 'app_only',
+    slack_webhook_url: '', slack_channel: '',
+    hot_lead_mode: 'slack_and_app', hot_lead_threshold: 80,
+    call_booked_mode: 'slack_and_app', setter_offline_mode: 'app_only',
     ai_takeover_mode: 'app_only', dnd_start: '', dnd_end: '',
   })
   const [loading, setLoading] = useState(true)
@@ -38,7 +38,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetch('/api/settings?section=notifications')
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.telegram_bot_token !== undefined) setSettings(d) })
+      .then((d) => { if (d?.slack_webhook_url !== undefined) setSettings(d) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
@@ -56,22 +56,22 @@ export default function NotificationsPage() {
     }
   }
 
-  const testTelegram = async () => {
-    if (!settings.telegram_bot_token || !settings.telegram_chat_id) {
-      setTestResult('Missing bot token or chat ID')
+  const testSlack = async () => {
+    if (!settings.slack_webhook_url) {
+      setTestResult('Missing Slack webhook URL')
       return
     }
     setTesting(true)
     setTestResult(null)
     try {
-      const res = await fetch(`https://api.telegram.org/bot${settings.telegram_bot_token}/sendMessage`, {
+      const res = await fetch(settings.slack_webhook_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: settings.telegram_chat_id, text: '🟢 BlackOps test notification — connection working!' }),
+        body: JSON.stringify({ text: '🟢 BlackOps test notification — connection working!' }),
       })
-      setTestResult(res.ok ? 'Message sent successfully!' : 'Failed to send. Check token and chat ID.')
+      setTestResult(res.ok ? 'Message sent successfully!' : 'Failed to send. Check webhook URL.')
     } catch {
-      setTestResult('Network error. Check bot token.')
+      setTestResult('Network error. Check webhook URL.')
     } finally {
       setTesting(false)
     }
@@ -82,27 +82,27 @@ export default function NotificationsPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Notification Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Configure Telegram bot and notification preferences.</p>
+      <p className="text-[10px] font-mono text-[#555] mb-6">Configure Slack integration and notification preferences.</p>
 
-      {/* Telegram config */}
+      {/* Slack config */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6 space-y-3">
-        <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Telegram</span>
+        <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Slack</span>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Bot Token</label>
-          <input type="password" value={settings.telegram_bot_token}
-            onChange={(e) => setSettings((p) => ({ ...p, telegram_bot_token: e.target.value }))}
+          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Webhook URL</label>
+          <input type="password" value={settings.slack_webhook_url}
+            onChange={(e) => setSettings((p) => ({ ...p, slack_webhook_url: e.target.value }))}
             className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
-            placeholder="123456:ABC-DEF..." />
+            placeholder="https://hooks.slack.com/services/..." />
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Chat ID</label>
-          <input value={settings.telegram_chat_id}
-            onChange={(e) => setSettings((p) => ({ ...p, telegram_chat_id: e.target.value }))}
+          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Channel (optional override)</label>
+          <input value={settings.slack_channel}
+            onChange={(e) => setSettings((p) => ({ ...p, slack_channel: e.target.value }))}
             className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
-            placeholder="-100123456789" />
+            placeholder="#notifications" />
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={testTelegram} disabled={testing}
+          <button onClick={testSlack} disabled={testing}
             className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50">
             {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} TEST
           </button>

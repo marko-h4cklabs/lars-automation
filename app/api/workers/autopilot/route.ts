@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase'
 import { generateJSON, generate } from '@/lib/ai'
 import { sendMultipleMessages, sendTextMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
-import { sendHotLeadAlert } from '@/lib/telegram'
+import { sendHotLeadAlert } from '@/lib/slack'
 import {
   LeadStage,
   NotificationType,
@@ -303,7 +303,7 @@ Keep it to 1-2 short sentences. Be warm but clear. Do not sound robotic.`,
         conversation_id: conversationId,
         message: `🔥 Hot lead! @${ctx.lead.username} scored ${newScore}/100`,
         read: false,
-        telegram_sent: false,
+        slack_sent: false,
       })
 
       sendHotLeadAlert(
