@@ -3,11 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   LayoutGrid, Table2, Filter, X, Search,
-  Users, Phone, TrendingUp, Flame, Bot, UserRound, Loader2
+  Users, Phone, TrendingUp, Flame, Bot, UserRound
 } from 'lucide-react'
 import { PipelineView } from '@/components/crm/PipelineView'
 import { TableView } from '@/components/crm/TableView'
 import { LeadDetailPanel } from '@/components/crm/LeadDetailPanel'
+import { LoadingMetricCards, LoadingTable } from '@/components/ui/loading-pulse'
+import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
+import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import type { Lead, LeadStage } from '@/types'
 
@@ -41,6 +45,7 @@ export default function CRMPage() {
   const [view, setView] = useState<'pipeline' | 'table'>('pipeline')
   const [leads, setLeads] = useState<EnrichedLead[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -64,6 +69,7 @@ export default function CRMPage() {
 
   const fetchLeads = useCallback(async (pageNum: number, append = false) => {
     setLoading(true)
+    setError(false)
     try {
       const params = new URLSearchParams({
         page: String(pageNum),
@@ -81,7 +87,7 @@ export default function CRMPage() {
       if (assignedTo) params.set('assignedTo', assignedTo)
 
       const res = await fetch(`/api/leads?${params}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error('Failed to load')
       const data = await res.json()
       if (append) {
         setLeads((prev) => [...prev, ...data.leads])
@@ -90,6 +96,8 @@ export default function CRMPage() {
       }
       setTotal(data.total)
       setHasMore(data.hasMore)
+    } catch {
+      if (!append) setError(true)
     } finally {
       setLoading(false)
     }
@@ -342,33 +350,46 @@ export default function CRMPage() {
 
           {/* View toggle */}
           <div className="flex bg-[#111] rounded border border-[#1a1a1a]">
-            <button
-              onClick={() => setView('pipeline')}
-              className={cn(
-                'px-2 py-1 rounded-l transition-colors',
-                view === 'pipeline' ? 'bg-[#00ff88]/10 text-[#00ff88]' : 'text-[#444] hover:text-[#666]'
-              )}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setView('table')}
-              className={cn(
-                'px-2 py-1 rounded-r transition-colors',
-                view === 'table' ? 'bg-[#00ff88]/10 text-[#00ff88]' : 'text-[#444] hover:text-[#666]'
-              )}
-            >
-              <Table2 className="w-3.5 h-3.5" />
-            </button>
+            <Tooltip content="Pipeline view" side="bottom">
+              <button
+                onClick={() => setView('pipeline')}
+                className={cn(
+                  'px-2 py-1 rounded-l transition-colors',
+                  view === 'pipeline' ? 'bg-[#00ff88]/10 text-[#00ff88]' : 'text-[#444] hover:text-[#666]'
+                )}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Table view" side="bottom">
+              <button
+                onClick={() => setView('table')}
+                className={cn(
+                  'px-2 py-1 rounded-r transition-colors',
+                  view === 'table' ? 'bg-[#00ff88]/10 text-[#00ff88]' : 'text-[#444] hover:text-[#666]'
+                )}
+              >
+                <Table2 className="w-3.5 h-3.5" />
+              </button>
+            </Tooltip>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           {loading && leads.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-5 h-5 animate-spin text-[#00ff88]" />
+            <div className="p-4 space-y-4">
+              <LoadingMetricCards count={4} />
+              <LoadingTable columns={6} rows={8} />
             </div>
+          ) : error ? (
+            <ErrorState message="Failed to load leads" onRetry={() => fetchLeads(0)} />
+          ) : leads.length === 0 && !loading ? (
+            <EmptyState
+              icon={<Users className="w-10 h-10" />}
+              title="No leads yet"
+              description="Leads will appear here as DMs come in"
+            />
           ) : view === 'pipeline' ? (
             <PipelineView
               leads={leads}

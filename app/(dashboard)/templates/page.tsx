@@ -6,6 +6,8 @@ import {
   Eye, Pencil, Upload,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingConversationList } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -62,6 +64,7 @@ const VARIABLES = [
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [category, setCategory] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -73,13 +76,14 @@ export default function TemplatesPage() {
     if (search) params.set('search', search)
 
     try {
+      setError(false)
       const res = await fetch(`/api/templates?${params}`)
       if (res.ok) {
         const data = await res.json()
         setTemplates(data.templates || [])
       }
     } catch {
-      // ignore
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -191,7 +195,9 @@ export default function TemplatesPage() {
         {/* Template list */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <p className="p-4 text-[10px] font-mono text-[#444]">Loading...</p>
+            <div className="p-3"><LoadingConversationList count={5} /></div>
+          ) : error ? (
+            <ErrorState message="Failed to load templates" onRetry={fetchTemplates} />
           ) : sortedTemplates.length === 0 ? (
             <div className="p-4 text-center">
               <FileText className="w-6 h-6 text-[#222] mx-auto mb-2" />

@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search, SlidersHorizontal, MessageSquare } from 'lucide-react'
 import { ConversationCard } from './ConversationCard'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { LoadingPulse } from '@/components/ui/loading-pulse'
+import { LoadingPulse, LoadingConversationList } from '@/components/ui/loading-pulse'
+import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useInboxStore } from '@/store/inboxStore'
 import { useAppStore } from '@/store/appStore'
@@ -34,6 +36,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
   const [sort] = useState('last_message')
   const [localConversations, setLocalConversations] = useState<ConversationWithMeta[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   const observerRef = useRef<HTMLDivElement>(null)
@@ -44,6 +47,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
   const fetchConversations = useCallback(async (pageNum: number, append: boolean = false) => {
     try {
       setLoading(true)
+      setError(false)
       const params = new URLSearchParams({
         page: String(pageNum),
         limit: '20',
@@ -53,7 +57,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       })
 
       const res = await fetch(`/api/conversations?${params}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error('Failed to load')
 
       const data = await res.json()
       const convos = data.conversations as ConversationWithMeta[]
@@ -65,7 +69,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       }
       setHasMore(data.hasMore)
     } catch {
-      // Silently fail
+      if (!append) setError(true)
     } finally {
       setLoading(false)
     }
@@ -149,13 +153,17 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       {/* Conversation list */}
       <ScrollArea className="flex-1">
         {loading && localConversations.length === 0 ? (
-          <div className="p-4">
-            <LoadingPulse lines={5} />
+          <div className="p-3">
+            <LoadingConversationList count={6} />
           </div>
+        ) : error ? (
+          <ErrorState message="Failed to load conversations" onRetry={() => fetchConversations(0)} />
         ) : localConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <p className="text-[#444] font-mono text-xs">No conversations found</p>
-          </div>
+          <EmptyState
+            icon={<MessageSquare className="w-10 h-10" />}
+            title="No conversations"
+            description="Messages will appear here as DMs come in"
+          />
         ) : (
           <>
             {localConversations.map((conv) => (

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Save, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 interface DistSettings {
   id?: string
@@ -22,14 +24,19 @@ export default function DistributionPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const fetchSettings = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=distribution')
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.distribution_mode) setSettings(d) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchSettings() }, [])
 
   const totalPct = settings.setter1_pct + settings.setter2_pct + settings.ai_pct
   const isValid = totalPct === 100
@@ -52,7 +59,8 @@ export default function DistributionPage() {
     }
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSettings} /></div>
 
   return (
     <div className="p-6 max-w-2xl">

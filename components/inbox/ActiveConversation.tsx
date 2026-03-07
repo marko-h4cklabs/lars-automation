@@ -4,7 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Send, FileText, Mic, Loader2 } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LoadingPulse } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useInboxStore } from '@/store/inboxStore'
 import { LeadHeader } from './LeadHeader'
 import { MessageBubble } from './MessageBubble'
@@ -25,6 +28,7 @@ interface ActiveConversationProps {
 export function ActiveConversation({ conversationId }: ActiveConversationProps) {
   const [conversation, setConversation] = useState<ConversationDetail | null>(null)
   const [loadingConv, setLoadingConv] = useState(true)
+  const [errorConv, setErrorConv] = useState(false)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [templateOpen, setTemplateOpen] = useState(false)
@@ -35,16 +39,25 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
   const { activeMessages, setActiveMessages, addMessage, isLoadingMessages, setLoadingMessages } = useInboxStore()
 
   // Fetch conversation details
-  useEffect(() => {
+  const fetchConversation = useCallback(() => {
     setLoadingConv(true)
+    setErrorConv(false)
     fetch(`/api/conversations/${conversationId}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (data) setConversation(data)
-      })
-      .catch(() => {})
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((data) => { if (data) setConversation(data) })
+      .catch(() => setErrorConv(true))
       .finally(() => setLoadingConv(false))
   }, [conversationId])
+
+  useEffect(() => { fetchConversation() }, [fetchConversation])
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    Enter: () => handleSend(),
+    k: () => { /* AISuggestPanel handles its own trigger */ },
+    t: () => { setTemplateOpen((v) => !v); setVoiceOpen(false) },
+    v: () => { setVoiceOpen((v) => !v); setTemplateOpen(false) },
+  })
 
   // Fetch messages
   const fetchMessages = useCallback(async (page: number, append: boolean = false) => {
@@ -153,6 +166,14 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     )
   }
 
+  if (errorConv) {
+    return (
+      <div className="flex-1 bg-[#080808]">
+        <ErrorState message="Failed to load conversation" onRetry={fetchConversation} />
+      </div>
+    )
+  }
+
   if (!conversation) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#080808]">
@@ -225,28 +246,32 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
             <div className="flex items-end gap-2 p-3">
               {/* Tool buttons */}
               <div className="flex gap-1 shrink-0">
-                <button
-                  onClick={() => { setTemplateOpen(!templateOpen); setVoiceOpen(false) }}
-                  className={cn(
-                    'w-7 h-7 flex items-center justify-center rounded transition-colors',
-                    templateOpen
-                      ? 'bg-[#00ff88]/10 text-[#00ff88]'
-                      : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
-                  )}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => { setVoiceOpen(!voiceOpen); setTemplateOpen(false) }}
-                  className={cn(
-                    'w-7 h-7 flex items-center justify-center rounded transition-colors',
-                    voiceOpen
-                      ? 'bg-[#00ff88]/10 text-[#00ff88]'
-                      : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
-                  )}
-                >
-                  <Mic className="w-3.5 h-3.5" />
-                </button>
+                <Tooltip content="Templates (\u2318T)" side="top">
+                  <button
+                    onClick={() => { setTemplateOpen(!templateOpen); setVoiceOpen(false) }}
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded transition-colors',
+                      templateOpen
+                        ? 'bg-[#00ff88]/10 text-[#00ff88]'
+                        : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
+                    )}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Voice (\u2318V)" side="top">
+                  <button
+                    onClick={() => { setVoiceOpen(!voiceOpen); setTemplateOpen(false) }}
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded transition-colors',
+                      voiceOpen
+                        ? 'bg-[#00ff88]/10 text-[#00ff88]'
+                        : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
+                    )}
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                  </button>
+                </Tooltip>
               </div>
 
               {/* Text input */}
@@ -265,22 +290,24 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
               />
 
               {/* Send button */}
-              <button
-                onClick={() => handleSend()}
-                disabled={!input.trim() || sending}
-                className={cn(
-                  'w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0',
-                  input.trim()
-                    ? 'bg-[#00ff88] text-black hover:bg-[#00dd77]'
-                    : 'bg-[#111] text-[#333]'
-                )}
-              >
-                {sending ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Send className="w-3.5 h-3.5" />
-                )}
-              </button>
+              <Tooltip content="Send (\u2318\u21B5)" side="top">
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!input.trim() || sending}
+                  className={cn(
+                    'w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 active:scale-95',
+                    input.trim()
+                      ? 'bg-[#00ff88] text-black hover:bg-[#00dd77]'
+                      : 'bg-[#111] text-[#333]'
+                  )}
+                >
+                  {sending ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </Tooltip>
             </div>
           </div>
         </div>

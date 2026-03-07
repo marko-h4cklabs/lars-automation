@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Save, Loader2, Copy, Check, ExternalLink } from 'lucide-react'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 interface IntegrationSettings {
   id?: string
@@ -28,16 +30,21 @@ export default function IntegrationsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+  const [error, setError] = useState(false)
 
   const domain = typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'
 
-  useEffect(() => {
+  const fetchSettings = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=integrations')
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.calendly_link !== undefined) setSettings(d) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchSettings() }, [])
 
   const save = async () => {
     setSaving(true)
@@ -58,7 +65,8 @@ export default function IntegrationsPage() {
     setTimeout(() => setCopiedIdx(null), 2000)
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSettings} /></div>
 
   return (
     <div className="p-6 max-w-2xl">

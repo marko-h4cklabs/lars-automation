@@ -7,6 +7,9 @@ import {
   ToggleLeft, ToggleRight, CheckCircle2, AlertCircle, Pencil,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -70,6 +73,7 @@ export default function VoicePage() {
   })
   const [templates, setTemplates] = useState<VoiceTemplate[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingAuto, setSavingAuto] = useState(false)
   const [openSections, setOpenSections] = useState<Set<string>>(
@@ -78,6 +82,7 @@ export default function VoicePage() {
 
   const fetchSettings = useCallback(async () => {
     try {
+      setError(false)
       const [settingsRes, templatesRes] = await Promise.all([
         fetch('/api/voice/settings'),
         fetch('/api/voice/templates'),
@@ -92,7 +97,7 @@ export default function VoicePage() {
         setTemplates(data.templates || [])
       }
     } catch {
-      // ignore
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -135,7 +140,8 @@ export default function VoicePage() {
     })
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-8"><LoadingFormSection fields={4} /></div>
+  if (error) return <ErrorState message="Failed to load voice settings" onRetry={fetchSettings} />
 
   return (
     <div className="h-[calc(100vh-48px)] overflow-y-auto">
@@ -609,6 +615,7 @@ function VoiceTemplatesSection({
   const [editing, setEditing] = useState<VoiceTemplate | null>(null)
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState('all')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const filtered = filter === 'all' ? templates : templates.filter((t) => t.category === filter)
 
@@ -631,9 +638,9 @@ function VoiceTemplatesSection({
   }
 
   const deleteTemplate = async (id: string) => {
-    if (!confirm('Delete this template?')) return
     await fetch(`/api/voice/templates?id=${id}`, { method: 'DELETE' })
     onChange(templates.filter((t) => t.id !== id))
+    setDeleteId(null)
   }
 
   return (
@@ -682,7 +689,7 @@ function VoiceTemplatesSection({
                 <Pencil className="w-3 h-3" />
               </button>
               <button
-                onClick={() => deleteTemplate(t.id)}
+                onClick={() => setDeleteId(t.id)}
                 className="p-1 text-[#555] hover:text-[#f05050]"
               >
                 <Trash2 className="w-3 h-3" />
@@ -713,6 +720,15 @@ function VoiceTemplatesSection({
           <Plus className="w-3 h-3" /> ADD TEMPLATE
         </button>
       )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Template"
+        description="This template will be permanently removed."
+        variant="danger"
+        onConfirm={() => { if (deleteId) deleteTemplate(deleteId) }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

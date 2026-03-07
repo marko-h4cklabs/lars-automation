@@ -1,8 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Plus, Trash2, GripVertical, Loader2 } from 'lucide-react'
+import { Save, Plus, Trash2, GripVertical, Loader2, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface QualField {
   id?: string
@@ -22,14 +26,20 @@ export default function QualificationPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [newField, setNewField] = useState<QualField | null>(null)
   const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [error, setError] = useState(false)
+  const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null)
 
-  useEffect(() => {
+  const fetchFields = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=qualification')
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.fields) setFields(d.fields) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchFields() }, [])
 
   const saveField = async (field: QualField) => {
     setSaving(true)
@@ -53,9 +63,9 @@ export default function QualificationPage() {
   }
 
   const deleteField = async (id: string) => {
-    if (!confirm('Delete this field? Existing lead data for this field will be orphaned.')) return
     await fetch(`/api/settings?section=qualification_field&id=${id}`, { method: 'DELETE' })
     setFields((prev) => prev.filter((f) => f.id !== id))
+    setDeleteFieldId(null)
   }
 
   const handleDrop = async (toIdx: number) => {
@@ -73,7 +83,8 @@ export default function QualificationPage() {
     })
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchFields} /></div>
 
   return (
     <div className="p-6 max-w-3xl">
@@ -81,6 +92,13 @@ export default function QualificationPage() {
       <p className="text-[10px] font-mono text-[#555] mb-6">Configure the fields used to qualify leads before booking a call.</p>
 
       {/* Fields list */}
+      {fields.length === 0 && !newField && !editingId && (
+        <EmptyState
+          icon={<Settings className="w-12 h-12" />}
+          title="No qualification fields"
+          description="Add fields to qualify leads before booking a call."
+        />
+      )}
       <div className="space-y-1.5 mb-4">
         {fields.map((field, idx) => (
           <div
@@ -111,7 +129,7 @@ export default function QualificationPage() {
               EDIT
             </button>
             <button
-              onClick={() => field.id && deleteField(field.id)}
+              onClick={() => field.id && setDeleteFieldId(field.id)}
               className="text-[#444] hover:text-[#f05050]"
             >
               <Trash2 className="w-3 h-3" />
@@ -142,6 +160,14 @@ export default function QualificationPage() {
           <Plus className="w-3 h-3" /> ADD FIELD
         </button>
       )}
+
+      <ConfirmDialog
+        open={!!deleteFieldId}
+        title="Delete Field"
+        description="Existing lead data using this field will be orphaned."
+        onConfirm={() => { if (deleteFieldId) deleteField(deleteFieldId) }}
+        onCancel={() => setDeleteFieldId(null)}
+      />
     </div>
   )
 }

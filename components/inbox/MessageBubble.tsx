@@ -13,7 +13,7 @@ export function MessageBubble({ message, showTimestamp = true }: MessageBubblePr
   const isOutbound = message.direction === 'outbound'
 
   return (
-    <div className={cn('flex w-full mb-2', isOutbound ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex w-full mb-2 animate-slide-in-up', isOutbound ? 'justify-end' : 'justify-start')}>
       <div className={cn('max-w-[70%] flex flex-col', isOutbound ? 'items-end' : 'items-start')}>
         {/* Sender tag */}
         {isOutbound && message.ai_generated && (

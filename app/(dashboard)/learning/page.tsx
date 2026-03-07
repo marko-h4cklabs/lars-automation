@@ -10,6 +10,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow, format } from 'date-fns'
+import { LoadingCard, LoadingConversationList } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { EmptyState } from '@/components/ui/empty-state'
 
 // ── Types ──
 
@@ -152,6 +155,11 @@ export default function LearningPage() {
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [feedbackFilter, setFeedbackFilter] = useState('all')
 
+  // ── Error states ──
+  const [convError, setConvError] = useState(false)
+  const [feedbackError, setFeedbackError] = useState(false)
+  const [insightError, setInsightError] = useState(false)
+
   // ── Insights state ──
   const [insight, setInsight] = useState<Insight | null>(null)
   const [insightMetrics, setInsightMetrics] = useState<InsightMetrics | null>(null)
@@ -163,15 +171,18 @@ export default function LearningPage() {
   // ── Fetch training conversations ──
   const fetchConversations = useCallback(async () => {
     setConvLoading(true)
+    setConvError(false)
     try {
       const params = new URLSearchParams({ page: String(convPage), limit: '20' })
       if (convFilter !== 'all') params.set('outcome', convFilter)
       if (convApproved !== 'all') params.set('approved', convApproved)
       const res = await fetch(`/api/learning?${params}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setConversations(data.conversations)
       setConvTotal(data.total)
+    } catch {
+      setConvError(true)
     } finally {
       setConvLoading(false)
     }
@@ -184,13 +195,16 @@ export default function LearningPage() {
   // ── Fetch feedback ──
   const fetchFeedback = useCallback(async () => {
     setFeedbackLoading(true)
+    setFeedbackError(false)
     try {
       const params = new URLSearchParams({ type: feedbackFilter, limit: '50' })
       const res = await fetch(`/api/learning/feedback?${params}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setFeedbackEntries(data.entries)
       setFeedbackStats(data.stats)
+    } catch {
+      setFeedbackError(true)
     } finally {
       setFeedbackLoading(false)
     }
@@ -203,16 +217,19 @@ export default function LearningPage() {
   // ── Fetch insights ──
   const fetchInsights = useCallback(async (forceRefresh = false) => {
     setInsightLoading(true)
+    setInsightError(false)
     try {
       const params = new URLSearchParams({ period: insightPeriod })
       if (forceRefresh) params.set('refresh', 'true')
       const res = await fetch(`/api/learning/insights?${params}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setInsight(data.insight)
       setInsightMetrics(data.metrics)
       setInsightCached(data.cached)
       setInsightGeneratedAt(data.generatedAt)
+    } catch {
+      setInsightError(true)
     } finally {
       setInsightLoading(false)
     }
@@ -461,14 +478,17 @@ export default function LearningPage() {
               {/* Conversation list */}
               <div className="flex-1 overflow-y-auto">
                 {convLoading ? (
-                  <div className="px-4 py-8 text-center">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#333] mx-auto" />
+                  <div className="px-4 py-4">
+                    <LoadingConversationList count={5} />
                   </div>
+                ) : convError ? (
+                  <ErrorState message="Failed to load conversations" onRetry={fetchConversations} />
                 ) : conversations.length === 0 ? (
-                  <div className="px-4 py-8 text-center">
-                    <p className="text-[9px] font-mono text-[#333]">No training conversations yet</p>
-                    <p className="text-[8px] font-mono text-[#222] mt-1">Upload conversations to start training</p>
-                  </div>
+                  <EmptyState
+                    icon={<BookOpen className="w-10 h-10" />}
+                    title="No training conversations"
+                    description="Upload conversations to start training your AI"
+                  />
                 ) : (
                   conversations.map((conv) => (
                     <div
@@ -614,9 +634,9 @@ export default function LearningPage() {
 
                   {/* Analysis results */}
                   {analyzing && (
-                    <div className="flex items-center gap-2 py-8 justify-center">
-                      <Loader2 className="w-4 h-4 animate-spin text-[#00ff88]" />
-                      <span className="text-[10px] font-mono text-[#555]">Analyzing with Sonnet...</span>
+                    <div className="space-y-3">
+                      <LoadingCard />
+                      <LoadingCard />
                     </div>
                   )}
 
@@ -800,15 +820,19 @@ export default function LearningPage() {
 
             {/* Entries */}
             {feedbackLoading ? (
-              <div className="py-8 text-center">
-                <Loader2 className="w-4 h-4 animate-spin text-[#333] mx-auto" />
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <LoadingCard key={i} />
+                ))}
               </div>
+            ) : feedbackError ? (
+              <ErrorState message="Failed to load feedback" onRetry={fetchFeedback} />
             ) : feedbackEntries.length === 0 ? (
-              <div className="py-8 text-center">
-                <MessageSquare className="w-6 h-6 text-[#1a1a1a] mx-auto mb-2" />
-                <p className="text-[9px] font-mono text-[#333]">No feedback entries yet</p>
-                <p className="text-[8px] font-mono text-[#222] mt-1">Feedback is recorded automatically as you use the system</p>
-              </div>
+              <EmptyState
+                icon={<MessageSquare className="w-10 h-10" />}
+                title="No feedback entries"
+                description="Feedback is recorded automatically as you use the system"
+              />
             ) : (
               <div className="space-y-1">
                 {feedbackEntries.map((entry) => (
@@ -887,17 +911,20 @@ export default function LearningPage() {
               </div>
             </div>
 
-            {insightLoading && !insight ? (
-              <div className="py-12 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-[#00ff88] mx-auto mb-3" />
-                <p className="text-[10px] font-mono text-[#555]">Generating insights with Sonnet...</p>
-                <p className="text-[8px] font-mono text-[#333] mt-1">This may take a moment</p>
+            {insightError ? (
+              <ErrorState message="Failed to load insights" onRetry={() => fetchInsights(true)} />
+            ) : insightLoading && !insight ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <LoadingCard key={i} />
+                ))}
               </div>
             ) : !insight ? (
-              <div className="py-12 text-center">
-                <BarChart3 className="w-8 h-8 text-[#1a1a1a] mx-auto mb-2" />
-                <p className="text-[10px] font-mono text-[#333]">Click Refresh to generate insights</p>
-              </div>
+              <EmptyState
+                icon={<BarChart3 className="w-10 h-10" />}
+                title="No insights yet"
+                description="Click Refresh to generate AI-powered insights"
+              />
             ) : (
               <>
                 {/* Metrics cards */}
@@ -1087,18 +1114,19 @@ function PatternAnalysisSection() {
       </div>
 
       {loading && (
-        <div className="py-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#00ff88] mx-auto mb-3" />
-          <p className="text-[10px] font-mono text-[#555]">Analyzing approved conversations with Sonnet...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <LoadingCard key={i} />
+          ))}
         </div>
       )}
 
       {!loading && !patterns && (
-        <div className="py-12 text-center">
-          <Brain className="w-8 h-8 text-[#1a1a1a] mx-auto mb-2" />
-          <p className="text-[10px] font-mono text-[#333]">Click &quot;Run Pattern Analysis&quot; to analyze approved conversations</p>
-          <p className="text-[8px] font-mono text-[#222] mt-1">Requires at least 1 approved training conversation</p>
-        </div>
+        <EmptyState
+          icon={<Brain className="w-10 h-10" />}
+          title="No pattern analysis"
+          description="Click &quot;Run Pattern Analysis&quot; to analyze approved conversations. Requires at least 1 approved training conversation."
+        />
       )}
 
       {patterns && (
@@ -1228,18 +1256,19 @@ function KBUpdatesSection() {
       </div>
 
       {loading && (
-        <div className="py-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#00ff88] mx-auto mb-3" />
-          <p className="text-[10px] font-mono text-[#555]">Analyzing conversations for KB gaps...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <LoadingCard key={i} />
+          ))}
         </div>
       )}
 
       {!loading && suggestions.length === 0 && (
-        <div className="py-12 text-center">
-          <FileText className="w-8 h-8 text-[#1a1a1a] mx-auto mb-2" />
-          <p className="text-[10px] font-mono text-[#333]">Click &quot;Suggest KB Updates&quot; to generate content suggestions</p>
-          <p className="text-[8px] font-mono text-[#222] mt-1">Based on patterns found in approved training data</p>
-        </div>
+        <EmptyState
+          icon={<FileText className="w-10 h-10" />}
+          title="No KB suggestions"
+          description="Click &quot;Suggest KB Updates&quot; to generate content suggestions based on approved training data."
+        />
       )}
 
       {suggestions.length > 0 && (

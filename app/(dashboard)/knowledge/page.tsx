@@ -7,6 +7,8 @@ import {
   Eye, Pencil, ToggleLeft, ToggleRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingConversationList } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -115,6 +117,7 @@ const KB_GUIDE: { type: string; title: string; tips: string[] }[] = [
 export default function KnowledgePage() {
   const [documents, setDocuments] = useState<KBDoc[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [category, setCategory] = useState('all')
   const [search, setSearch] = useState('')
@@ -127,13 +130,14 @@ export default function KnowledgePage() {
     if (search) params.set('search', search)
 
     try {
+      setError(false)
       const res = await fetch(`/api/knowledge?${params}`)
       if (res.ok) {
         const data = await res.json()
         setDocuments(data.documents || [])
       }
     } catch {
-      // ignore
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -216,7 +220,9 @@ export default function KnowledgePage() {
         {/* Document List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-4 text-[10px] font-mono text-[#444]">Loading...</div>
+            <div className="p-3"><LoadingConversationList count={5} /></div>
+          ) : error ? (
+            <ErrorState message="Failed to load documents" onRetry={fetchDocuments} />
           ) : documents.length === 0 ? (
             <div className="p-4 text-center">
               <FileText className="w-6 h-6 text-[#222] mx-auto mb-2" />

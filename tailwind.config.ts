@@ -9,6 +9,45 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['var(--font-jetbrains)', 'var(--font-geist-mono)', 'monospace'],
+        sans: ['var(--font-inter)', 'var(--font-geist-sans)', 'sans-serif'],
+      },
+      keyframes: {
+        'slide-in-right': {
+          '0%': { transform: 'translateX(10px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'slide-in-up': {
+          '0%': { transform: 'translateY(6px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'count-up': {
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '25%': { transform: 'rotate(-8deg)' },
+          '75%': { transform: 'rotate(8deg)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'slide-in-right': 'slide-in-right 200ms ease-out',
+        'slide-in-up': 'slide-in-up 200ms ease-out',
+        'scale-in': 'scale-in 150ms ease-out',
+        'count-up': 'count-up 200ms ease-out',
+        shake: 'shake 300ms ease-out',
+        'fade-in': 'fade-in 200ms ease-out',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -7,6 +7,9 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { MetricCard } from '@/components/ui/metric-card'
+import { LoadingMetricCards, LoadingChart } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { cn } from '@/lib/utils'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -171,16 +174,19 @@ export default function DashboardPage() {
   const [customTo, setCustomTo] = useState('')
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const fetchData = useCallback(async (from: string, to: string) => {
     setLoading(true)
+    setError(false)
     try {
       const res = await fetch(`/api/analytics?dateFrom=${encodeURIComponent(from)}&dateTo=${encodeURIComponent(to)}`)
-      if (res.ok) {
-        const json = await res.json()
-        setData(json)
-      }
-    } catch { /* ignore */ }
+      if (!res.ok) throw new Error('Failed')
+      const json = await res.json()
+      setData(json)
+    } catch {
+      setError(true)
+    }
     setLoading(false)
   }, [])
 
@@ -254,9 +260,21 @@ export default function DashboardPage() {
         </div>
 
         {loading && !data ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-[10px] font-mono text-[#444] animate-pulse">LOADING ANALYTICS...</div>
+          <div className="space-y-6">
+            <LoadingMetricCards count={6} />
+            <div className="grid grid-cols-5 gap-4">
+              <div className="col-span-3"><LoadingChart /></div>
+              <div className="col-span-2"><LoadingChart /></div>
+            </div>
           </div>
+        ) : error ? (
+          <ErrorState
+            message="Failed to load analytics"
+            onRetry={() => {
+              const { from, to } = getDateRange(preset)
+              fetchData(from, to)
+            }}
+          />
         ) : (
           <>
             {/* ── ROW 1: KPI Cards ── */}
@@ -346,7 +364,7 @@ export default function DashboardPage() {
                 <Shield className="w-3 h-3 text-[#5f27cd]" />
                 <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Setter vs AI Performance</span>
               </div>
-              <div className="overflow-x-auto">
+              <ResponsiveTable>
                 <table className="w-full text-[10px] font-mono">
                   <thead>
                     <tr className="border-b border-[#1a1a1a]">
@@ -411,7 +429,7 @@ export default function DashboardPage() {
                     </tr>
                   </tbody>
                 </table>
-              </div>
+              </ResponsiveTable>
             </div>
 
             {/* ── ROW 4: Bookings by Source + Bookings by Hour ── */}

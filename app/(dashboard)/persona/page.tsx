@@ -6,6 +6,8 @@ import {
   ToggleLeft, ToggleRight, ChevronDown, ChevronRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -91,6 +93,7 @@ const VIBE_SETTINGS: { key: keyof StyleRules; title: string; desc: string }[] = 
 export default function PersonaPage() {
   const [persona, setPersona] = useState<PersonaState | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [openSections, setOpenSections] = useState<Set<string>>(
@@ -99,13 +102,14 @@ export default function PersonaPage() {
 
   const fetchPersona = useCallback(async () => {
     try {
+      setError(false)
       const res = await fetch('/api/persona')
       if (res.ok) {
         const data = await res.json()
         setPersona(data)
       }
     } catch {
-      // ignore
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -150,7 +154,9 @@ export default function PersonaPage() {
     })
   }
 
-  if (loading || !persona) return <div className="p-8 text-[#444] font-mono text-xs">Loading persona...</div>
+  if (loading) return <div className="p-8"><LoadingFormSection fields={5} /></div>
+  if (error) return <ErrorState message="Failed to load persona" onRetry={fetchPersona} />
+  if (!persona) return <ErrorState message="Failed to load persona" onRetry={fetchPersona} />
 
   return (
     <div className="h-[calc(100vh-48px)] overflow-y-auto">

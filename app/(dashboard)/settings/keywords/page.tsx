@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Save, Loader2, Zap, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingTable } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 
 interface Trigger {
   id?: string
@@ -20,14 +24,20 @@ export default function KeywordsPage() {
   const [saving, setSaving] = useState(false)
   const [testText, setTestText] = useState('')
   const [testResults, setTestResults] = useState<string[] | null>(null)
+  const [error, setError] = useState(false)
+  const [deleteTriggerId, setDeleteTriggerId] = useState<string | null>(null)
 
-  useEffect(() => {
+  const fetchTriggers = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=keywords')
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.triggers) setTriggers(d.triggers) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchTriggers() }, [])
 
   const saveTrigger = async (trigger: Trigger) => {
     setSaving(true)
@@ -47,9 +57,9 @@ export default function KeywordsPage() {
   }
 
   const deleteTrigger = async (id: string) => {
-    if (!confirm('Delete this keyword trigger?')) return
     await fetch(`/api/settings?section=keyword&id=${id}`, { method: 'DELETE' })
     setTriggers((prev) => prev.filter((t) => t.id !== id))
+    setDeleteTriggerId(null)
   }
 
   const toggleActive = async (trigger: Trigger) => {
@@ -77,7 +87,8 @@ export default function KeywordsPage() {
     setTestResults(matches.map((m) => `"${m.keyword}" (${m.match_type})`))
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingTable /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchTriggers} /></div>
 
   return (
     <div className="p-6 max-w-3xl">
@@ -85,7 +96,7 @@ export default function KeywordsPage() {
       <p className="text-[10px] font-mono text-[#555] mb-6">Automatic responses when leads send specific keywords.</p>
 
       {/* Triggers table */}
-      <div className="border border-[#1a1a1a] rounded-lg overflow-hidden mb-4">
+      <ResponsiveTable className="border border-[#1a1a1a] rounded-lg overflow-hidden mb-4">
         <table className="w-full">
           <thead>
             <tr className="bg-[#0d0d0d] border-b border-[#1a1a1a]">
@@ -114,7 +125,7 @@ export default function KeywordsPage() {
                 </td>
                 <td className="px-3 py-2 flex gap-1">
                   <button onClick={() => setEditing(t)} className="text-[8px] font-mono text-[#666] hover:text-[#ccc] px-1.5 py-0.5 border border-[#222] rounded">EDIT</button>
-                  <button onClick={() => t.id && deleteTrigger(t.id)} className="text-[#444] hover:text-[#f05050]"><Trash2 className="w-3 h-3" /></button>
+                  <button onClick={() => t.id && setDeleteTriggerId(t.id)} className="text-[#444] hover:text-[#f05050]"><Trash2 className="w-3 h-3" /></button>
                 </td>
               </tr>
             ))}
@@ -123,7 +134,7 @@ export default function KeywordsPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {/* Editor */}
       {editing && (
@@ -162,6 +173,14 @@ export default function KeywordsPage() {
           </p>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!deleteTriggerId}
+        title="Delete Trigger"
+        description="This keyword trigger will be permanently removed."
+        onConfirm={() => { if (deleteTriggerId) deleteTrigger(deleteTriggerId) }}
+        onCancel={() => setDeleteTriggerId(null)}
+      />
     </div>
   )
 }

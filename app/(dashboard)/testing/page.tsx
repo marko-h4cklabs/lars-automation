@@ -7,6 +7,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { showToast } from '@/components/ui/toast-notification'
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -126,7 +127,7 @@ export default function TestingPage() {
       .then((data) => {
         if (data?.id) setPersonas([{ id: data.id, name: data.name || 'Global Persona' }])
       })
-      .catch(() => {})
+      .catch(() => showToast('Failed to load personas', 'error'))
   }, [])
 
   // ── Auto-scroll ──
@@ -496,7 +497,7 @@ export default function TestingPage() {
           )}
 
           {messages.map((msg) => (
-            <div key={msg.id} className={cn('flex', msg.role === 'lead' ? 'justify-start' : 'justify-end')}>
+            <div key={msg.id} className={cn('flex animate-slide-in-up', msg.role === 'lead' ? 'justify-start' : 'justify-end')}>
               <div className={cn('max-w-[70%] space-y-1')}>
                 {/* Sender tag */}
                 <div className={cn('flex items-center gap-1', msg.role === 'lead' ? '' : 'justify-end')}>

@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Plus, Loader2, Shield, ShieldCheck, UserX, UserCheck, X, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingTable } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 
 interface TeamMember {
   id: string
@@ -22,8 +26,12 @@ export default function TeamPage() {
   const [editSlackId, setEditSlackId] = useState<string | null>(null)
   const [slackInput, setSlackInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(false)
+  const [confirmUser, setConfirmUser] = useState<{id: string, active: boolean} | null>(null)
 
   const fetchMembers = async () => {
+    setError(false)
+    setLoading(true)
     try {
       const res = await fetch('/api/settings?section=team')
       if (res.ok) {
@@ -31,7 +39,7 @@ export default function TeamPage() {
         if (data?.members) setMembers(data.members)
       }
     } catch {
-      // ignore
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -54,7 +62,6 @@ export default function TeamPage() {
   }
 
   const toggleActive = async (userId: string, isActive: boolean) => {
-    if (!confirm(isActive ? 'Deactivate this user?' : 'Reactivate this user?')) return
     setSaving(true)
     try {
       await fetch('/api/settings', {
@@ -65,6 +72,7 @@ export default function TeamPage() {
       setMembers((prev) => prev.map((m) => m.id === userId ? { ...m, is_active: !isActive } : m))
     } finally {
       setSaving(false)
+      setConfirmUser(null)
     }
   }
 
@@ -84,7 +92,8 @@ export default function TeamPage() {
     }
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingTable /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchMembers} /></div>
 
   return (
     <div className="p-6 max-w-4xl">
@@ -107,7 +116,7 @@ export default function TeamPage() {
       )}
 
       {/* Team table */}
-      <div className="border border-[#1a1a1a] rounded-lg overflow-hidden">
+      <ResponsiveTable className="border border-[#1a1a1a] rounded-lg overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="bg-[#0d0d0d] border-b border-[#1a1a1a]">
@@ -184,7 +193,7 @@ export default function TeamPage() {
                 </td>
                 <td className="px-3 py-2">
                   <button
-                    onClick={() => toggleActive(m.id, m.is_active)}
+                    onClick={() => setConfirmUser({ id: m.id, active: m.is_active })}
                     disabled={saving}
                     className={cn(
                       'flex items-center gap-1 text-[8px] font-mono px-1.5 py-0.5 border rounded transition-colors disabled:opacity-50',
@@ -208,7 +217,17 @@ export default function TeamPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
+
+      <ConfirmDialog
+        open={!!confirmUser}
+        title={confirmUser?.active ? 'Deactivate User' : 'Activate User'}
+        description={confirmUser?.active ? 'This user will lose access to the platform.' : 'This user will regain access to the platform.'}
+        confirmLabel={confirmUser?.active ? 'DEACTIVATE' : 'ACTIVATE'}
+        variant={confirmUser?.active ? 'danger' : 'warning'}
+        onConfirm={() => { if (confirmUser) toggleActive(confirmUser.id, confirmUser.active) }}
+        onCancel={() => setConfirmUser(null)}
+      />
     </div>
   )
 }

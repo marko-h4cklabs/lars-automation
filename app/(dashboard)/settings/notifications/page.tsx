@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Save, Loader2, Send, Volume2, VolumeX } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 interface NotifSettings {
   id?: string
@@ -42,15 +44,22 @@ export default function NotificationsPage() {
   const [testing, setTesting] = useState<'alerts' | 'system' | null>(null)
   const [testResult, setTestResult] = useState<string | null>(null)
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const fetchSettings = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=notifications')
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.slack_webhook_alerts !== undefined) setSettings(d)
       })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchSettings()
 
     if (typeof window !== 'undefined') {
       setSoundEnabled(localStorage.getItem(SOUND_KEY) !== 'false')
@@ -110,7 +119,8 @@ export default function NotificationsPage() {
     }
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSettings} /></div>
 
   return (
     <div className="p-6 max-w-2xl">

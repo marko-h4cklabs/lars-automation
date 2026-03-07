@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useParams } from 'next/navigation'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
 
 interface CopilotSettings {
   id?: string
@@ -23,14 +25,19 @@ export default function CopilotPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const fetchSettings = () => {
+    setError(false)
+    setLoading(true)
     fetch(`/api/settings?section=copilot&userId=${setterId}`)
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.user_id) setSettings(d) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [setterId])
+  }
+
+  useEffect(() => { fetchSettings() }, [setterId])
 
   const save = async () => {
     setSaving(true)
@@ -45,7 +52,8 @@ export default function CopilotPage() {
     }
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSettings} /></div>
 
   const setterLabel = setterId === 'setter1' ? 'Setter 1' : 'Setter 2'
 

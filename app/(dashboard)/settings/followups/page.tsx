@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Save, Loader2, Timer, ChevronDown, ChevronUp, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingFormSection } from '@/components/ui/loading-pulse'
+import { ErrorState } from '@/components/ui/error-state'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Step {
   delay_hours: number
@@ -23,14 +27,20 @@ export default function FollowupsPage() {
   const [loading, setLoading] = useState(true)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(false)
+  const [deleteSeqId, setDeleteSeqId] = useState<string | null>(null)
 
-  useEffect(() => {
+  const fetchSequences = () => {
+    setError(false)
+    setLoading(true)
     fetch('/api/settings?section=followups')
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.sequences) setSequences(d.sequences) })
-      .catch(() => {})
+      .catch(() => { setError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchSequences() }, [])
 
   const saveSequence = async (seq: Sequence) => {
     setSaving(true)
@@ -50,18 +60,26 @@ export default function FollowupsPage() {
   }
 
   const deleteSequence = async (id: string) => {
-    if (!confirm('Delete this sequence?')) return
     await fetch(`/api/settings?section=followup&id=${id}`, { method: 'DELETE' })
     setSequences((prev) => prev.filter((s) => s.id !== id))
+    setDeleteSeqId(null)
   }
 
-  if (loading) return <div className="p-8 text-[#444] font-mono text-xs">Loading...</div>
+  if (loading) return <div className="p-6"><LoadingFormSection /></div>
+  if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSequences} /></div>
 
   return (
     <div className="p-6 max-w-3xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Follow-Up Sequences</h1>
       <p className="text-[10px] font-mono text-[#555] mb-6">Automated follow-up message chains for leads who go quiet.</p>
 
+      {sequences.length === 0 && (
+        <EmptyState
+          icon={<Timer className="w-12 h-12" />}
+          title="No follow-up sequences"
+          description="Create automated follow-up chains for leads who go quiet."
+        />
+      )}
       <div className="space-y-3 mb-4">
         {sequences.map((seq, idx) => (
           <div key={seq.id || idx} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg overflow-hidden">
@@ -88,7 +106,7 @@ export default function FollowupsPage() {
               <SequenceEditor
                 sequence={seq}
                 onSave={saveSequence}
-                onDelete={() => seq.id && deleteSequence(seq.id)}
+                onDelete={() => seq.id && setDeleteSeqId(seq.id)}
                 onCancel={() => setEditingIdx(null)}
                 saving={saving}
               />
@@ -106,6 +124,14 @@ export default function FollowupsPage() {
       >
         <Plus className="w-3 h-3" /> ADD SEQUENCE
       </button>
+
+      <ConfirmDialog
+        open={!!deleteSeqId}
+        title="Delete Sequence"
+        description="This follow-up sequence will be permanently removed."
+        onConfirm={() => { if (deleteSeqId) deleteSequence(deleteSeqId) }}
+        onCancel={() => setDeleteSeqId(null)}
+      />
     </div>
   )
 }

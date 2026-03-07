@@ -67,3 +67,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .label-caps {
+    @apply text-[8px] font-mono uppercase tracking-[0.15em] text-[#666];
+  }
+}
