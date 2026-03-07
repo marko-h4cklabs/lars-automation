@@ -1,8 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
+let _anthropic: Anthropic | null = null
+function getAnthropic() {
+  if (!_anthropic) {
+    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+  }
+  return _anthropic
+}
 
 export type AIModel = 'sonnet' | 'haiku'
 
@@ -26,7 +30,7 @@ export async function generate({
   maxTokens = 2048,
   temperature = 0.7,
 }: GenerateOptions): Promise<string> {
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: MODEL_MAP[model],
     max_tokens: maxTokens,
     temperature,
@@ -49,4 +53,4 @@ export async function generateJSON<T>(options: GenerateOptions): Promise<T> {
   return JSON.parse(jsonStr) as T
 }
 
-export { anthropic }
+export { getAnthropic as anthropic }

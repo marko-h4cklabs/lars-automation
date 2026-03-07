@@ -1,14 +1,25 @@
 import { Redis } from '@upstash/redis'
 import { Client } from '@upstash/qstash'
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+// Lazy initialization — avoids build-time crashes when env vars are missing
+let _redis: Redis | null = null
+function getRedis(): Redis {
+  if (!_redis) {
+    _redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  }
+  return _redis
+}
 
-const qstash = new Client({
-  token: process.env.QSTASH_TOKEN!,
-})
+let _qstash: Client | null = null
+function getQStash(): Client {
+  if (!_qstash) {
+    _qstash = new Client({ token: process.env.QSTASH_TOKEN! })
+  }
+  return _qstash
+}
 
 const MESSAGE_QUEUE = 'message_queue'
 
@@ -30,6 +41,8 @@ export interface QueuePayload {
 
 export async function pushMessage(payload: QueuePayload): Promise<void> {
   const MAX_RETRIES = 3
+  const redis = getRedis()
+  const qstash = getQStash()
 
   // Push to Redis list for backup (always succeeds first)
   await redis.lpush(MESSAGE_QUEUE, JSON.stringify(payload))
@@ -63,6 +76,7 @@ export async function pushMessage(payload: QueuePayload): Promise<void> {
 export async function getBundleMessages(
   instagramUserId: string
 ): Promise<QueuePayload[]> {
+  const redis = getRedis()
   const key = `bundle:${instagramUserId}`
   const messages = await redis.lrange(key, 0, -1)
   return messages.map((m) =>
@@ -75,6 +89,7 @@ export async function addToBundle(
   payload: QueuePayload,
   ttlSeconds: number = 30
 ): Promise<number> {
+  const redis = getRedis()
   const key = `bundle:${instagramUserId}`
   const count = await redis.lpush(key, JSON.stringify(payload))
   await redis.expire(key, ttlSeconds)
@@ -82,6 +97,7 @@ export async function addToBundle(
 }
 
 export async function clearBundle(instagramUserId: string): Promise<void> {
+  const redis = getRedis()
   const key = `bundle:${instagramUserId}`
   await redis.del(key)
 }
@@ -92,6 +108,7 @@ export async function checkRateLimit(
   maxRequests: number = 100,
   windowSeconds: number = 1
 ): Promise<boolean> {
+  const redis = getRedis()
   const key = `ratelimit:${ip}`
   const count = await redis.incr(key)
   if (count === 1) {
@@ -100,4 +117,4 @@ export async function checkRateLimit(
   return count <= maxRequests
 }
 
-export { redis, qstash }
+export { getRedis as redis, getQStash as qstash }

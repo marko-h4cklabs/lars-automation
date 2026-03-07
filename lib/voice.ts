@@ -1,9 +1,13 @@
 import axios from 'axios'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-})
+let _openai: OpenAI | null = null
+function getOpenAI() {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+  }
+  return _openai
+}
 
 // ElevenLabs TTS
 export async function generateVoice(
@@ -43,7 +47,7 @@ export async function transcribeVoice(audioUrl: string): Promise<string> {
   // Create a File-like object for Whisper API
   const file = new File([audioBuffer], 'audio.ogg', { type: 'audio/ogg' })
 
-  const transcription = await openai.audio.transcriptions.create({
+  const transcription = await getOpenAI().audio.transcriptions.create({
     model: 'whisper-1',
     file,
   })
