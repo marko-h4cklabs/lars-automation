@@ -1,0 +1,292 @@
+'use client'
+
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Send, FileText, Mic, Loader2 } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { LoadingPulse } from '@/components/ui/loading-pulse'
+import { cn } from '@/lib/utils'
+import { useInboxStore } from '@/store/inboxStore'
+import { LeadHeader } from './LeadHeader'
+import { MessageBubble } from './MessageBubble'
+import { AISuggestPanel } from './AISuggestPanel'
+import { TemplateSelector } from './TemplateSelector'
+import { VoicePanel } from './VoicePanel'
+import { QualificationBar } from './QualificationBar'
+import { SummaryBox } from './SummaryBox'
+import type { Conversation, Lead, Message, LeadStage } from '@/types'
+
+type ConversationDetail = Conversation & { lead: Lead }
+
+interface ActiveConversationProps {
+  conversationId: string
+}
+
+export function ActiveConversation({ conversationId }: ActiveConversationProps) {
+  const [conversation, setConversation] = useState<ConversationDetail | null>(null)
+  const [loadingConv, setLoadingConv] = useState(true)
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [templateOpen, setTemplateOpen] = useState(false)
+  const [voiceOpen, setVoiceOpen] = useState(false)
+  const [messagesPage, setMessagesPage] = useState(0)
+  const [hasMoreMessages, setHasMoreMessages] = useState(true)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { activeMessages, setActiveMessages, addMessage, isLoadingMessages, setLoadingMessages } = useInboxStore()
+
+  // Fetch conversation details
+  useEffect(() => {
+    setLoadingConv(true)
+    fetch(`/api/conversations/${conversationId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data) setConversation(data)
+      })
+      .catch(() => {})
+      .finally(() => setLoadingConv(false))
+  }, [conversationId])
+
+  // Fetch messages
+  const fetchMessages = useCallback(async (page: number, append: boolean = false) => {
+    setLoadingMessages(true)
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/messages?page=${page}&limit=30`)
+      if (!res.ok) return
+      const data = await res.json()
+      const msgs = data.messages as Message[]
+      if (append) {
+        setActiveMessages([...msgs.reverse(), ...activeMessages])
+      } else {
+        setActiveMessages(msgs.reverse())
+      }
+      setHasMoreMessages(data.hasMore)
+    } finally {
+      setLoadingMessages(false)
+    }
+  }, [conversationId, setActiveMessages, setLoadingMessages, activeMessages])
+
+  useEffect(() => {
+    setMessagesPage(0)
+    setHasMoreMessages(true)
+    fetchMessages(0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId])
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [activeMessages.length])
+
+  // Send message
+  const handleSend = async (text?: string, voiceUrl?: string) => {
+    const content = text || input.trim()
+    if (!content) return
+    setSending(true)
+
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          type: voiceUrl ? 'voice' : 'text',
+          voice_url: voiceUrl || undefined,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        addMessage(data.message)
+        setInput('')
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const handleSuggestSend = (messages: string[]) => {
+    // Send messages sequentially
+    messages.forEach((msg, i) => {
+      setTimeout(() => handleSend(msg), i * 500)
+    })
+  }
+
+  const handleTransfer = async () => {
+    const res = await fetch(`/api/conversations/${conversationId}/transfer`, { method: 'POST' })
+    if (res.ok) {
+      // Refetch conversation
+      const data = await fetch(`/api/conversations/${conversationId}`).then(r => r.json())
+      setConversation(data)
+    }
+  }
+
+  const handleStageChange = async (stage: LeadStage) => {
+    if (!conversation) return
+    await fetch(`/api/conversations/${conversationId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: conversation.status }),
+    })
+    // Update lead stage directly
+    setConversation((prev) =>
+      prev ? { ...prev, lead: { ...prev.lead, stage } } : null
+    )
+  }
+
+  const loadOlderMessages = () => {
+    if (!hasMoreMessages || isLoadingMessages) return
+    const next = messagesPage + 1
+    setMessagesPage(next)
+    fetchMessages(next, true)
+  }
+
+  // Loading state
+  if (loadingConv) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#080808]">
+        <LoadingPulse lines={3} />
+      </div>
+    )
+  }
+
+  if (!conversation) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#080808]">
+        <p className="text-[#333] font-mono text-xs">Conversation not found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1 flex flex-col bg-[#080808] h-full">
+      {/* Lead header */}
+      <LeadHeader
+        lead={conversation.lead}
+        conversation={conversation}
+        onTransfer={handleTransfer}
+        onStageChange={handleStageChange}
+      />
+
+      {/* Right sidebar panels */}
+      <div className="flex flex-1 min-h-0">
+        {/* Messages area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Messages */}
+          <ScrollArea className="flex-1 px-4 py-3">
+            {/* Load more button */}
+            {hasMoreMessages && (
+              <button
+                onClick={loadOlderMessages}
+                className="w-full py-2 text-[9px] font-mono text-[#444] hover:text-[#666] transition-colors"
+                disabled={isLoadingMessages}
+              >
+                {isLoadingMessages ? 'Loading...' : '↑ Load older messages'}
+              </button>
+            )}
+
+            {isLoadingMessages && activeMessages.length === 0 ? (
+              <LoadingPulse lines={5} />
+            ) : activeMessages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-[#333] font-mono text-xs">No messages yet</p>
+              </div>
+            ) : (
+              activeMessages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </ScrollArea>
+
+          {/* AI suggest panel */}
+          <AISuggestPanel
+            conversationId={conversationId}
+            onSend={handleSuggestSend}
+          />
+
+          {/* Input area */}
+          <div className="relative border-t border-[#1a1a1a] bg-[#0a0a0a]">
+            <TemplateSelector
+              open={templateOpen}
+              onClose={() => setTemplateOpen(false)}
+              onSelect={(content) => setInput(content)}
+            />
+            <VoicePanel
+              open={voiceOpen}
+              onClose={() => setVoiceOpen(false)}
+              onSend={(text, url) => handleSend(text, url)}
+            />
+
+            <div className="flex items-end gap-2 p-3">
+              {/* Tool buttons */}
+              <div className="flex gap-1 shrink-0">
+                <button
+                  onClick={() => { setTemplateOpen(!templateOpen); setVoiceOpen(false) }}
+                  className={cn(
+                    'w-7 h-7 flex items-center justify-center rounded transition-colors',
+                    templateOpen
+                      ? 'bg-[#00ff88]/10 text-[#00ff88]'
+                      : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
+                  )}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => { setVoiceOpen(!voiceOpen); setTemplateOpen(false) }}
+                  className={cn(
+                    'w-7 h-7 flex items-center justify-center rounded transition-colors',
+                    voiceOpen
+                      ? 'bg-[#00ff88]/10 text-[#00ff88]'
+                      : 'text-[#444] hover:text-[#888] hover:bg-[#111]'
+                  )}
+                >
+                  <Mic className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Text input */}
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSend()
+                  }
+                }}
+                placeholder="Type a message..."
+                rows={1}
+                className="flex-1 bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2 text-xs font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30 max-h-24"
+              />
+
+              {/* Send button */}
+              <button
+                onClick={() => handleSend()}
+                disabled={!input.trim() || sending}
+                className={cn(
+                  'w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0',
+                  input.trim()
+                    ? 'bg-[#00ff88] text-black hover:bg-[#00dd77]'
+                    : 'bg-[#111] text-[#333]'
+                )}
+              >
+                {sending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right sidebar */}
+        <div className="w-[260px] border-l border-[#1a1a1a] flex flex-col shrink-0 overflow-y-auto">
+          <QualificationBar
+            conversationId={conversationId}
+            collectedFields={conversation.qualified_fields_collected || {}}
+          />
+          <SummaryBox conversationId={conversationId} />
+        </div>
+      </div>
+    </div>
+  )
+}
