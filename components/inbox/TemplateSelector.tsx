@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, X, Search } from 'lucide-react'
+import { FileText, X, Search, Star, Clock, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Template {
@@ -9,39 +9,59 @@ interface Template {
   name: string
   category: string
   content: string
+  tags: string[]
+  usage_count: number
+  is_favorite: boolean
 }
 
 interface TemplateSelectorProps {
   open: boolean
   onClose: () => void
   onSelect: (content: string) => void
+  onSendDirect?: (templateId: string) => void
 }
 
-const FALLBACK_TEMPLATES: Template[] = [
-  { id: '1', name: 'Intro', category: 'opening', content: 'Hey! Thanks for reaching out 🙏 What made you interested in working with a coach?' },
-  { id: '2', name: 'Qualify Budget', category: 'qualifying', content: 'Just so I can point you in the right direction — have you invested in coaching or fitness programs before?' },
-  { id: '3', name: 'Qualify Timeline', category: 'qualifying', content: 'What kind of timeline are you looking at for hitting your goals?' },
-  { id: '4', name: 'Qualify Commitment', category: 'qualifying', content: 'How many days a week are you currently training?' },
-  { id: '5', name: 'Book Call', category: 'closing', content: 'I think you\'d be a great fit. Want me to send you a link to book a quick call with the coach?' },
-  { id: '6', name: 'Send Calendly', category: 'closing', content: 'Here\'s the link to book your call: [CALENDLY_LINK]\n\nPick whatever time works best for you!' },
-  { id: '7', name: 'Follow Up', category: 'follow_up', content: 'Hey! Just checking in — did you get a chance to look at that link I sent?' },
-  { id: '8', name: 'Soft Close', category: 'closing', content: 'No pressure at all — just want to make sure you don\'t miss out. The coach only takes on a few clients per month.' },
+const CATEGORIES = [
+  { value: 'all', label: 'ALL', color: '' },
+  { value: 'opener', label: 'OPEN', color: 'text-[#00ff88]' },
+  { value: 'qualifying', label: 'QUAL', color: 'text-[#54a0ff]' },
+  { value: 'nurturing', label: 'NURT', color: 'text-[#ff9f43]' },
+  { value: 'booking_push', label: 'BOOK', color: 'text-[#f05050]' },
+  { value: 'follow_up', label: 'F/UP', color: 'text-[#aaa]' },
+  { value: 'objection', label: 'OBJ', color: 'text-[#5f27cd]' },
+  { value: 'closer', label: 'CLOSE', color: 'text-[#333]' },
 ]
 
-const CATEGORIES = ['all', 'opening', 'qualifying', 'closing', 'follow_up']
+const CAT_COLORS: Record<string, string> = {
+  opener: 'text-[#00ff88] bg-[#00ff88]/10',
+  qualifying: 'text-[#54a0ff] bg-[#54a0ff]/10',
+  nurturing: 'text-[#ff9f43] bg-[#ff9f43]/10',
+  booking_push: 'text-[#f05050] bg-[#f05050]/10',
+  follow_up: 'text-[#aaa] bg-[#aaa]/10',
+  objection: 'text-[#5f27cd] bg-[#5f27cd]/10',
+  closer: 'text-[#666] bg-[#666]/10',
+}
 
-export function TemplateSelector({ open, onClose, onSelect }: TemplateSelectorProps) {
-  const [templates, setTemplates] = useState<Template[]>(FALLBACK_TEMPLATES)
+export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: TemplateSelectorProps) {
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [recentIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!open) return
+    setLoading(true)
     fetch('/api/templates')
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.templates?.length > 0) setTemplates(data.templates)
+        if (data?.templates) setTemplates(data.templates)
       })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+
+    // Load recent
+    fetch('/api/templates?recent=true')
       .catch(() => {})
   }, [open])
 
@@ -49,17 +69,28 @@ export function TemplateSelector({ open, onClose, onSelect }: TemplateSelectorPr
 
   const filtered = templates.filter((t) => {
     if (category !== 'all' && t.category !== category) return false
-    if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.content.toLowerCase().includes(search.toLowerCase())) return false
+    if (search) {
+      const q = search.toLowerCase()
+      if (!t.name.toLowerCase().includes(q) && !t.content.toLowerCase().includes(q) && !t.tags.some((tag) => tag.toLowerCase().includes(q))) return false
+    }
     return true
   })
 
+  // Split into favorites + recent + rest
+  const favorites = filtered.filter((t) => t.is_favorite)
+  const recent = recentIds.length > 0
+    ? filtered.filter((t) => recentIds.includes(t.id) && !t.is_favorite)
+    : []
+  const rest = filtered.filter((t) => !t.is_favorite && !recentIds.includes(t.id))
+
   return (
-    <div className="absolute bottom-full left-0 right-0 bg-[#0a0a0a] border border-[#1a1a1a] rounded-t-lg shadow-2xl max-h-[320px] flex flex-col z-50">
+    <div className="absolute bottom-full left-0 right-0 bg-[#0a0a0a] border border-[#1a1a1a] rounded-t-lg shadow-2xl flex flex-col z-50" style={{ height: '400px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[#1a1a1a]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[#1a1a1a] shrink-0">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3 h-3 text-[#00ff88]" />
           <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Templates</span>
+          <span className="text-[8px] font-mono text-[#444]">({filtered.length})</span>
         </div>
         <button onClick={onClose} className="text-[#444] hover:text-[#888]">
           <X className="w-3.5 h-3.5" />
@@ -67,7 +98,7 @@ export function TemplateSelector({ open, onClose, onSelect }: TemplateSelectorPr
       </div>
 
       {/* Search + categories */}
-      <div className="px-3 py-2 border-b border-[#111] space-y-2">
+      <div className="px-3 py-2 border-b border-[#111] space-y-2 shrink-0">
         <div className="flex items-center gap-2 bg-[#111] rounded px-2 py-1">
           <Search className="w-3 h-3 text-[#444]" />
           <input
@@ -75,21 +106,22 @@ export function TemplateSelector({ open, onClose, onSelect }: TemplateSelectorPr
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search templates..."
             className="bg-transparent text-[#ccc] text-[10px] font-mono placeholder:text-[#333] outline-none flex-1"
+            autoFocus
           />
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {CATEGORIES.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setCategory(cat)}
+              key={cat.value}
+              onClick={() => setCategory(cat.value)}
               className={cn(
-                'px-2 py-0.5 rounded text-[8px] font-mono uppercase transition-colors',
-                category === cat
+                'px-1.5 py-0.5 rounded text-[7px] font-mono uppercase transition-colors',
+                category === cat.value
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20'
-                  : 'text-[#555] hover:text-[#888]'
+                  : 'text-[#555] hover:text-[#888] border border-transparent'
               )}
             >
-              {cat.replace('_', ' ')}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -97,26 +129,84 @@ export function TemplateSelector({ open, onClose, onSelect }: TemplateSelectorPr
 
       {/* Template list */}
       <div className="flex-1 overflow-y-auto">
-        {filtered.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => {
-              onSelect(t.content)
-              onClose()
-            }}
-            className="w-full text-left px-3 py-2 hover:bg-[#111] border-b border-[#0d0d0d] transition-colors"
-          >
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] font-mono text-[#ccc] font-bold">{t.name}</span>
-              <span className="text-[8px] font-mono text-[#444] uppercase">{t.category}</span>
-            </div>
-            <p className="text-[9px] font-mono text-[#555] truncate">{t.content}</p>
-          </button>
-        ))}
-        {filtered.length === 0 && (
-          <p className="text-center text-[10px] font-mono text-[#444] py-6">No templates found</p>
+        {loading ? (
+          <p className="text-center text-[10px] font-mono text-[#444] py-6">Loading...</p>
+        ) : (
+          <>
+            {/* Favorites */}
+            {favorites.length > 0 && (
+              <div>
+                <div className="px-3 py-1 flex items-center gap-1">
+                  <Star className="w-2.5 h-2.5 text-[#ff9f43]" />
+                  <span className="text-[7px] font-mono text-[#555] uppercase tracking-wider">Favorites</span>
+                </div>
+                {favorites.map((t) => (
+                  <TemplateRow key={t.id} template={t} onSelect={onSelect} onClose={onClose} onSendDirect={onSendDirect} />
+                ))}
+              </div>
+            )}
+
+            {/* Recent */}
+            {recent.length > 0 && (
+              <div>
+                <div className="px-3 py-1 flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5 text-[#555]" />
+                  <span className="text-[7px] font-mono text-[#555] uppercase tracking-wider">Recent</span>
+                </div>
+                {recent.map((t) => (
+                  <TemplateRow key={t.id} template={t} onSelect={onSelect} onClose={onClose} onSendDirect={onSendDirect} />
+                ))}
+              </div>
+            )}
+
+            {/* All */}
+            {rest.map((t) => (
+              <TemplateRow key={t.id} template={t} onSelect={onSelect} onClose={onClose} onSendDirect={onSendDirect} />
+            ))}
+
+            {filtered.length === 0 && (
+              <p className="text-center text-[10px] font-mono text-[#444] py-6">No templates found</p>
+            )}
+          </>
         )}
       </div>
+    </div>
+  )
+}
+
+function TemplateRow({
+  template, onSelect, onClose, onSendDirect,
+}: {
+  template: Template; onSelect: (content: string) => void
+  onClose: () => void; onSendDirect?: (id: string) => void
+}) {
+  return (
+    <div className="flex items-center gap-1 px-3 py-1.5 hover:bg-[#111] border-b border-[#0d0d0d] transition-colors group">
+      <button
+        onClick={() => { onSelect(template.content); onClose() }}
+        className="flex-1 text-left min-w-0"
+      >
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span className="text-[10px] font-mono text-[#ccc] font-bold truncate">{template.name}</span>
+          <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded shrink-0',
+            CAT_COLORS[template.category] || 'text-[#666] bg-[#666]/10')}>
+            {template.category.replace('_', ' ')}
+          </span>
+          {template.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="text-[7px] font-mono text-[#444] bg-[#111] px-1 rounded shrink-0">{tag}</span>
+          ))}
+        </div>
+        <p className="text-[9px] font-mono text-[#555] truncate">{template.content.slice(0, 60)}</p>
+      </button>
+      {onSendDirect && (
+        <button
+          onClick={() => { onSendDirect(template.id); onClose() }}
+          className="p-1 text-[#333] hover:text-[#00ff88] opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+          title="Send directly"
+        >
+          <Send className="w-3 h-3" />
+        </button>
+      )}
     </div>
   )
 }
