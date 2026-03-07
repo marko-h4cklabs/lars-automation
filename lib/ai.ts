@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { logAIUsage, estimateTokens } from '@/lib/ai-cost'
 
 let _anthropic: Anthropic | null = null
 function getAnthropic() {
@@ -21,6 +22,10 @@ interface GenerateOptions {
   messages: { role: 'user' | 'assistant'; content: string }[]
   maxTokens?: number
   temperature?: number
+  // Optional context for cost tracking
+  action?: string
+  conversationId?: string
+  leadId?: string
 }
 
 export async function generate({
@@ -29,6 +34,9 @@ export async function generate({
   messages,
   maxTokens = 2048,
   temperature = 0.7,
+  action,
+  conversationId,
+  leadId,
 }: GenerateOptions): Promise<string> {
   const response = await getAnthropic().messages.create({
     model: MODEL_MAP[model],
@@ -37,6 +45,21 @@ export async function generate({
     system,
     messages,
   })
+
+  // Log token usage for cost tracking
+  if (action) {
+    const inputTokens = response.usage?.input_tokens || estimateTokens(system + messages.map((m) => m.content).join(''))
+    const outputTokens = response.usage?.output_tokens || 0
+
+    logAIUsage({
+      model,
+      action,
+      inputTokens,
+      outputTokens,
+      conversationId,
+      leadId,
+    })
+  }
 
   const block = response.content[0]
   if (block.type === 'text') {

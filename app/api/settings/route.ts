@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { invalidateSettingsCache } from '@/lib/notifications'
+import { invalidateCache } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -69,6 +70,7 @@ export async function PUT(request: NextRequest) {
     case 'distribution': {
       const { error } = await supabase.from('distribution_settings').upsert({ id: data.id || undefined, ...data, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      invalidateCache('DISTRIBUTION').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
     case 'qualification_field': {
@@ -111,11 +113,13 @@ export async function PUT(request: NextRequest) {
     case 'autopilot': {
       const { error } = await supabase.from('autopilot_settings').upsert({ id: data.id || undefined, ...data, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      invalidateCache('AUTOPILOT').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
     case 'persona': {
       const { error } = await supabase.from('persona_settings').upsert({ id: data.id || undefined, ...data })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      invalidateCache('PERSONA').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
     case 'copilot': {

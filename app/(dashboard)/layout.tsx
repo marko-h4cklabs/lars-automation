@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { NotificationPanel } from '@/components/notifications/NotificationPanel'
 import { ToastProvider } from '@/components/ui/toast-notification'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useRealtime } from '@/hooks/useRealtime'
 import { useAppStore } from '@/store/appStore'
 
@@ -36,7 +37,7 @@ export default function DashboardLayout({
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {children}
+          <ErrorBoundary>{children}</ErrorBoundary>
         </main>
       </div>
 
