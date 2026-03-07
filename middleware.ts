@@ -66,6 +66,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/inbox', request.url))
   }
 
+  // Root path — redirect to inbox
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/inbox', request.url))
+  }
+
   // Fetch user role for downstream use
   const { data: user } = await supabase
     .from('users')
