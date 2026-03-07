@@ -12,6 +12,7 @@ import { transcribeVoice } from '@/lib/voice'
 import { triageLead } from '@/lib/workers/triage'
 import { calculateAssignment } from '@/lib/workers/distribution'
 import { createNotification } from '@/lib/notifications'
+import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import {
   LeadStage,
   LeadSource,
@@ -40,11 +41,15 @@ import {
 export const maxDuration = 60 // Allow up to 60s for this worker
 
 export async function POST(request: NextRequest) {
+  // Verify QStash signature
+  const authError = await verifyQStashSignature(request)
+  if (authError) return authError
+
   const supabase = createAdminClient()
 
   let payload: QueuePayload
   try {
-    payload = await request.json()
+    payload = await getVerifiedBody<QueuePayload>(request)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }

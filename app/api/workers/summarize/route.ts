@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { generate } from '@/lib/ai'
+import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import type { Message } from '@/types'
 
 export const maxDuration = 30
@@ -11,10 +12,14 @@ export const maxDuration = 30
  * Called every N inbound messages by the process worker.
  */
 export async function POST(request: NextRequest) {
+  // Verify QStash signature
+  const authError = await verifyQStashSignature(request)
+  if (authError) return authError
+
   const supabase = createAdminClient()
 
   try {
-    const { conversationId } = await request.json()
+    const { conversationId } = await getVerifiedBody<{ conversationId: string }>(request)
 
     if (!conversationId) {
       return NextResponse.json({ error: 'Missing conversationId' }, { status: 400 })

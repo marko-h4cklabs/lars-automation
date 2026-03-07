@@ -4,6 +4,7 @@ import { generateJSON, generate } from '@/lib/ai'
 import { sendMultipleMessages, sendTextMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
 import { createNotification } from '@/lib/notifications'
+import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import {
   LeadStage,
   NotificationType,
@@ -16,10 +17,14 @@ import { HOT_LEAD_THRESHOLD } from '@/constants'
 export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
+  // Verify QStash signature
+  const authError = await verifyQStashSignature(request)
+  if (authError) return authError
+
   const supabase = createAdminClient()
 
   try {
-    const { conversationId, leadId } = await request.json()
+    const { conversationId, leadId } = await getVerifiedBody<{ conversationId: string; leadId: string }>(request)
 
     if (!conversationId || !leadId) {
       return NextResponse.json({ error: 'Missing conversationId or leadId' }, { status: 400 })

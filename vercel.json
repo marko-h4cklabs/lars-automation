@@ -2,5 +2,37 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/workers/process/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/workers/autopilot/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/workers/followup/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/workers/summarize/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/workers/notifications/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/webhooks/manychat/dm/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/webhooks/calendly/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/conversations/*/suggest/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/persona/preview/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/testing/simulate/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }

@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { generate } from '@/lib/ai'
 import { sendTextMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
 import { advanceJob } from '@/lib/workers/followup'
+import { verifyQStashSignature } from '@/lib/qstash-verify'
 import {
   FollowUpJobStatus,
   LeadStage,
@@ -19,7 +20,10 @@ export const maxDuration = 60
  * Called by QStash every 5 minutes (cron).
  * Processes all due follow-up jobs.
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Verify QStash signature
+  const authError = await verifyQStashSignature(request)
+  if (authError) return authError
   const supabase = createAdminClient()
 
   try {

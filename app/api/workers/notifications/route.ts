@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase'
 import { createNotification } from '@/lib/notifications'
+import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import { NotificationType } from '@/types'
 
 export const maxDuration = 30
@@ -12,10 +14,11 @@ export const maxDuration = 30
  * - call_booked        (from Calendly webhook)
  * - setter_offline     (from user status update)
  * - ai_takeover        (from conversation transfer)
+ * - refresh_views      (materialized view refresh — called by QStash cron)
  *
  * POST body:
  * {
- *   event: 'hot_lead_detected' | 'call_booked' | 'setter_offline' | 'ai_takeover',
+ *   event: 'hot_lead_detected' | 'call_booked' | 'setter_offline' | 'ai_takeover' | 'refresh_views',
  *   leadId?: string,
  *   conversationId?: string,
  *   userId?: string,     // target user for directed notifications (null = broadcast)
@@ -26,8 +29,12 @@ export const maxDuration = 30
  * }
  */
 export async function POST(request: NextRequest) {
+  // Verify QStash signature
+  const authError = await verifyQStashSignature(request)
+  if (authError) return authError
+
   try {
-    const body = await request.json()
+    const body = await getVerifiedBody<Record<string, unknown>>(request)
     const {
       event,
       leadId,
@@ -50,6 +57,14 @@ export async function POST(request: NextRequest) {
 
     if (!event) {
       return NextResponse.json({ error: 'Missing event' }, { status: 400 })
+    }
+
+    // Handle materialized view refresh (no notification needed)
+    if (event === 'refresh_views') {
+      const supabase = createAdminClient()
+      await supabase.rpc('refresh_daily_metrics')
+      await supabase.rpc('refresh_lead_stats')
+      return NextResponse.json({ status: 'refreshed', views: ['mv_daily_metrics', 'mv_lead_stats'] })
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

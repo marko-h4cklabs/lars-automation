@@ -132,6 +132,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
    lib/database/migrations/003_analytics_views.sql    # Analytics RPC functions
    lib/database/migrations/004_notification_settings.sql # Notification settings table
    lib/database/migrations/005_performance_indexes.sql   # Performance indexes + materialized views
+   lib/database/migrations/006_app_settings_and_storage.sql # App settings KV store + media bucket
+   lib/database/migrations/007_auth_user_trigger.sql  # Auto-create user row on auth signup
    ```
 3. Enable the **pgvector** extension (required for knowledge base embeddings):
    - SQL Editor → `create extension if not exists vector;`
@@ -272,13 +274,14 @@ npm run build
 ### Post-Deployment Checklist
 
 - [ ] All environment variables set in Vercel
-- [ ] Supabase migrations run (001 through 005)
+- [ ] Supabase migrations run (001 through 007)
 - [ ] Supabase Realtime enabled on `messages`, `notifications`, `conversations`, `leads`
 - [ ] ManyChat webhooks pointing to production URLs
 - [ ] QStash cron jobs created (followup every 5min, summarize every 15min)
 - [ ] Calendly webhook registered
 - [ ] Slack webhooks tested from Settings page
-- [ ] First admin user created (sign up → set role to 'admin' in Supabase)
+- [ ] Supabase Storage `media` bucket exists (created by migration 006, verify in dashboard)
+- [ ] First admin user created (sign up → auto-creates user row via trigger 007 → promote to admin)
 - [ ] Persona configured in Settings → Autopilot
 - [ ] Knowledge base documents uploaded
 - [ ] Distribution rules set (round-robin or AI-assigned)
@@ -296,6 +299,8 @@ Run in order via Supabase SQL Editor:
 | `003_analytics_views.sql` | RPC functions for dashboard metrics (daily metrics, setter performance, funnel) |
 | `004_notification_settings.sql` | Notification settings table with default row |
 | `005_performance_indexes.sql` | Compound indexes, materialized views (mv_daily_metrics, mv_lead_stats), query timeout |
+| `006_app_settings_and_storage.sql` | Key-value `app_settings` table for voice/template settings + `media` storage bucket |
+| `007_auth_user_trigger.sql` | Auto-insert `public.users` row when a user signs up via Supabase Auth |
 
 ---
 
@@ -327,7 +332,7 @@ Run in order via Supabase SQL Editor:
 
 After running migrations and deploying:
 
-1. **Create admin user**: Sign up through the app, then in Supabase SQL Editor:
+1. **Create admin user**: Sign up through the app (migration 007 auto-creates a `users` row with `setter` role), then promote to admin in Supabase SQL Editor:
    ```sql
    UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
    ```
