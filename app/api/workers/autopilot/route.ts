@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase'
 import { generateJSON, generate } from '@/lib/ai'
 import { sendMultipleMessages, sendTextMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
-import { sendHotLeadAlert } from '@/lib/slack'
+import { createNotification } from '@/lib/notifications'
 import {
   LeadStage,
   NotificationType,
@@ -296,21 +296,17 @@ Keep it to 1-2 short sentences. Be warm but clear. Do not sound robotic.`,
     if (newScore >= HOT_LEAD_THRESHOLD && previousScore < HOT_LEAD_THRESHOLD) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-      await supabase.from('notifications').insert({
-        user_id: null,
+      createNotification({
         type: NotificationType.HotLead,
-        lead_id: leadId,
-        conversation_id: conversationId,
+        leadId,
+        conversationId,
         message: `🔥 Hot lead! @${ctx.lead.username} scored ${newScore}/100`,
-        read: false,
-        slack_sent: false,
-      })
-
-      sendHotLeadAlert(
-        ctx.lead.username,
-        newScore,
-        `${appUrl}/inbox/${conversationId}`
-      ).catch(() => {})
+        metadata: {
+          username: ctx.lead.username,
+          heatScore: newScore,
+          conversationUrl: `${appUrl}/inbox/${conversationId}`,
+        },
+      }).catch(() => {})
     }
 
     // Touch conversation updated_at

@@ -299,7 +299,25 @@ CREATE TABLE notifications (
 );
 
 -- ═══════════════════════════════════════════════════════════════
--- TABLE 17: training_conversations
+-- TABLE 17: notification_settings (single row)
+-- ═══════════════════════════════════════════════════════════════
+
+CREATE TABLE notification_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slack_webhook_alerts TEXT,
+  slack_webhook_system TEXT,
+  hot_lead_mode TEXT NOT NULL DEFAULT 'slack_and_app',
+  hot_lead_threshold INTEGER NOT NULL DEFAULT 80,
+  call_booked_mode TEXT NOT NULL DEFAULT 'slack_and_app',
+  setter_offline_mode TEXT NOT NULL DEFAULT 'app_only',
+  ai_takeover_mode TEXT NOT NULL DEFAULT 'app_only',
+  dnd_start TEXT,
+  dnd_end TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ═══════════════════════════════════════════════════════════════
+-- TABLE 18: training_conversations
 -- ═══════════════════════════════════════════════════════════════
 
 CREATE TABLE training_conversations (
@@ -422,6 +440,7 @@ ALTER TABLE setter_ai_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE autopilot_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE distribution_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE training_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
@@ -629,6 +648,13 @@ CREATE POLICY "notifications_update" ON notifications
 
 CREATE POLICY "notifications_insert" ON notifications
   FOR INSERT WITH CHECK (TRUE); -- system/workers can create for any user
+
+-- ── notification_settings (admin writes, everyone reads) ──
+CREATE POLICY "notification_settings_select" ON notification_settings
+  FOR SELECT USING (TRUE);
+
+CREATE POLICY "notification_settings_modify" ON notification_settings
+  FOR ALL USING (is_admin());
 
 -- ── training_conversations (admin manages, setters read) ──
 CREATE POLICY "training_conversations_select" ON training_conversations

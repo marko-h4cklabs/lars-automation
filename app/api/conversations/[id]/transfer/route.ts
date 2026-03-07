@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createNotification } from '@/lib/notifications'
 import { NotificationType } from '@/types'
 
 export async function POST(
@@ -40,17 +41,20 @@ export async function POST(
       .eq('id', conv.lead_id)
 
     const leadData = conv.lead as unknown as { username: string }
+    const username = leadData?.username || 'Lead'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    // Create notification
-    await supabase.from('notifications').insert({
-      user_id: null,
+    // Create notification via centralized system (handles in-app + Slack)
+    createNotification({
       type: NotificationType.AITakeover,
-      lead_id: conv.lead_id,
-      conversation_id: id,
-      message: `@${leadData?.username || 'Lead'} transferred to AI autopilot`,
-      read: false,
-      slack_sent: false,
-    })
+      leadId: conv.lead_id,
+      conversationId: id,
+      message: `🤖 @${username} transferred to AI autopilot`,
+      metadata: {
+        username,
+        conversationUrl: `${appUrl}/inbox/${id}`,
+      },
+    }).catch(() => {})
   }
 
   return NextResponse.json({ status: 'transferred', conversationId: id })

@@ -11,7 +11,7 @@ import type { QueuePayload } from '@/lib/queue'
 import { transcribeVoice } from '@/lib/voice'
 import { triageLead } from '@/lib/workers/triage'
 import { calculateAssignment } from '@/lib/workers/distribution'
-import { sendHotLeadAlert } from '@/lib/slack'
+import { createNotification } from '@/lib/notifications'
 import {
   LeadStage,
   LeadSource,
@@ -322,27 +322,21 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', lead.id)
 
-    // Hot lead notification
+    // Hot lead notification (centralized — handles in-app + Slack + preferences)
     if (triageResult.heat_score >= HOT_LEAD_THRESHOLD) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-      // In-app notification
-      await supabase.from('notifications').insert({
-        user_id: null, // broadcast
+      createNotification({
         type: NotificationType.HotLead,
-        lead_id: lead.id,
-        conversation_id: conversation.id,
+        leadId: lead.id,
+        conversationId: conversation.id,
         message: `🔥 Hot lead! @${username} scored ${triageResult.heat_score}/100`,
-        read: false,
-        slack_sent: false,
-      })
-
-      // Slack alert (fire-and-forget)
-      sendHotLeadAlert(
-        username,
-        triageResult.heat_score,
-        `${appUrl}/inbox/${conversation.id}`
-      ).catch(() => {})
+        metadata: {
+          username,
+          heatScore: triageResult.heat_score,
+          conversationUrl: `${appUrl}/inbox/${conversation.id}`,
+        },
+      }).catch(() => {})
     }
 
     // ═══════════════════════════════════════
@@ -416,16 +410,15 @@ export async function POST(request: NextRequest) {
         retries: 3,
       })
     } else {
-      // Setter assigned — push notification via Supabase Realtime
-      await supabase.from('notifications').insert({
-        user_id: assignedTo,
-        type: NotificationType.HotLead, // Using hot_lead for new message alerts
-        lead_id: lead.id,
-        conversation_id: conversation.id,
+      // Setter assigned — push notification via centralized system
+      createNotification({
+        type: NotificationType.HotLead,
+        leadId: lead.id,
+        conversationId: conversation.id,
+        userId: assignedTo,
         message: `New message from @${username}`,
-        read: false,
-        slack_sent: false,
-      })
+        metadata: { username },
+      }).catch(() => {})
     }
 
     // ═══════════════════════════════════════

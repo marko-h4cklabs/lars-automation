@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { invalidateSettingsCache } from '@/lib/notifications'
 
 export async function GET(request: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -125,6 +126,7 @@ export async function PUT(request: NextRequest) {
     case 'notifications': {
       const { error } = await supabase.from('notification_settings').upsert({ id: data.id || undefined, ...data })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      invalidateSettingsCache()
       return NextResponse.json({ status: 'saved' })
     }
     case 'integrations': {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateCalendlySignature, logWebhookEvent } from '@/lib/webhooks/security'
 import { createAdminClient } from '@/lib/supabase'
+import { createNotification } from '@/lib/notifications'
 import { LeadStage, NotificationType } from '@/types'
 
 export async function POST(request: NextRequest) {
@@ -34,25 +35,28 @@ export async function POST(request: NextRequest) {
     // Look for UTM-based matching first (instagram username passed as utm_source)
     const utmSource = payload?.tracking?.utm_source as string | undefined
     let leadId: string | null = null
+    let username: string | null = null
 
     if (utmSource) {
       const { data: lead } = await supabase
         .from('leads')
-        .select('id')
+        .select('id, username')
         .eq('username', utmSource)
         .single()
       leadId = lead?.id || null
+      username = lead?.username || null
     }
 
     // Fallback: match by name
     if (!leadId && name) {
       const { data: lead } = await supabase
         .from('leads')
-        .select('id')
+        .select('id, username')
         .ilike('full_name', `%${name}%`)
         .limit(1)
         .single()
       leadId = lead?.id || null
+      username = lead?.username || null
     }
 
     if (leadId) {
@@ -82,19 +86,21 @@ export async function POST(request: NextRequest) {
           .eq('id', conversation.id)
       }
 
-      // Create CALL_BOOKED notification (broadcast to all users)
-      await supabase.from('notifications').insert({
-        user_id: null, // broadcast
-        type: NotificationType.CallBooked,
-        lead_id: leadId,
-        conversation_id: conversation?.id || null,
-        message: `Call booked! ${name || 'A lead'} scheduled${scheduledAt ? ` for ${new Date(scheduledAt).toLocaleDateString()}` : ''}`,
-        read: false,
-        slack_sent: false,
-      })
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-      // Send Slack notification (fire-and-forget)
-      sendSlackNotification(name, scheduledAt).catch(() => {})
+      // Create CALL_BOOKED notification via centralized system (handles in-app + Slack)
+      createNotification({
+        type: NotificationType.CallBooked,
+        leadId,
+        conversationId: conversation?.id || null,
+        message: `📅 Call booked! @${username || name || 'A lead'} scheduled${scheduledAt ? ` for ${new Date(scheduledAt).toLocaleDateString()}` : ''}`,
+        metadata: {
+          username: username || name || undefined,
+          scheduledAt,
+          leadUrl: `${appUrl}/crm?lead=${leadId}`,
+          conversationUrl: conversation ? `${appUrl}/inbox/${conversation.id}` : undefined,
+        },
+      }).catch(() => {})
     }
 
     logWebhookEvent('webhook.calendly.invitee_created', 'lead', leadId || 'unknown', {
@@ -109,20 +115,4 @@ export async function POST(request: NextRequest) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
-}
-
-async function sendSlackNotification(
-  name: string | undefined,
-  scheduledAt: string | undefined
-) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL
-  if (!webhookUrl) return
-
-  const text = `🎯 *CALL BOOKED!*\n${name || 'Unknown lead'}${scheduledAt ? `\n📅 ${new Date(scheduledAt).toLocaleString()}` : ''}`
-
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  })
 }
