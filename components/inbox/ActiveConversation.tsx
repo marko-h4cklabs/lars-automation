@@ -109,6 +109,11 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     })
   }
 
+  const handleSuggestUse = (messages: string[]) => {
+    // Copy suggestion text into the input field
+    setInput(messages.join('\n'))
+  }
+
   const handleTransfer = async () => {
     const res = await fetch(`/api/conversations/${conversationId}/transfer`, { method: 'POST' })
     if (res.ok) {
@@ -200,6 +205,7 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
           <AISuggestPanel
             conversationId={conversationId}
             onSend={handleSuggestSend}
+            onUseThis={handleSuggestUse}
           />
 
           {/* Input area */}

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Sparkles, Send, Copy, Check, Loader2 } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Sparkles, Send, MessageSquare, Loader2, ChevronDown, ChevronUp, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInboxStore } from '@/store/inboxStore'
 
@@ -12,142 +12,233 @@ interface SuggestionOption {
   targeting_field: string
 }
 
+interface SuggestResponse {
+  option_a: SuggestionOption
+  option_b: SuggestionOption
+  context_summary: string
+  recommended: 'a' | 'b'
+  suggestion_id: string | null
+}
+
 interface AISuggestPanelProps {
   conversationId: string
   onSend: (messages: string[]) => void
+  onUseThis: (messages: string[]) => void
 }
 
-export function AISuggestPanel({ conversationId, onSend }: AISuggestPanelProps) {
-  const [selected, setSelected] = useState<'a' | 'b' | null>(null)
-  const [copied, setCopied] = useState(false)
-  const { aiSuggestions, isGeneratingSuggestions, setGeneratingSuggestions, setAISuggestions } = useInboxStore()
+function confidenceColor(score: number): string {
+  if (score >= 90) return 'text-[#00ff88]'
+  if (score >= 70) return 'text-[#f0c030]'
+  return 'text-[#f08030]'
+}
 
-  const generateSuggestions = async () => {
+function confidenceBg(score: number): string {
+  if (score >= 90) return 'bg-[#00ff88]/10 border-[#00ff88]/30'
+  if (score >= 70) return 'bg-[#f0c030]/10 border-[#f0c030]/30'
+  return 'bg-[#f08030]/10 border-[#f08030]/30'
+}
+
+function confidenceLabel(score: number): string {
+  if (score >= 90) return 'HIGH'
+  if (score >= 70) return 'MED'
+  return 'LOW'
+}
+
+export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestPanelProps) {
+  const [expanded, setExpanded] = useState(true)
+  const [hoveredOption, setHoveredOption] = useState<'a' | 'b' | null>(null)
+  const [sendingOption, setSendingOption] = useState<'a' | 'b' | null>(null)
+  const [suggestionData, setSuggestionData] = useState<SuggestResponse | null>(null)
+  const { isGeneratingSuggestions, setGeneratingSuggestions } = useInboxStore()
+
+  const generateSuggestions = useCallback(async () => {
     setGeneratingSuggestions(true)
+    setSuggestionData(null)
     try {
       const res = await fetch(`/api/conversations/${conversationId}/suggest`, { method: 'POST' })
       if (res.ok) {
-        const data = await res.json()
-        setAISuggestions(data)
-        setSelected(data.recommended === 'a' ? 'a' : 'b')
+        const data = await res.json() as SuggestResponse
+        setSuggestionData(data)
+        setExpanded(true)
       }
     } finally {
       setGeneratingSuggestions(false)
     }
+  }, [conversationId, setGeneratingSuggestions])
+
+  const trackUsage = (option: 'a' | 'b', action: 'use' | 'send') => {
+    if (!suggestionData?.suggestion_id) return
+    fetch(`/api/conversations/${conversationId}/suggest/use`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        suggestion_id: suggestionData.suggestion_id,
+        used_option: option,
+        action,
+      }),
+    }).catch(() => {})
   }
 
-  const parseSuggestion = (key: 'a' | 'b'): SuggestionOption | null => {
-    if (!aiSuggestions) return null
-    const raw = key === 'a' ? aiSuggestions.suggestion_1 : aiSuggestions.suggestion_2
-    try {
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
-      return parsed as SuggestionOption
-    } catch {
-      return null
-    }
+  const handleUseThis = (option: 'a' | 'b') => {
+    const opt = option === 'a' ? suggestionData?.option_a : suggestionData?.option_b
+    if (!opt) return
+    onUseThis(opt.messages)
+    trackUsage(option, 'use')
   }
 
-  const optionA = parseSuggestion('a')
-  const optionB = parseSuggestion('b')
-
-  const handleCopy = (msgs: string[]) => {
-    navigator.clipboard.writeText(msgs.join('\n'))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleSendNow = (option: 'a' | 'b') => {
+    const opt = option === 'a' ? suggestionData?.option_a : suggestionData?.option_b
+    if (!opt) return
+    setSendingOption(option)
+    onSend(opt.messages)
+    trackUsage(option, 'send')
+    setTimeout(() => setSendingOption(null), 1000)
   }
+
+  const optionA = suggestionData?.option_a || null
+  const optionB = suggestionData?.option_b || null
+  const recommended = suggestionData?.recommended || null
 
   return (
     <div className="border-t border-[#1a1a1a] bg-[#080808]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="w-3 h-3 text-[#00ff88]" />
-          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Co-Pilot</span>
-        </div>
-        <button
-          onClick={generateSuggestions}
-          disabled={isGeneratingSuggestions}
-          className="flex items-center gap-1 px-2 py-0.5 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors disabled:opacity-50"
-        >
-          {isGeneratingSuggestions ? (
-            <>
-              <Loader2 className="w-2.5 h-2.5 animate-spin" />
-              THINKING...
-            </>
-          ) : (
-            'SUGGEST'
+      <button
+        onClick={() => optionA ? setExpanded(!expanded) : generateSuggestions()}
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0d0d0d] transition-colors"
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Sparkles className="w-3 h-3 text-[#00ff88] shrink-0" />
+          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider shrink-0">Co-Pilot</span>
+          {suggestionData?.context_summary && expanded && (
+            <span className="text-[8px] font-mono text-[#444] ml-2 truncate">
+              — {suggestionData.context_summary}
+            </span>
           )}
-        </button>
-      </div>
-
-      {/* Context summary */}
-      {aiSuggestions?.reasoning && (
-        <p className="px-3 pb-1.5 text-[9px] font-mono text-[#555] italic">
-          {aiSuggestions.reasoning}
-        </p>
-      )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); generateSuggestions() }}
+            disabled={isGeneratingSuggestions}
+            className="flex items-center gap-1 px-2 py-0.5 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors disabled:opacity-50"
+          >
+            {isGeneratingSuggestions ? (
+              <>
+                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                THINKING...
+              </>
+            ) : optionA ? (
+              'REGENERATE'
+            ) : (
+              'AI SUGGEST'
+            )}
+          </button>
+          {optionA && (
+            expanded
+              ? <ChevronUp className="w-3 h-3 text-[#444]" />
+              : <ChevronDown className="w-3 h-3 text-[#444]" />
+          )}
+        </div>
+      </button>
 
       {/* Suggestion cards */}
-      {(optionA || optionB) && (
-        <div className="px-3 pb-3 grid grid-cols-2 gap-2">
-          {[
-            { key: 'a' as const, option: optionA, label: 'Option A' },
-            { key: 'b' as const, option: optionB, label: 'Option B' },
-          ].map(({ key, option, label }) =>
+      {expanded && (optionA || optionB) && (
+        <div className="px-3 pb-3 space-y-2">
+          {([
+            { key: 'a' as const, option: optionA, label: 'A' },
+            { key: 'b' as const, option: optionB, label: 'B' },
+          ]).map(({ key, option, label }) =>
             option ? (
-              <button
+              <div
                 key={key}
-                onClick={() => setSelected(key)}
+                onMouseEnter={() => setHoveredOption(key)}
+                onMouseLeave={() => setHoveredOption(null)}
                 className={cn(
-                  'text-left p-2 rounded border transition-all',
-                  selected === key
-                    ? 'bg-[#00ff88]/5 border-[#00ff88]/30'
-                    : 'bg-[#111] border-[#1a1a1a] hover:border-[#333]'
+                  'rounded-lg border transition-all',
+                  recommended === key
+                    ? 'border-[#00ff88]/20 bg-[#00ff88]/[0.03]'
+                    : 'border-[#1a1a1a] bg-[#0d0d0d]'
                 )}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[8px] font-mono text-[#666] uppercase">{label}</span>
-                  <span className={cn(
-                    'text-[8px] font-mono',
-                    option.confidence >= 0.8 ? 'text-[#00ff88]' : 'text-[#666]'
-                  )}>
-                    {Math.round(option.confidence * 100)}%
-                  </span>
+                {/* Card header */}
+                <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      'w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-bold',
+                      recommended === key
+                        ? 'bg-[#00ff88]/15 text-[#00ff88]'
+                        : 'bg-[#1a1a1a] text-[#666]'
+                    )}>
+                      {label}
+                    </span>
+                    {recommended === key && (
+                      <span className="text-[7px] font-mono text-[#00ff88] uppercase tracking-widest">
+                        RECOMMENDED
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Target className="w-2.5 h-2.5 text-[#444]" />
+                      <span className="text-[8px] font-mono text-[#555]">{option.targeting_field}</span>
+                    </div>
+                    <span className={cn(
+                      'px-1.5 py-0.5 rounded text-[8px] font-mono font-bold border',
+                      confidenceBg(option.confidence),
+                      confidenceColor(option.confidence)
+                    )}>
+                      {option.confidence}% {confidenceLabel(option.confidence)}
+                    </span>
+                  </div>
                 </div>
-                {option.messages.map((msg, i) => (
-                  <p key={i} className="text-[10px] font-mono text-[#ccc] leading-relaxed mb-1">
-                    {msg}
-                  </p>
-                ))}
-                <p className="text-[8px] font-mono text-[#444] mt-1">{option.reasoning}</p>
-              </button>
+
+                {/* Messages preview */}
+                <div className="px-3 py-1.5 space-y-1">
+                  {option.messages.map((msg, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <MessageSquare className="w-2.5 h-2.5 text-[#333] shrink-0 mt-0.5" />
+                      <p className="text-[11px] font-mono text-[#ccc] leading-relaxed">{msg}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Reasoning */}
+                <p className={cn(
+                  'px-3 pb-1.5 text-[9px] font-mono italic transition-colors',
+                  hoveredOption === key ? 'text-[#888]' : 'text-[#444]'
+                )}>
+                  {option.reasoning}
+                </p>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 px-3 pb-2.5">
+                  <button
+                    onClick={() => handleUseThis(key)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111] border border-[#222] rounded text-[9px] font-mono text-[#888] hover:text-[#ccc] hover:border-[#444] transition-colors"
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    USE THIS
+                  </button>
+                  <button
+                    onClick={() => handleSendNow(key)}
+                    disabled={sendingOption === key}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-mono transition-colors',
+                      recommended === key
+                        ? 'bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] hover:bg-[#00ff88]/20'
+                        : 'bg-[#111] border border-[#222] text-[#888] hover:text-[#00ff88] hover:border-[#00ff88]/30'
+                    )}
+                  >
+                    {sendingOption === key ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Send className="w-3 h-3" />
+                    )}
+                    SEND NOW
+                  </button>
+                </div>
+              </div>
             ) : null
           )}
-        </div>
-      )}
-
-      {/* Action buttons */}
-      {selected && (
-        <div className="flex items-center gap-2 px-3 pb-3">
-          <button
-            onClick={() => {
-              const opt = selected === 'a' ? optionA : optionB
-              if (opt) onSend(opt.messages)
-            }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
-          >
-            <Send className="w-3 h-3" />
-            SEND OPTION {selected.toUpperCase()}
-          </button>
-          <button
-            onClick={() => {
-              const opt = selected === 'a' ? optionA : optionB
-              if (opt) handleCopy(opt.messages)
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[#111] border border-[#222] rounded text-[10px] font-mono text-[#888] hover:text-[#ccc] transition-colors"
-          >
-            {copied ? <Check className="w-3 h-3 text-[#00ff88]" /> : <Copy className="w-3 h-3" />}
-          </button>
         </div>
       )}
     </div>
