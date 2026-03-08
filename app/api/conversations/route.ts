@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '0')
   const limit = parseInt(searchParams.get('limit') || '20')
   const filter = searchParams.get('filter') || 'all'
+  const assignedTo = searchParams.get('assignedTo') || ''
   const search = searchParams.get('search') || ''
   const sort = searchParams.get('sort') || 'last_message'
   const offset = page * limit
@@ -20,6 +21,8 @@ export async function GET(request: NextRequest) {
     .select('id, role')
     .eq('id', session.user.id)
     .single()
+
+  const isAdmin = user?.role === 'admin'
 
   let query = supabase
     .from('conversations')
@@ -32,22 +35,40 @@ export async function GET(request: NextRequest) {
     `, { count: 'exact' })
     .eq('status', 'active')
 
-  // Role-based filtering: setters see only their assigned
-  if (user?.role === 'setter') {
-    query = query.eq('assigned_to', session.user.id)
-  }
-
-  // Filter tabs
-  switch (filter) {
-    case 'my_leads':
+  // assignedTo param takes priority over filter tabs
+  if (assignedTo) {
+    if (assignedTo === 'me') {
       query = query.eq('assigned_to', session.user.id)
-      break
-    case 'ai_leads':
-      query = query.is('assigned_to', null)
-      break
-    case 'hot_leads':
-      query = query.gte('lead.heat_score', 80)
-      break
+    } else if (assignedTo === 'all') {
+      // Admin sees all — no filter. Setters rejected.
+      if (!isAdmin) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+    } else {
+      // Specific user ID — admin only
+      if (!isAdmin) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+      query = query.eq('assigned_to', assignedTo)
+    }
+  } else {
+    // Legacy filter tabs — setters always scoped to own leads
+    if (!isAdmin) {
+      query = query.eq('assigned_to', session.user.id)
+    }
+
+    switch (filter) {
+      case 'my_leads':
+        query = query.eq('assigned_to', session.user.id)
+        break
+      case 'ai_leads':
+        query = query.is('assigned_to', null)
+        break
+      case 'hot_leads':
+        query = query.gte('lead.heat_score', 80)
+        break
+      // 'all' — admin sees everything, setter already scoped above
+    }
   }
 
   // Search by username

@@ -1,4 +1,4 @@
-import type { DistributionSettings, User, AssignmentType } from '@/types'
+import type { AssignmentType, SetterAllocation, User } from '@/types'
 
 interface AssignmentResult {
   assignedTo: string | null // user_id or null for AI
@@ -7,49 +7,41 @@ interface AssignmentResult {
 
 /**
  * Calculates assignment using weighted random selection.
- * Only considers online setters. Falls back to AI if no setters available.
+ * Queries all users with receives_leads=true, filters to online,
+ * and uses configured percentages for weighted selection.
+ * Falls back to AI if no setters are online.
  */
 export function calculateAssignment(
-  settings: DistributionSettings,
+  allocations: SetterAllocation[],
   onlineSetters: User[]
 ): AssignmentResult {
   const onlineIds = new Set(onlineSetters.map((s) => s.id))
 
-  const setter1Online = settings.setter1_id
-    ? onlineIds.has(settings.setter1_id)
-    : false
-  const setter2Online = settings.setter2_id
-    ? onlineIds.has(settings.setter2_id)
-    : false
-
-  // Build weighted pool from available assignees
+  // Build weighted pool from active allocations
   const pool: { assignedTo: string | null; type: AssignmentType; weight: number }[] = []
 
-  if (setter1Online && settings.setter1_id) {
-    pool.push({
-      assignedTo: settings.setter1_id,
-      type: 'setter1' as AssignmentType,
-      weight: settings.setter1_pct,
-    })
+  for (const alloc of allocations) {
+    if (!alloc.receives_leads || alloc.pct <= 0) continue
+
+    if (alloc.user_id === null) {
+      // AI always available
+      pool.push({
+        assignedTo: null,
+        type: 'ai' as AssignmentType,
+        weight: alloc.pct,
+      })
+    } else if (onlineIds.has(alloc.user_id)) {
+      // Only include online setters
+      pool.push({
+        assignedTo: alloc.user_id,
+        type: 'setter' as AssignmentType,
+        weight: alloc.pct,
+      })
+    }
   }
 
-  if (setter2Online && settings.setter2_id) {
-    pool.push({
-      assignedTo: settings.setter2_id,
-      type: 'setter2' as AssignmentType,
-      weight: settings.setter2_pct,
-    })
-  }
-
-  // AI always available
-  pool.push({
-    assignedTo: null,
-    type: 'ai' as AssignmentType,
-    weight: settings.ai_pct,
-  })
-
-  // If no setters online, AI gets 100%
-  if (!setter1Online && !setter2Online) {
+  // If pool is empty or only has offline entries, AI gets 100%
+  if (pool.length === 0) {
     return { assignedTo: null, assignmentType: 'ai' as AssignmentType }
   }
 
@@ -73,7 +65,7 @@ export function calculateAssignment(
     }
   }
 
-  // Fallback (shouldn't reach here)
+  // Fallback
   const last = pool[pool.length - 1]
   return {
     assignedTo: last.assignedTo,

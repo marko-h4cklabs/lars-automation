@@ -26,13 +26,21 @@ export default function CopilotPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(false)
+  const [setterName, setSetterName] = useState('Setter')
 
   const fetchSettings = () => {
     setError(false)
     setLoading(true)
-    fetch(`/api/settings?section=copilot&userId=${setterId}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.user_id) setSettings(d) })
+    Promise.all([
+      fetch(`/api/settings?section=copilot&userId=${setterId}`).then((r) => r.ok ? r.json() : null),
+      fetch('/api/team').then((r) => r.ok ? r.json() : null),
+    ])
+      .then(([copilotData, teamData]) => {
+        if (copilotData?.user_id) setSettings(copilotData)
+        const users = (teamData?.users || []) as { id: string; name: string }[]
+        const user = users.find((u) => u.id === setterId)
+        if (user) setSetterName(user.name)
+      })
       .catch(() => { setError(true) })
       .finally(() => setLoading(false))
   }
@@ -55,12 +63,10 @@ export default function CopilotPage() {
   if (loading) return <div className="p-6"><LoadingFormSection /></div>
   if (error) return <div className="p-6"><ErrorState message="Failed to load settings" onRetry={fetchSettings} /></div>
 
-  const setterLabel = setterId === 'setter1' ? 'Setter 1' : 'Setter 2'
-
   return (
     <div className="p-6 max-w-2xl">
-      <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">{setterLabel} Co-Pilot Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Personal AI assistant preferences for {setterLabel}.</p>
+      <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">{setterName} Co-Pilot Settings</h1>
+      <p className="text-[10px] font-mono text-[#555] mb-6">Personal AI assistant preferences for {setterName}.</p>
 
       {/* Response style */}
       <div className="mb-6">

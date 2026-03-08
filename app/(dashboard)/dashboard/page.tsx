@@ -24,7 +24,7 @@ import {
 interface AnalyticsData {
   kpis: {
     totalDms: number
-    leadsCreated: number
+    callsOffered: number
     callsBooked: number
     bookingRate: number
     aiBookings: number
@@ -280,7 +280,7 @@ export default function DashboardPage() {
             {/* ── ROW 1: KPI Cards ── */}
             <div className="grid grid-cols-6 gap-3">
               <MetricCard label="Total DMs" value={k?.totalDms ?? 0} />
-              <MetricCard label="Leads Created" value={k?.leadsCreated ?? 0} />
+              <MetricCard label="Calls Offered" value={k?.callsOffered ?? 0} />
               <MetricCard label="Calls Booked" value={k?.callsBooked ?? 0} />
               <MetricCard label="Booking Rate" value={`${k?.bookingRate ?? 0}%`} />
               <MetricCard
@@ -513,7 +513,13 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── ROW 7: Activity Feed ── */}
+            {/* ── ROW 7: Outbound Trigger Performance (FIX 4) ── */}
+            <OutboundTriggerSection preset={preset} customFrom={customFrom} customTo={customTo} />
+
+            {/* ── ROW 8: Lead Flow Performance (FIX 6) ── */}
+            <LeadFlowSection preset={preset} customFrom={customFrom} customTo={customTo} />
+
+            {/* ── ROW 9: Activity Feed ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Activity className="w-3 h-3 text-[#ff9f43]" />
@@ -537,6 +543,135 @@ export default function DashboardPage() {
             </div>
           </>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Funnel Component
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// Outbound Trigger Performance (FIX 4)
+// ═══════════════════════════════════════════════════════════════
+
+interface TriggerData {
+  triggerType: string; label: string; sent: number; replied: number; replyRate: number
+}
+
+function OutboundTriggerSection({ preset, customFrom, customTo }: { preset: DatePreset; customFrom: string; customTo: string }) {
+  const [triggers, setTriggers] = useState<TriggerData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const range = preset === 'custom' && customFrom && customTo
+      ? { from: new Date(customFrom).toISOString(), to: new Date(customTo + 'T23:59:59.999Z').toISOString() }
+      : getDateRange(preset)
+
+    setLoading(true)
+    fetch(`/api/analytics/trigger-performance?dateFrom=${encodeURIComponent(range.from)}&dateTo=${encodeURIComponent(range.to)}`)
+      .then((r) => r.json())
+      .then((d) => setTriggers(d.triggers || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [preset, customFrom, customTo])
+
+  if (loading) return <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"><LoadingChart /></div>
+
+  return (
+    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Zap className="w-3 h-3 text-[#ff9f43]" />
+        <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Outbound Trigger Performance</span>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {triggers.map((t) => {
+          const color = t.replyRate >= 30 ? '#00ff88' : t.replyRate >= 15 ? '#ff9f43' : '#f05050'
+          return (
+            <div key={t.triggerType} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3">
+              <div className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2">{t.label}</div>
+              <div className="text-[18px] font-mono font-bold text-[#f0f0f0] mb-1">{t.replyRate}%</div>
+              <div className="text-[9px] font-mono text-[#444] mb-2">{t.sent} sent / {t.replied} replied</div>
+              <div className="h-1.5 bg-[#111] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${Math.min(t.replyRate, 100)}%`, backgroundColor: color }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Lead Flow Performance (FIX 6)
+// ═══════════════════════════════════════════════════════════════
+
+interface FlowData {
+  id: string; label: string; description: string; sent: number; replied: number; replyRate: number; sparkline: number[]
+}
+
+function LeadFlowSection({ preset, customFrom, customTo }: { preset: DatePreset; customFrom: string; customTo: string }) {
+  const [flows, setFlows] = useState<FlowData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const range = preset === 'custom' && customFrom && customTo
+      ? { from: new Date(customFrom).toISOString(), to: new Date(customTo + 'T23:59:59.999Z').toISOString() }
+      : getDateRange(preset)
+
+    setLoading(true)
+    fetch(`/api/analytics/lead-flows?dateFrom=${encodeURIComponent(range.from)}&dateTo=${encodeURIComponent(range.to)}`)
+      .then((r) => r.json())
+      .then((d) => setFlows(d.flows || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [preset, customFrom, customTo])
+
+  if (loading) return <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"><LoadingChart /></div>
+
+  return (
+    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <MessageSquare className="w-3 h-3 text-[#54a0ff]" />
+        <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Lead Flow Performance</span>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {flows.map((flow) => {
+          const color = flow.replyRate >= 30 ? '#00ff88' : flow.replyRate >= 15 ? '#ff9f43' : '#f05050'
+          const maxSparkline = Math.max(...flow.sparkline, 1)
+          return (
+            <div key={flow.id} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3">
+              <div className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-1">{flow.label}</div>
+              <div className="text-[8px] font-mono text-[#333] mb-3">{flow.description}</div>
+              <div className="flex items-end gap-1 mb-2">
+                <span className="text-[22px] font-mono font-bold" style={{ color }}>{flow.replyRate}%</span>
+                <span className="text-[9px] font-mono text-[#444] mb-1">reply rate</span>
+              </div>
+              <div className="text-[9px] font-mono text-[#555] mb-3">
+                {flow.sent} triggered / {flow.replied} replied
+              </div>
+              {/* Mini sparkline */}
+              <div className="flex items-end gap-[2px] h-6">
+                {flow.sparkline.map((val, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t"
+                    style={{
+                      height: `${Math.max((val / maxSparkline) * 100, 8)}%`,
+                      backgroundColor: `${color}40`,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="text-[7px] font-mono text-[#333] mt-1">7-day trend</div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

@@ -1,20 +1,29 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
   Percent, ClipboardCheck, Key, Timer, Bot, UserRound, Bell, Plug, Users, Settings
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-const NAV_ITEMS = [
+interface NavItem {
+  href: string
+  label: string
+  icon: LucideIcon
+}
+
+const STATIC_BEFORE: NavItem[] = [
   { href: '/settings/distribution', label: 'Distribution', icon: Percent },
   { href: '/settings/qualification', label: 'Qualification', icon: ClipboardCheck },
   { href: '/settings/keywords', label: 'Keyword Triggers', icon: Key },
   { href: '/settings/followups', label: 'Follow-up Sequences', icon: Timer },
   { href: '/settings/autopilot', label: 'Autopilot AI', icon: Bot },
-  { href: '/settings/copilot/setter1', label: 'Setter 1 Co-Pilot', icon: UserRound },
-  { href: '/settings/copilot/setter2', label: 'Setter 2 Co-Pilot', icon: UserRound },
+]
+
+const STATIC_AFTER: NavItem[] = [
   { href: '/settings/notifications', label: 'Notifications', icon: Bell },
   { href: '/settings/integrations', label: 'Integrations', icon: Plug },
   { href: '/settings/team', label: 'Team', icon: Users },
@@ -22,6 +31,26 @@ const NAV_ITEMS = [
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const [setterItems, setSetterItems] = useState<NavItem[]>([])
+
+  useEffect(() => {
+    fetch('/api/team')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        const users = (data?.users || []) as { id: string; name: string; role: string; receives_leads?: boolean }[]
+        const items: NavItem[] = users
+          .filter((u) => u.role === 'setter' || u.role === 'admin')
+          .map((u) => ({
+            href: `/settings/copilot/${u.id}`,
+            label: `${u.name} Co-Pilot`,
+            icon: UserRound,
+          }))
+        setSetterItems(items)
+      })
+      .catch(() => {})
+  }, [])
+
+  const navItems = [...STATIC_BEFORE, ...setterItems, ...STATIC_AFTER]
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -32,7 +61,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-wider font-bold">Settings</span>
         </div>
         <nav className="py-1">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link

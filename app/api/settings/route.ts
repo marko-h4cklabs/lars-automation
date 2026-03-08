@@ -68,8 +68,15 @@ export async function PUT(request: NextRequest) {
 
   switch (section) {
     case 'distribution': {
-      const { error } = await supabase.from('distribution_settings').upsert({ id: data.id || undefined, ...data, updated_at: new Date().toISOString() })
+      const { user_updates, ...distData } = data
+      const { error } = await supabase.from('distribution_settings').upsert({ id: distData.id || undefined, ...distData, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      // Update receives_leads on each user
+      if (Array.isArray(user_updates)) {
+        for (const u of user_updates as { id: string; receives_leads: boolean }[]) {
+          await supabase.from('users').update({ receives_leads: u.receives_leads }).eq('id', u.id)
+        }
+      }
       invalidateCache('DISTRIBUTION').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
@@ -135,6 +142,15 @@ export async function PUT(request: NextRequest) {
     }
     case 'integrations': {
       const { error } = await supabase.from('integration_settings').upsert({ id: data.id || undefined, ...data })
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ status: 'saved' })
+    }
+    case 'app_setting': {
+      const { key, value } = data as { key: string; value: unknown }
+      const { error } = await supabase.from('app_settings').upsert(
+        { key, value: JSON.stringify(value), updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      )
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ status: 'saved' })
     }

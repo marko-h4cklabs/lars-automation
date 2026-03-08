@@ -13,6 +13,7 @@ import { triageLead } from '@/lib/workers/triage'
 import { calculateAssignment } from '@/lib/workers/distribution'
 import { createNotification } from '@/lib/notifications'
 import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
+import { getDisplayName, getFirstName } from '@/lib/nameValidator'
 import {
   LeadStage,
   LeadSource,
@@ -199,6 +200,28 @@ export async function POST(request: NextRequest) {
         .single()
 
       conversation = newConvo as Conversation
+
+      // Mark as potentially having prior ManyChat history
+      try {
+        await supabase
+          .from('conversations')
+          .update({ has_prior_history: true })
+          .eq('id', conversation.id)
+
+        // Insert system message about prior history
+        await supabase.from('messages').insert({
+          conversation_id: conversation.id,
+          lead_id: lead.id,
+          direction: 'outbound',
+          type: 'text',
+          content: 'This contact may have prior conversation history in ManyChat before migration. Check ManyChat for full context.',
+          sent_by: 'system',
+          sent_at: new Date().toISOString(),
+          ai_generated: false,
+        })
+      } catch {
+        // Non-critical — continue processing
+      }
     }
 
     // ═══════════════════════════════════════
@@ -228,10 +251,18 @@ export async function POST(request: NextRequest) {
     const storedMessages = (insertedMessages || []) as Message[]
 
     // ═══════════════════════════════════════
-    // STEP 6 — KEYWORD CHECK
+    // STEP 6 — SMART KEYWORD CHECK
     // ═══════════════════════════════════════
-    if (isNewConversation) {
+    {
       const combinedText = allPayloads.map((p) => p.messageText).join(' ').toLowerCase()
+
+      // Get current message count for the conversation
+      const { count: messageCount } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('conversation_id', conversation.id)
+
+      const currentMsgCount = messageCount || 0
 
       const { data: triggers } = await supabase
         .from('keyword_triggers')
@@ -260,19 +291,50 @@ export async function POST(request: NextRequest) {
         })
 
         if (matchedTrigger) {
-          // Send keyword-triggered response (stored as outbound message)
-          await supabase.from('messages').insert({
-            conversation_id: conversation.id,
-            lead_id: lead.id,
-            direction: MessageDirection.Outbound,
-            type: MessageType.Template,
-            content: matchedTrigger.response_template,
-            sent_by: 'system',
-            sent_at: new Date().toISOString(),
-            ai_generated: false,
-          })
+          // Only fire keyword trigger on first messages (message_count <= 1)
+          if (currentMsgCount <= 1 || isNewConversation) {
+            // Resolve template variables
+            const resolvedContent = matchedTrigger.response_template
+              .replace(/\{username\}/g, lead.username || '')
+              .replace(/\{lead_username\}/g, lead.username || '')
+              .replace(/\{lead_name\}/g, getDisplayName(lead.full_name || lead.username, 'man'))
+              .replace(/\{lead_first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
+              .replace(/\{first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
+
+            // Send keyword-triggered response
+            await supabase.from('messages').insert({
+              conversation_id: conversation.id,
+              lead_id: lead.id,
+              direction: MessageDirection.Outbound,
+              type: MessageType.Template,
+              content: resolvedContent,
+              sent_by: 'system',
+              sent_at: new Date().toISOString(),
+              ai_generated: false,
+              is_trigger_outbound: true,
+              trigger_type: payload.source === 'follow' ? 'follow'
+                : payload.source === 'comment' ? 'comment_keyword'
+                : payload.source === 'story_reply' ? 'story_keyword'
+                : 'dm_keyword',
+            })
+          } else {
+            // Keyword detected mid-conversation — suppress trigger, mark messages
+            for (const msg of storedMessages) {
+              await supabase
+                .from('messages')
+                .update({ keyword_suppressed: true })
+                .eq('id', msg.id)
+            }
+            // Continue to normal AI/setter flow (don't return early)
+          }
         }
       }
+
+      // Update conversation message_count
+      await supabase
+        .from('conversations')
+        .update({ message_count: currentMsgCount + storedMessages.length })
+        .eq('id', conversation.id)
     }
 
     // ═══════════════════════════════════════
@@ -360,12 +422,14 @@ export async function POST(request: NextRequest) {
       const { data: onlineSetters } = await supabase
         .from('users')
         .select('*')
-        .eq('role', 'setter')
+        .in('role', ['setter', 'admin'])
         .eq('status', 'online')
+        .eq('receives_leads', true)
 
       if (distSettings) {
+        const allocations = (distSettings as DistributionSettings).setter_allocations || []
         const result = calculateAssignment(
-          distSettings as DistributionSettings,
+          allocations,
           (onlineSetters || []) as User[]
         )
         assignedTo = result.assignedTo

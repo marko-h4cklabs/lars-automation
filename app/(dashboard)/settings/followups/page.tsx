@@ -13,6 +13,9 @@ interface Step {
   message_type: 'text' | 'ai_personalized' | 'template'
   content: string
   ai_personalized: boolean
+  knowledge_source?: 'general' | 'specific_docs' | 'custom_content'
+  specific_doc_ids?: string[]
+  custom_content?: string
 }
 
 interface Sequence {
@@ -209,6 +212,31 @@ function SequenceEditor({ sequence, onSave, onDelete, onCancel, saving }: {
                 placeholder={step.message_type === 'ai_personalized' ? 'AI context/prompt...' : 'Message content...'}
                 className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
               />
+
+              {/* Knowledge Source — only for ai_personalized steps */}
+              {step.message_type === 'ai_personalized' && (
+                <div className="space-y-2 bg-[#080808] border border-[#1a1a1a] rounded p-2">
+                  <label className="text-[7px] font-mono text-[#444] uppercase">Knowledge Source</label>
+                  <select
+                    value={step.knowledge_source || 'general'}
+                    onChange={(e) => updateStep(idx, { knowledge_source: e.target.value as Step['knowledge_source'] })}
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-[9px] font-mono text-[#ccc] outline-none"
+                  >
+                    <option value="general">General Knowledge Base (all docs)</option>
+                    <option value="custom_content">Follow-up Specific Content</option>
+                  </select>
+
+                  {step.knowledge_source === 'custom_content' && (
+                    <textarea
+                      value={step.custom_content || ''}
+                      onChange={(e) => updateStep(idx, { custom_content: e.target.value })}
+                      rows={3}
+                      placeholder="Paste specific content for this follow-up step..."
+                      className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+                    />
+                  )}
+                </div>
+              )}
             </div>
             <button onClick={() => removeStep(idx)} className="text-[#444] hover:text-[#f05050] mt-1 shrink-0">
               <X className="w-3 h-3" />

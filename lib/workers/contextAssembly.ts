@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase'
+import { getDisplayName } from '@/lib/nameValidator'
 import { searchKnowledgeBase } from './ragSearch'
 import type { KBChunk } from './ragSearch'
 import {
@@ -110,11 +111,12 @@ export async function assembleContext(
   if (olderSummary) {
     transcript += `[EARLIER CONTEXT]: ${olderSummary}\n\n`
   }
+  const displayName = getDisplayName(lead.full_name || lead.username, lead.username)
   transcript += messages
     .map((m) => {
       const sender =
         m.direction === 'inbound'
-          ? `@${lead.username}`
+          ? `${displayName} (@${lead.username})`
           : m.sent_by === 'ai'
             ? 'Lars (AI)'
             : m.sent_by || 'Lars'
@@ -127,6 +129,21 @@ export async function assembleContext(
   const missingFields = qualificationFields.filter(
     (f) => !(f.field_key in collectedFields)
   )
+
+  // Build qualification criteria context for AI
+  const qualCriteriaContext = qualificationFields
+    .filter((f) => f.qualifying_criteria || f.disqualifying_criteria)
+    .map((f) => {
+      let line = `For field [${f.field_label}]:`
+      if (f.qualifying_criteria) line += ` Qualifying if: ${f.qualifying_criteria}.`
+      if (f.disqualifying_criteria) line += ` Disqualifying if: ${f.disqualifying_criteria}.`
+      return line
+    })
+    .join('\n')
+
+  if (qualCriteriaContext) {
+    transcript += `\n\n[QUALIFICATION CRITERIA]:\n${qualCriteriaContext}`
+  }
 
   // RAG search — use last 3 inbound messages as query (cached — 600s TTL)
   const lastInbound = allMessages

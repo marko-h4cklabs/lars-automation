@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, SlidersHorizontal, MessageSquare } from 'lucide-react'
+import { Search, SlidersHorizontal, MessageSquare, ChevronDown, Users } from 'lucide-react'
 import { ConversationCard } from './ConversationCard'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LoadingPulse, LoadingConversationList } from '@/components/ui/loading-pulse'
@@ -10,20 +10,14 @@ import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useInboxStore } from '@/store/inboxStore'
 import { useAppStore } from '@/store/appStore'
-import type { Conversation, Lead, Message } from '@/types'
+import { useUser } from '@/hooks/useUser'
+import type { Conversation, Lead, Message, User } from '@/types'
 
 type ConversationWithMeta = Conversation & {
   lead: Lead
   last_message: Pick<Message, 'content' | 'direction' | 'sent_at' | 'type'> | null
   unread_count: number
 }
-
-const FILTER_TABS = [
-  { label: 'ALL', value: 'all' },
-  { label: 'MY LEADS', value: 'my_leads' },
-  { label: 'AI LEADS', value: 'ai_leads' },
-  { label: 'HOT', value: 'hot_leads' },
-]
 
 interface ConversationListProps {
   activeId: string | null
@@ -32,17 +26,55 @@ interface ConversationListProps {
 
 export function ConversationList({ activeId, onSelect }: ConversationListProps) {
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState('all')
+  const [assignedTo, setAssignedTo] = useState('all') // 'all' | 'me' | userId
+  const [assignedLabel, setAssignedLabel] = useState('ALL')
   const [sort] = useState('last_message')
   const [localConversations, setLocalConversations] = useState<ConversationWithMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const [showSetterDropdown, setShowSetterDropdown] = useState(false)
+  const [setters, setSetters] = useState<User[]>([])
   const observerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const { conversations: storeConversations } = useInboxStore()
   const { activeConversationId } = useAppStore()
+  const { user } = useUser()
+
+  const isAdmin = user?.role === 'admin'
+
+  // Fetch active setters for dropdown (admin only)
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchSetters() {
+      try {
+        const res = await fetch('/api/team')
+        if (!res.ok) return
+        const data = await res.json()
+        const activeSetters = (data.users || []).filter(
+          (u: User & { receives_leads?: boolean }) =>
+            (u.role === 'setter' || u.role === 'admin') && u.id !== user?.id
+        )
+        setSetters(activeSetters)
+      } catch {
+        // Silently fail — dropdown just won't show setters
+      }
+    }
+    fetchSetters()
+  }, [isAdmin, user?.id])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowSetterDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   const fetchConversations = useCallback(async (pageNum: number, append: boolean = false) => {
     try {
@@ -51,7 +83,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       const params = new URLSearchParams({
         page: String(pageNum),
         limit: '20',
-        filter,
+        assignedTo,
         search,
         sort,
       })
@@ -73,7 +105,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
     } finally {
       setLoading(false)
     }
-  }, [filter, search, sort])
+  }, [assignedTo, search, sort])
 
   // Initial fetch + refetch on filter/search change
   useEffect(() => {
@@ -103,7 +135,6 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
   // Merge realtime updates from store
   useEffect(() => {
     if (storeConversations.length === 0) return
-    // Store conversations from realtime updates — merge with local
     setLocalConversations((prev) => {
       const map = new Map(prev.map((c) => [c.id, c]))
       for (const sc of storeConversations) {
@@ -114,6 +145,12 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       return Array.from(map.values())
     })
   }, [storeConversations])
+
+  function selectFilter(value: string, label: string) {
+    setAssignedTo(value)
+    setAssignedLabel(label)
+    setShowSetterDropdown(false)
+  }
 
   return (
     <div className="w-[380px] h-full bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col shrink-0">
@@ -133,22 +170,110 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       </div>
 
       {/* Filter tabs */}
-      <div className="flex border-b border-[#1a1a1a]">
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={cn(
-              'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
-              filter === tab.value
-                ? 'text-[#00ff88] border-b border-[#00ff88]'
-                : 'text-[#444] hover:text-[#666]'
+      <div className="flex border-b border-[#1a1a1a] relative">
+        {/* ALL tab */}
+        <button
+          onClick={() => selectFilter('all', 'ALL')}
+          className={cn(
+            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            assignedTo === 'all'
+              ? 'text-[#00ff88] border-b border-[#00ff88]'
+              : 'text-[#444] hover:text-[#666]'
+          )}
+        >
+          ALL
+        </button>
+
+        {/* MY LEADS tab */}
+        <button
+          onClick={() => selectFilter('me', 'MY LEADS')}
+          className={cn(
+            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            assignedTo === 'me'
+              ? 'text-[#00ff88] border-b border-[#00ff88]'
+              : 'text-[#444] hover:text-[#666]'
+          )}
+        >
+          MY LEADS
+        </button>
+
+        {/* VIEW BY SETTER dropdown — admin only */}
+        {isAdmin && (
+          <div ref={dropdownRef} className="relative flex-1">
+            <button
+              onClick={() => setShowSetterDropdown(!showSetterDropdown)}
+              className={cn(
+                'w-full py-2 text-[9px] font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-1',
+                assignedTo !== 'all' && assignedTo !== 'me'
+                  ? 'text-[#00ff88] border-b border-[#00ff88]'
+                  : 'text-[#444] hover:text-[#666]'
+              )}
+            >
+              <Users className="w-3 h-3" />
+              <span>SETTER</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+
+            {showSetterDropdown && (
+              <div className="absolute top-full left-0 right-0 z-50 bg-[#111] border border-[#1a1a1a] rounded-b shadow-lg max-h-[200px] overflow-y-auto">
+                {setters.length === 0 ? (
+                  <div className="px-3 py-2 text-[10px] font-mono text-[#444]">No setters found</div>
+                ) : (
+                  setters.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => selectFilter(s.id, `${s.name}'s Leads`)}
+                      className={cn(
+                        'w-full text-left px-3 py-2 text-[10px] font-mono transition-colors hover:bg-[#1a1a1a] flex items-center gap-2',
+                        assignedTo === s.id ? 'text-[#00ff88]' : 'text-[#999]'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-1.5 h-1.5 rounded-full',
+                        s.status === 'online' ? 'bg-[#00ff88]' : 'bg-[#333]'
+                      )} />
+                      {s.name}
+                      <span className="text-[#444] text-[8px] ml-auto">{s.role}</span>
+                    </button>
+                  ))
+                )}
+              </div>
             )}
-          >
-            {tab.label}
-          </button>
-        ))}
+          </div>
+        )}
+
+        {/* HOT tab */}
+        <button
+          onClick={() => {
+            setAssignedTo('all')
+            setAssignedLabel('HOT')
+            // For HOT we use legacy filter param
+          }}
+          className={cn(
+            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            assignedLabel === 'HOT'
+              ? 'text-[#00ff88] border-b border-[#00ff88]'
+              : 'text-[#444] hover:text-[#666]'
+          )}
+        >
+          HOT
+        </button>
       </div>
+
+      {/* Active filter badge */}
+      {assignedTo !== 'all' && assignedLabel !== 'ALL' && assignedLabel !== 'HOT' && (
+        <div className="px-3 py-1.5 border-b border-[#1a1a1a] flex items-center gap-2">
+          <span className="text-[8px] font-mono uppercase tracking-wider text-[#00ff88] bg-[#00ff8810] px-2 py-0.5 rounded">
+            {assignedLabel}
+          </span>
+          <button
+            onClick={() => selectFilter('all', 'ALL')}
+            className="text-[8px] font-mono text-[#444] hover:text-[#666]"
+          >
+            CLEAR
+          </button>
+        </div>
+      )}
 
       {/* Conversation list */}
       <ScrollArea className="flex-1">

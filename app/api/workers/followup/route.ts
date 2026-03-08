@@ -134,6 +134,12 @@ export async function POST(request: NextRequest) {
           // Use Sonnet to generate personalized follow-up
           const ctx = await assembleContext(job.conversation_id)
 
+          // Build knowledge context based on step's knowledge_source setting
+          let knowledgeBlock = ''
+          if (currentStep.knowledge_source === 'custom_content' && currentStep.custom_content) {
+            knowledgeBlock = `\nFOLLOW-UP SPECIFIC KNOWLEDGE (use this as your primary reference):\n${currentStep.custom_content}\n`
+          }
+
           const followUpPrompt = `You are a world-class appointment setter working for Lars, a high-ticket fitness transformation coach.
 You are sending a follow-up message because the lead hasn't replied.
 
@@ -147,7 +153,7 @@ Heat Score: ${ctx.lead.heat_score}/100
 
 CONVERSATION SO FAR:
 ${ctx.transcript}
-
+${knowledgeBlock}
 FOLLOW-UP CONTEXT:
 - This is follow-up step ${job.current_step + 1} of ${steps.length} in sequence "${sequence.name}"
 - The step guidance says: "${currentStep.content}"
@@ -160,7 +166,7 @@ RULES:
 4. Reference something from the conversation if possible
 5. Match the lead's communication style
 6. NEVER mention you are AI or automated
-7. NEVER say "just following up" or "just checking in" — be creative
+7. NEVER say "just following up" or "just checking in" — be creative${currentStep.knowledge_source === 'custom_content' ? '\n8. Incorporate the follow-up specific knowledge naturally into your message' : ''}
 
 Reply with ONLY the message text. No quotes, no explanation.`
 

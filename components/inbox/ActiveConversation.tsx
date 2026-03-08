@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Send, FileText, Mic, Loader2 } from 'lucide-react'
+import { Send, FileText, Mic, Loader2, AlertTriangle, ExternalLink } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LoadingPulse } from '@/components/ui/loading-pulse'
 import { ErrorState } from '@/components/ui/error-state'
@@ -191,6 +191,24 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
         onTransfer={handleTransfer}
         onStageChange={handleStageChange}
       />
+
+      {/* Prior history banner */}
+      {(conversation as ConversationDetail & { has_prior_history?: boolean }).has_prior_history && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#f0a030]/10 border-b border-[#f0a030]/20">
+          <AlertTriangle className="w-3.5 h-3.5 text-[#f0a030] shrink-0" />
+          <span className="text-[10px] font-mono text-[#f0a030] flex-1">
+            This lead had prior conversations before migration. History may be incomplete.
+          </span>
+          <a
+            href="https://manychat.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[9px] font-mono text-[#f0a030] hover:text-[#ffb54c] shrink-0"
+          >
+            View in ManyChat <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      )}
 
       {/* Right sidebar panels */}
       <div className="flex flex-1 min-h-0">

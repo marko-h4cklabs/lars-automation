@@ -38,6 +38,7 @@ export enum LeadStage {
 export enum AssignmentType {
   Setter1 = 'setter1',
   Setter2 = 'setter2',
+  Setter = 'setter',
   AI = 'ai',
 }
 
@@ -128,6 +129,7 @@ export interface User {
   status: UserStatus
   avatar_url: string | null
   last_seen: string | null
+  receives_leads: boolean
   created_at: string
 }
 
@@ -224,6 +226,9 @@ export interface FollowUpStep {
   message_type: 'text' | 'ai_personalized' | 'template'
   content: string
   ai_personalized: boolean
+  knowledge_source?: 'general' | 'custom_content'
+  specific_doc_ids?: string[]
+  custom_content?: string
 }
 
 export interface FollowUpJob {
@@ -269,6 +274,8 @@ export interface QualificationField {
   weight: number
   is_required: boolean
   display_order: number
+  qualifying_criteria: string | null
+  disqualifying_criteria: string | null
 }
 
 export interface PersonaSettings {
@@ -325,7 +332,16 @@ export interface DistributionSettings {
   setter2_pct: number
   ai_pct: number
   distribution_mode: DistributionMode
+  setter_allocations: SetterAllocation[]
   updated_at: string
+}
+
+export interface SetterAllocation {
+  user_id: string | null // null = AI
+  name: string
+  role: string
+  pct: number
+  receives_leads: boolean
 }
 
 export interface Notification {

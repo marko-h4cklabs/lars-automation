@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   const [
     totalDmsResult,
-    leadsCreatedResult,
+    callsOfferedResult,
     callsBookedResult,
     qualifiedResult,
     aiBookingsResult,
@@ -41,10 +41,11 @@ export async function GET(req: NextRequest) {
       .gte('sent_at', dateFrom)
       .lte('sent_at', dateTo),
 
-    // 2. Leads created in period
+    // 2. Calls offered in period (leads that reached call_offered stage or beyond)
     supabase
       .from('leads')
       .select('*', { count: 'exact', head: true })
+      .in('stage', ['call_offered', 'call_booked', 'showed', 'no_show', 'won'])
       .gte('created_at', dateFrom)
       .lte('created_at', dateTo),
 
@@ -151,7 +152,7 @@ export async function GET(req: NextRequest) {
 
   // ── Compute KPIs ──
   const totalDms = totalDmsResult.count || 0
-  const leadsCreated = leadsCreatedResult.count || 0
+  const callsOffered = callsOfferedResult.count || 0
   const callsBooked = callsBookedResult.count || 0
   const qualified = qualifiedResult.count || 0
   const aiBookings = aiBookingsResult.count || 0
@@ -264,7 +265,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     kpis: {
       totalDms,
-      leadsCreated,
+      callsOffered,
       callsBooked,
       bookingRate,
       aiBookings,

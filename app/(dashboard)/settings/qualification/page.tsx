@@ -17,6 +17,8 @@ interface QualField {
   weight: number
   is_required: boolean
   display_order: number
+  qualifying_criteria?: string
+  disqualifying_criteria?: string
 }
 
 export default function QualificationPage() {
@@ -28,6 +30,8 @@ export default function QualificationPage() {
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [error, setError] = useState(false)
   const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null)
+  const [autoDisqualifyMode, setAutoDisqualifyMode] = useState<'flag' | 'auto_close'>('flag')
+  const [savingDisqualify, setSavingDisqualify] = useState(false)
 
   const fetchFields = () => {
     setError(false)
@@ -39,7 +43,14 @@ export default function QualificationPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchFields() }, [])
+  useEffect(() => {
+    fetchFields()
+    // Fetch auto-disqualify mode from app_settings
+    fetch('/api/settings?section=qualification')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.auto_disqualify_mode) setAutoDisqualifyMode(d.auto_disqualify_mode) })
+      .catch(() => {})
+  }, [])
 
   const saveField = async (field: QualField) => {
     setSaving(true)
@@ -161,6 +172,72 @@ export default function QualificationPage() {
         </button>
       )}
 
+      {/* Auto-Disqualify Rules */}
+      <div className="mt-8 pt-6 border-t border-[#1a1a1a]">
+        <h2 className="text-[11px] font-mono font-bold text-[#f0f0f0] mb-1">Auto-Disqualify Rules</h2>
+        <p className="text-[9px] font-mono text-[#555] mb-4">
+          When AI detects disqualifying criteria in any field, what should happen?
+        </p>
+
+        <div className="space-y-2 mb-4">
+          <label
+            className={cn(
+              'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+              autoDisqualifyMode === 'flag' ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-[#0d0d0d] border-[#1a1a1a]'
+            )}
+          >
+            <input
+              type="radio"
+              name="disqualify"
+              value="flag"
+              checked={autoDisqualifyMode === 'flag'}
+              onChange={() => setAutoDisqualifyMode('flag')}
+              className="accent-[#00ff88]"
+            />
+            <div>
+              <div className="text-[10px] font-mono text-[#ccc]">Flag for setter review</div>
+              <div className="text-[8px] font-mono text-[#555]">Creates notification, doesn&apos;t auto-close the lead</div>
+            </div>
+          </label>
+
+          <label
+            className={cn(
+              'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+              autoDisqualifyMode === 'auto_close' ? 'bg-[#f05050]/5 border-[#f05050]/20' : 'bg-[#0d0d0d] border-[#1a1a1a]'
+            )}
+          >
+            <input
+              type="radio"
+              name="disqualify"
+              value="auto_close"
+              checked={autoDisqualifyMode === 'auto_close'}
+              onChange={() => setAutoDisqualifyMode('auto_close')}
+              className="accent-[#f05050]"
+            />
+            <div>
+              <div className="text-[10px] font-mono text-[#ccc]">Auto soft-close</div>
+              <div className="text-[8px] font-mono text-[#555]">AI sends disqualification message and closes the lead</div>
+            </div>
+          </label>
+        </div>
+
+        <button
+          onClick={async () => {
+            setSavingDisqualify(true)
+            await fetch('/api/settings', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ section: 'app_setting', key: 'auto_disqualify_mode', value: autoDisqualifyMode }),
+            }).catch(() => {})
+            setSavingDisqualify(false)
+          }}
+          disabled={savingDisqualify}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50"
+        >
+          {savingDisqualify ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE RULE
+        </button>
+      </div>
+
       <ConfirmDialog
         open={!!deleteFieldId}
         title="Delete Field"
@@ -217,6 +294,28 @@ function FieldEditor({ field, onSave, onCancel, saving }: {
           </label>
         </div>
       </div>
+      {/* Qualifying criteria */}
+      <div>
+        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">What answer qualifies this lead?</label>
+        <textarea
+          value={f.qualifying_criteria || ''}
+          onChange={(e) => setF({ ...f, qualifying_criteria: e.target.value })}
+          placeholder="e.g. Lead is above 35 years old, or mentions being a business owner, or says they have tried other programs before"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30 resize-none h-16"
+        />
+      </div>
+
+      {/* Disqualifying criteria */}
+      <div>
+        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">What answer disqualifies this lead?</label>
+        <textarea
+          value={f.disqualifying_criteria || ''}
+          onChange={(e) => setF({ ...f, disqualifying_criteria: e.target.value })}
+          placeholder="e.g. Lead is under 25, or mentions they are a student with no income, or says they just want free advice"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#f05050]/30 resize-none h-16"
+        />
+      </div>
+
       <div className="flex gap-2">
         <button onClick={() => onSave(f)} disabled={saving || !f.field_key || !f.field_label}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">

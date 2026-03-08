@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   LayoutGrid, Table2, Filter, X, Search,
-  Users, Phone, TrendingUp, Flame, Bot, UserRound
+  Users, Phone, TrendingUp, Flame, Bot, UserRound,
+  ChevronDown, Trophy,
 } from 'lucide-react'
 import { PipelineView } from '@/components/crm/PipelineView'
 import { TableView } from '@/components/crm/TableView'
 import { LeadDetailPanel } from '@/components/crm/LeadDetailPanel'
-import { LoadingMetricCards, LoadingTable } from '@/components/ui/loading-pulse'
+import { LoadingMetricCards, LoadingTable, LoadingPulse } from '@/components/ui/loading-pulse'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Tooltip } from '@/components/ui/tooltip'
@@ -425,6 +427,9 @@ export default function CRMPage() {
         </div>
       </div>
 
+      {/* Setter Performance Panel (FIX 5) */}
+      <SetterPerformancePanel />
+
       {/* Lead detail slide-over */}
       {selectedLeadId && (
         <>
@@ -438,6 +443,83 @@ export default function CRMPage() {
             onUpdate={() => fetchLeads(0)}
           />
         </>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Setter Performance Panel (FIX 5)
+// ═══════════════════════════════════════════════════════════════
+
+interface SetterStat {
+  id: string; name: string; firstContacts: number; replied: number; continuationRate: number
+}
+
+function SetterPerformancePanel() {
+  const [open, setOpen] = useState(false)
+  const [stats, setStats] = useState<SetterStat[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    setLoading(true)
+    fetch('/api/analytics/setter-performance')
+      .then((r) => r.json())
+      .then((d) => setStats(d.performance || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [open])
+
+  return (
+    <div className="w-[280px] border-l border-[#1a1a1a] bg-[#0a0a0a] flex flex-col shrink-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-2.5 border-b border-[#1a1a1a] hover:bg-[#111] transition-colors"
+      >
+        <Trophy className="w-3 h-3 text-[#ff9f43]" />
+        <span className="text-[9px] font-mono text-[#888] uppercase tracking-wider flex-1 text-left">Setter Performance</span>
+        <ChevronDown className={cn('w-3 h-3 text-[#444] transition-transform', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div className="flex-1 overflow-y-auto p-3">
+          {loading ? (
+            <LoadingPulse lines={5} />
+          ) : stats.length === 0 ? (
+            <p className="text-[10px] font-mono text-[#333] text-center py-4">No data yet</p>
+          ) : (
+            <ResponsiveTable>
+              <table className="w-full text-[9px] font-mono">
+                <thead>
+                  <tr className="border-b border-[#1a1a1a]">
+                    <th className="text-left text-[#444] py-1.5 px-1 text-[7px] uppercase">#</th>
+                    <th className="text-left text-[#444] py-1.5 px-1 text-[7px] uppercase">Name</th>
+                    <th className="text-center text-[#444] py-1.5 px-1 text-[7px] uppercase">1st</th>
+                    <th className="text-center text-[#444] py-1.5 px-1 text-[7px] uppercase">Re</th>
+                    <th className="text-center text-[#444] py-1.5 px-1 text-[7px] uppercase">Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.map((s, i) => (
+                    <tr key={s.id} className="border-b border-[#111]">
+                      <td className="py-1.5 px-1 text-[#555]">{i + 1}</td>
+                      <td className="py-1.5 px-1 text-[#ccc] truncate max-w-[80px]">{s.name}</td>
+                      <td className="py-1.5 px-1 text-center text-[#888]">{s.firstContacts}</td>
+                      <td className="py-1.5 px-1 text-center text-[#888]">{s.replied}</td>
+                      <td className={cn(
+                        'py-1.5 px-1 text-center font-bold',
+                        s.continuationRate >= 50 ? 'text-[#00ff88]' : s.continuationRate >= 25 ? 'text-[#ff9f43]' : 'text-[#f05050]'
+                      )}>
+                        {s.continuationRate}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ResponsiveTable>
+          )}
+        </div>
       )}
     </div>
   )
