@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     case 'integrations': {
       // Only return operational settings, never credentials
       const { data } = await supabase.from('integration_settings').select('id, calendly_link, manychat_page_id').limit(1).single()
-      return NextResponse.json(data || {})
+      return NextResponse.json(data || { calendly_link: '', manychat_page_id: '' })
     }
     case 'team': {
       const { data: user } = await supabase.from('users').select('role').eq('id', session.user.id).single()
@@ -70,7 +70,11 @@ export async function PUT(request: NextRequest) {
   switch (section) {
     case 'distribution': {
       const { user_updates, ...distData } = data
-      const { error } = await supabase.from('distribution_settings').upsert({ id: distData.id || undefined, ...distData, updated_at: new Date().toISOString() })
+      if (!distData.id) {
+        const { data: existing } = await supabase.from('distribution_settings').select('id').limit(1).single()
+        if (existing) distData.id = existing.id
+      }
+      const { error } = await supabase.from('distribution_settings').upsert({ ...distData, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       // Update receives_leads on each user
       if (Array.isArray(user_updates)) {
@@ -119,13 +123,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ status: 'saved' })
     }
     case 'autopilot': {
-      const { error } = await supabase.from('autopilot_settings').upsert({ id: data.id || undefined, ...data, updated_at: new Date().toISOString() })
+      if (!data.id) {
+        const { data: existing } = await supabase.from('autopilot_settings').select('id').limit(1).single()
+        if (existing) data.id = existing.id
+      }
+      const { error } = await supabase.from('autopilot_settings').upsert({ ...data, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       invalidateCache('AUTOPILOT').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
     case 'persona': {
-      const { error } = await supabase.from('persona_settings').upsert({ id: data.id || undefined, ...data })
+      if (!data.id) {
+        const { data: existing } = await supabase.from('persona_settings').select('id').limit(1).single()
+        if (existing) data.id = existing.id
+      }
+      const { error } = await supabase.from('persona_settings').upsert({ ...data })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       invalidateCache('PERSONA').catch(() => {})
       return NextResponse.json({ status: 'saved' })
@@ -136,7 +148,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ status: 'saved' })
     }
     case 'notifications': {
-      const { error } = await supabase.from('notification_settings').upsert({ id: data.id || undefined, ...data })
+      if (!data.id) {
+        const { data: existing } = await supabase.from('notification_settings').select('id').limit(1).single()
+        if (existing) data.id = existing.id
+      }
+      const { error } = await supabase.from('notification_settings').upsert({ ...data })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       invalidateSettingsCache()
       return NextResponse.json({ status: 'saved' })
@@ -145,7 +161,12 @@ export async function PUT(request: NextRequest) {
       // Only persist operational settings, strip any credentials
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { manychat_api_key, calendly_webhook_secret, ...safeData } = data as Record<string, unknown>
-      const { error } = await supabase.from('integration_settings').upsert({ id: safeData.id || undefined, ...safeData })
+      // Ensure we have the existing row id for upsert
+      if (!safeData.id) {
+        const { data: existing } = await supabase.from('integration_settings').select('id').limit(1).single()
+        if (existing) safeData.id = existing.id
+      }
+      const { error } = await supabase.from('integration_settings').upsert({ ...safeData, updated_at: new Date().toISOString() })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ status: 'saved' })
     }

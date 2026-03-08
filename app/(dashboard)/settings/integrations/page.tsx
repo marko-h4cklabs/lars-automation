@@ -36,7 +36,7 @@ export default function IntegrationsPage() {
     setLoading(true)
     fetch('/api/settings?section=integrations')
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.calendly_link !== undefined) setSettings(d) })
+      .then((d) => { if (d) setSettings({ id: d.id, calendly_link: d.calendly_link ?? '', manychat_page_id: d.manychat_page_id ?? '' }) })
       .catch(() => { setError(true) })
       .finally(() => setLoading(false))
   }
