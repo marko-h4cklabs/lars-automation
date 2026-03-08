@@ -9,7 +9,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase'
-import { sendNotification } from '@/lib/slack'
+import { sendNotification, invalidateSlackWebhookCache } from '@/lib/slack'
 import { NotificationType } from '@/types'
 
 // ═══════════════════════════════════════
@@ -211,4 +211,5 @@ export async function createNotification(params: CreateNotificationParams): Prom
 export function invalidateSettingsCache(): void {
   cachedSettings = null
   settingsCachedAt = 0
+  invalidateSlackWebhookCache()
 }

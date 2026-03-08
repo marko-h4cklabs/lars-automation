@@ -8,8 +8,6 @@ import { ErrorState } from '@/components/ui/error-state'
 interface IntegrationSettings {
   id?: string
   calendly_link: string
-  calendly_webhook_secret: string
-  manychat_api_key: string
   manychat_page_id: string
 }
 
@@ -24,8 +22,7 @@ const WEBHOOK_ENDPOINTS = [
 
 export default function IntegrationsPage() {
   const [settings, setSettings] = useState<IntegrationSettings>({
-    calendly_link: '', calendly_webhook_secret: '',
-    manychat_api_key: '', manychat_page_id: '',
+    calendly_link: '', manychat_page_id: '',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -73,6 +70,14 @@ export default function IntegrationsPage() {
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Integrations</h1>
       <p className="text-[10px] font-mono text-[#555] mb-6">Connect external services to the BlackOps platform.</p>
 
+      {/* Env Var Info */}
+      <div className="bg-[#111] border border-[#1a1a1a] rounded-lg p-3 mb-6">
+        <span className="text-[8px] font-mono text-[#666] uppercase tracking-wider block mb-1.5">API Keys &amp; Credentials</span>
+        <p className="text-[9px] font-mono text-[#555] leading-relaxed">
+          API keys (ManyChat, Calendly webhook secret, Anthropic, OpenAI, ElevenLabs) are configured as environment variables in Vercel and are never stored in the database.
+        </p>
+      </div>
+
       {/* Calendly */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6 space-y-3">
         <div className="flex items-center gap-2">
@@ -85,13 +90,6 @@ export default function IntegrationsPage() {
             className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="https://calendly.com/your-link" />
         </div>
-        <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Webhook Secret</label>
-          <input type="password" value={settings.calendly_webhook_secret}
-            onChange={(e) => setSettings((p) => ({ ...p, calendly_webhook_secret: e.target.value }))}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
-            placeholder="whsec_..." />
-        </div>
         <div className="flex items-center gap-2">
           <a href={settings.calendly_link || '#'} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 text-[8px] font-mono text-[#666] hover:text-[#00ff88]">
@@ -103,19 +101,11 @@ export default function IntegrationsPage() {
       {/* ManyChat */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6 space-y-3">
         <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">ManyChat</span>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">API Key</label>
-            <input type="password" value={settings.manychat_api_key}
-              onChange={(e) => setSettings((p) => ({ ...p, manychat_api_key: e.target.value }))}
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
-          </div>
-          <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Page ID</label>
-            <input value={settings.manychat_page_id}
-              onChange={(e) => setSettings((p) => ({ ...p, manychat_page_id: e.target.value }))}
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
-          </div>
+        <div>
+          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Page ID</label>
+          <input value={settings.manychat_page_id}
+            onChange={(e) => setSettings((p) => ({ ...p, manychat_page_id: e.target.value }))}
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
         </div>
 
         {/* Webhook URLs */}

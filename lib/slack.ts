@@ -1,14 +1,16 @@
 /**
  * Slack notification system using Incoming Webhooks + Block Kit.
  *
+ * Webhook URLs are read from the notification_settings DB table (set via Settings > Notifications).
  * Supports:
- * - Dual webhooks: SLACK_WEBHOOK_ALERTS (hot leads + bookings) and SLACK_WEBHOOK_SYSTEM (offline/takeover)
+ * - Dual webhooks: alerts (hot leads + bookings) and system (offline/takeover)
  * - Rate limiting: max 1 Slack message per lead per 60 minutes
  * - Retry with exponential backoff: 3 attempts
  * - Rich Block Kit formatting per notification type
  */
 
 import { NotificationType } from '@/types'
+import { createAdminClient } from '@/lib/supabase'
 
 // ═══════════════════════════════════════
 // TYPES
@@ -66,28 +68,62 @@ function recordSend(leadId: string): void {
 }
 
 // ═══════════════════════════════════════
-// WEBHOOK HELPERS
+// WEBHOOK HELPERS (read from notification_settings DB)
 // ═══════════════════════════════════════
 
-function getAlertsWebhook(): string | undefined {
-  return process.env.SLACK_WEBHOOK_ALERTS || process.env.SLACK_WEBHOOK_URL
+interface SlackWebhooks {
+  alerts: string | undefined
+  system: string | undefined
 }
 
-function getSystemWebhook(): string | undefined {
-  return process.env.SLACK_WEBHOOK_SYSTEM || getAlertsWebhook()
+let cachedWebhooks: SlackWebhooks | null = null
+let webhooksCachedAt = 0
+const WEBHOOKS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+async function getSlackWebhooks(): Promise<SlackWebhooks> {
+  if (cachedWebhooks && Date.now() - webhooksCachedAt < WEBHOOKS_CACHE_TTL) {
+    return cachedWebhooks
+  }
+
+  try {
+    const supabase = createAdminClient()
+    const { data } = await supabase
+      .from('notification_settings')
+      .select('slack_webhook_alerts, slack_webhook_system')
+      .limit(1)
+      .single()
+
+    cachedWebhooks = {
+      alerts: data?.slack_webhook_alerts || undefined,
+      system: data?.slack_webhook_system || undefined,
+    }
+    webhooksCachedAt = Date.now()
+    return cachedWebhooks
+  } catch {
+    return { alerts: undefined, system: undefined }
+  }
 }
 
-function getWebhookForType(type: NotificationType): string | undefined {
+/**
+ * Invalidate the webhook URL cache (call after notification settings are updated).
+ */
+export function invalidateSlackWebhookCache(): void {
+  cachedWebhooks = null
+  webhooksCachedAt = 0
+}
+
+async function getWebhookForType(type: NotificationType): Promise<string | undefined> {
+  const webhooks = await getSlackWebhooks()
   switch (type) {
     case NotificationType.HotLead:
     case NotificationType.CallBooked:
     case NotificationType.Disqualified:
-      return getAlertsWebhook()
+      return webhooks.alerts
     case NotificationType.SetterOffline:
     case NotificationType.AITakeover:
-      return getSystemWebhook()
+      return webhooks.system || webhooks.alerts
     default:
-      return getAlertsWebhook()
+      return webhooks.alerts
   }
 }
 
@@ -279,7 +315,7 @@ function buildBlocksForType(payload: SlackNotificationPayload): SlackBlock[] {
  * Handles rate limiting (1 per lead per 60 min), retry, and webhook routing.
  */
 export async function sendNotification(payload: SlackNotificationPayload): Promise<boolean> {
-  const webhookUrl = getWebhookForType(payload.type)
+  const webhookUrl = await getWebhookForType(payload.type)
   if (!webhookUrl) return false
 
   // Rate limit per lead
@@ -309,7 +345,7 @@ export async function sendSlackMessage(
   text: string,
   webhookUrl?: string
 ): Promise<boolean> {
-  const url = webhookUrl || getAlertsWebhook()
+  const url = webhookUrl || (await getSlackWebhooks()).alerts
   if (!url) return false
 
   return postWithRetry(url, { text })

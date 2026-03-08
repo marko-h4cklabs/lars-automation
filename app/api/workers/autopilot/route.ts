@@ -5,6 +5,7 @@ import { sendMultipleMessages, sendTextMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
 import { createNotification } from '@/lib/notifications'
 import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
+import { getIntegrationSettings } from '@/lib/cache'
 import {
   LeadStage,
   NotificationType,
@@ -183,7 +184,8 @@ qualification_updates: only include fields you extracted from the lead's message
     // STEP 5 — CALENDLY LINK
     // ═══════════════════════════════════════
     if (aiResponse.should_send_calendly) {
-      const calendlyUrl = process.env.CALENDLY_URL
+      const integrations = await getIntegrationSettings()
+      const calendlyUrl = integrations.calendly_link
       if (calendlyUrl) {
         const calendlyMsg = `here's my calendar, grab a time that works 👇\n${calendlyUrl}`
         await sendTextMessage(ctx.lead.instagram_user_id, calendlyMsg)

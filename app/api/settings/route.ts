@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data || {})
     }
     case 'integrations': {
-      const { data } = await supabase.from('integration_settings').select('*').limit(1).single()
+      // Only return operational settings, never credentials
+      const { data } = await supabase.from('integration_settings').select('id, calendly_link, manychat_page_id').limit(1).single()
       return NextResponse.json(data || {})
     }
     case 'team': {
@@ -141,7 +142,10 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ status: 'saved' })
     }
     case 'integrations': {
-      const { error } = await supabase.from('integration_settings').upsert({ id: data.id || undefined, ...data })
+      // Only persist operational settings, strip any credentials
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { manychat_api_key, calendly_webhook_secret, ...safeData } = data as Record<string, unknown>
+      const { error } = await supabase.from('integration_settings').upsert({ id: safeData.id || undefined, ...safeData })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ status: 'saved' })
     }

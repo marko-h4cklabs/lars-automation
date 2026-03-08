@@ -135,6 +135,35 @@ export async function getPersonaSettings(): Promise<PersonaSettings | null> {
 }
 
 // ═══════════════════════════════════════
+// INTEGRATION SETTINGS
+// ═══════════════════════════════════════
+
+export interface CachedIntegrationSettings {
+  calendly_link: string | null
+  manychat_page_id: string | null
+}
+
+export async function getIntegrationSettings(): Promise<CachedIntegrationSettings> {
+  const key = 'cache:integration_settings'
+  const cached = await getFromCache<CachedIntegrationSettings>(key)
+  if (cached) return cached
+
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('integration_settings')
+    .select('calendly_link, manychat_page_id')
+    .limit(1)
+    .single()
+
+  const result: CachedIntegrationSettings = {
+    calendly_link: data?.calendly_link || null,
+    manychat_page_id: data?.manychat_page_id || null,
+  }
+  await setInCache(key, result, 300) // 5 min TTL
+  return result
+}
+
+// ═══════════════════════════════════════
 // LEAD ASSIGNMENT
 // ═══════════════════════════════════════
 

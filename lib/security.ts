@@ -25,7 +25,6 @@ const ENV_REQUIREMENTS: EnvRequirement[] = [
   { key: 'UPSTASH_REDIS_REST_TOKEN', required: true, description: 'Upstash Redis token' },
   { key: 'QSTASH_TOKEN', required: true, description: 'QStash token' },
   { key: 'MANYCHAT_API_KEY', required: true, description: 'ManyChat API key' },
-  { key: 'SLACK_WEBHOOK_ALERTS', required: false, description: 'Slack alerts webhook URL' },
   { key: 'NEXT_PUBLIC_APP_URL', required: true, description: 'Application URL' },
 ]
 
