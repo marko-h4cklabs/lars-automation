@@ -58,45 +58,48 @@ export async function POST(request: NextRequest) {
   const { instagramUserId, username } = payload
 
   try {
+    // Check if this is an internal bundle-check call
+    const isBundleCheck = (payload as QueuePayload & { _bundleCheck?: boolean })._bundleCheck
+
     // ═══════════════════════════════════════
-    // STEP 1 — DEDUP CHECK
+    // STEP 1 — DEDUP CHECK (skip for bundle-check calls)
     // ═══════════════════════════════════════
-    const dedupKey = `dedup:${instagramUserId}:${payload.timestamp}`
-    const alreadyProcessed = await getRedis().get(dedupKey)
-    if (alreadyProcessed) {
-      return NextResponse.json({ status: 'duplicate', skipped: true })
+    if (!isBundleCheck) {
+      const dedupKey = `dedup:${instagramUserId}:${payload.timestamp}`
+      const alreadyProcessed = await getRedis().get(dedupKey)
+      if (alreadyProcessed) {
+        return NextResponse.json({ status: 'duplicate', skipped: true })
+      }
+      // Mark as processing (TTL 1 hour)
+      await getRedis().set(dedupKey, '1', { ex: 3600 })
     }
-    // Mark as processing (TTL 1 hour)
-    await getRedis().set(dedupKey, '1', { ex: 3600 })
 
     // ═══════════════════════════════════════
     // STEP 2 — SMART DELAY / BUNDLE CHECK
     // ═══════════════════════════════════════
-    const existingBundle = await getBundleMessages(instagramUserId)
-
-    if (existingBundle.length > 0) {
-      // Add to existing bundle and extend window
-      await addToBundle(instagramUserId, payload, MESSAGE_BUNDLE_EXTEND_SECONDS)
-
-      // Reschedule processing after bundle window
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-      await getQStash().publishJSON({
-        url: `${appUrl}/api/workers/process`,
-        body: { ...payload, _bundleCheck: true },
-        delay: MESSAGE_BUNDLE_EXTEND_SECONDS,
-        retries: 3,
-      })
-
-      return NextResponse.json({ status: 'bundled', count: existingBundle.length + 1 })
-    }
-
-    // First message — start a bundle window
-    await addToBundle(instagramUserId, payload, MESSAGE_BUNDLE_WINDOW_SECONDS)
-
-    // Wait for bundle window, then check if more messages arrived
-    // For first message, schedule a delayed self-call
-    const isBundleCheck = (payload as QueuePayload & { _bundleCheck?: boolean })._bundleCheck
     if (!isBundleCheck) {
+      const existingBundle = await getBundleMessages(instagramUserId)
+
+      if (existingBundle.length > 0) {
+        // Add to existing bundle and extend window
+        await addToBundle(instagramUserId, payload, MESSAGE_BUNDLE_EXTEND_SECONDS)
+
+        // Reschedule processing after bundle window
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+        await getQStash().publishJSON({
+          url: `${appUrl}/api/workers/process`,
+          body: { ...payload, _bundleCheck: true },
+          delay: MESSAGE_BUNDLE_EXTEND_SECONDS,
+          retries: 3,
+        })
+
+        return NextResponse.json({ status: 'bundled', count: existingBundle.length + 1 })
+      }
+
+      // First message — start a bundle window
+      await addToBundle(instagramUserId, payload, MESSAGE_BUNDLE_WINDOW_SECONDS)
+
+      // Schedule a delayed self-call to process after bundle window
       const appUrl = process.env.NEXT_PUBLIC_APP_URL!
       await getQStash().publishJSON({
         url: `${appUrl}/api/workers/process`,
