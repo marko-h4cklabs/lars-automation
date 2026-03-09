@@ -9,49 +9,69 @@ function getHeaders() {
   }
 }
 
+function toSubscriberId(id: string): number {
+  const num = parseInt(id, 10)
+  if (isNaN(num)) throw new Error(`Invalid subscriber ID: ${id}`)
+  return num
+}
+
 export async function sendTextMessage(
   subscriberId: string,
   text: string
 ): Promise<void> {
-  await axios.post(
-    `${MANYCHAT_BASE_URL}/sending/sendContent`,
-    {
-      subscriber_id: subscriberId,
-      data: {
-        version: 'v2',
-        content: {
-          messages: [{ type: 'text', text }],
+  try {
+    await axios.post(
+      `${MANYCHAT_BASE_URL}/sending/sendContent`,
+      {
+        subscriber_id: toSubscriberId(subscriberId),
+        data: {
+          version: 'v2',
+          content: {
+            messages: [{ type: 'text', text }],
+          },
         },
+        message_tag: 'HUMAN_AGENT',
       },
-      message_tag: 'ACCOUNT_UPDATE',
-    },
-    { headers: getHeaders() }
-  )
+      { headers: getHeaders() }
+    )
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      console.error('ManyChat API error:', err.response?.status, JSON.stringify(err.response?.data))
+    }
+    throw err
+  }
 }
 
 export async function sendVoiceMessage(
   subscriberId: string,
   audioUrl: string
 ): Promise<void> {
-  await axios.post(
-    `${MANYCHAT_BASE_URL}/sending/sendContent`,
-    {
-      subscriber_id: subscriberId,
-      data: {
-        version: 'v2',
-        content: {
-          messages: [
-            {
-              type: 'audio',
-              url: audioUrl,
-            },
-          ],
+  try {
+    await axios.post(
+      `${MANYCHAT_BASE_URL}/sending/sendContent`,
+      {
+        subscriber_id: toSubscriberId(subscriberId),
+        data: {
+          version: 'v2',
+          content: {
+            messages: [
+              {
+                type: 'audio',
+                url: audioUrl,
+              },
+            ],
+          },
         },
+        message_tag: 'HUMAN_AGENT',
       },
-      message_tag: 'ACCOUNT_UPDATE',
-    },
-    { headers: getHeaders() }
-  )
+      { headers: getHeaders() }
+    )
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      console.error('ManyChat API error:', err.response?.status, JSON.stringify(err.response?.data))
+    }
+    throw err
+  }
 }
 
 export async function sendMultipleMessages(
