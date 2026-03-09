@@ -30,6 +30,7 @@ export async function sendTextMessage(
             messages: [{ type: 'text', text }],
           },
         },
+        message_tag: 'ACCOUNT_UPDATE',
       },
       { headers: getHeaders() }
     )
