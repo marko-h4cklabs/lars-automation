@@ -60,20 +60,21 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     v: () => { setVoiceOpen((v) => !v); setTemplateOpen(false) },
   })
 
-  // Fetch messages
+  // Fetch messages (API returns ASC order — oldest first)
   const fetchMessages = useCallback(async (page: number, append: boolean = false) => {
     setLoadingMessages(true)
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages?page=${page}&limit=30`)
       if (!res.ok) return
       const data = await res.json()
-      const msgs = data.messages as Message[]
+      const msgs = (data.messages || []) as Message[]
       if (append) {
-        setActiveMessages([...msgs.reverse(), ...activeMessages])
+        // Prepend older messages before current ones
+        setActiveMessages([...msgs, ...activeMessages])
       } else {
-        setActiveMessages(msgs.reverse())
+        setActiveMessages(msgs)
       }
-      setHasMoreMessages(data.hasMore)
+      setHasMoreMessages(data.hasMore ?? false)
     } finally {
       setLoadingMessages(false)
     }

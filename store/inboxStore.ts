@@ -68,7 +68,9 @@ export const useInboxStore = create<InboxState>((set) => ({
   setActiveMessages: (messages) => set({ activeMessages: messages }),
   addMessage: (message) =>
     set((s) => ({
-      activeMessages: [...s.activeMessages, message],
+      activeMessages: s.activeMessages.some((m) => m.id === message.id)
+        ? s.activeMessages
+        : [...s.activeMessages, message],
     })),
   updateMessage: (id, updates) =>
     set((s) => ({

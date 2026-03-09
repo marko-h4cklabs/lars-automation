@@ -34,7 +34,10 @@ export async function GET(
     .eq('direction', 'inbound')
     .is('read_at', null)
 
-  return NextResponse.json({ messages: data, total: count, page })
+  const total = count || 0
+  const hasMore = offset + limit < total
+
+  return NextResponse.json({ messages: data, total, page, hasMore })
 }
 
 export async function POST(
