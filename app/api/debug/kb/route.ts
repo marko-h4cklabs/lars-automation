@@ -1,12 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase'
+import { upsertDocument } from '@/lib/embedding'
 
 /**
  * GET /api/debug/kb — Diagnose KB issues
  * Returns: user auth status, role, document count, OpenAI key status
+ * Add ?create=true to insert a test document end-to-end
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const shouldCreate = req.nextUrl.searchParams.get('create') === 'true'
   const results: Record<string, unknown> = {}
 
   // 1. Check auth
@@ -62,6 +65,20 @@ export async function GET() {
     results.openai_embedding = { status: 'success', dimensions: embedding.length }
   } catch (err) {
     results.openai_embedding = { status: 'failed', error: err instanceof Error ? err.message : String(err) }
+  }
+
+  // 6. Optionally create a test document (add ?create=true)
+  if (shouldCreate) {
+    try {
+      const id = await upsertDocument({
+        title: 'Test Document (debug)',
+        content: 'This is a test document created by the debug endpoint to verify the full KB pipeline works end-to-end.',
+        type: 'general',
+      })
+      results.test_create = { status: 'success', id }
+    } catch (err) {
+      results.test_create = { status: 'failed', error: err instanceof Error ? err.message : String(err) }
+    }
   }
 
   return NextResponse.json(results)

@@ -758,24 +758,32 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   }
 
   const handleSave = async () => {
-    if (!title || !content) return
+    if (!title || !content) {
+      setError(`Missing fields: ${!title ? 'title' : ''} ${!content ? 'content' : ''}`.trim())
+      return
+    }
     setSaving(true)
     setError('')
     try {
+      console.log('[KB Upload] Sending:', { title, type, fileType, contentLength: content.length })
       const res = await fetch('/api/knowledge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content, type, file_type: fileType }),
       })
+      console.log('[KB Upload] Response status:', res.status)
       if (res.ok) {
         const data = await res.json()
+        console.log('[KB Upload] Success:', data)
         onCreated(data.id)
       } else {
-        const data = await res.json()
-        setError(data.error || 'Failed to create document')
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+        console.error('[KB Upload] Failed:', data)
+        setError(data.error || `Failed (HTTP ${res.status})`)
       }
-    } catch {
-      setError('Network error')
+    } catch (err) {
+      console.error('[KB Upload] Network error:', err)
+      setError('Network error — check console for details')
     } finally {
       setSaving(false)
     }
