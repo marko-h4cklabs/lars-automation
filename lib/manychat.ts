@@ -29,76 +29,28 @@ export async function sendTextMessage(
   const numericId = toSubscriberId(subscriberId)
   console.log('[ManyChat] sendTextMessage → subscriber_id:', numericId, 'text:', text.substring(0, 50))
 
-  // Try with HUMAN_AGENT tag first (inside data.content), fall back without tag
-  const bodyWithTag = {
-    subscriber_id: numericId,
-    data: {
-      version: 'v2',
-      content: {
-        messages: [{ type: 'text', text }],
-        message_tag: 'HUMAN_AGENT',
-      },
-    },
-  }
-
-  const bodyWithoutTag = {
-    subscriber_id: numericId,
-    data: {
-      version: 'v2',
-      content: {
-        messages: [{ type: 'text', text }],
-      },
-    },
-  }
-
-  // Attempt 1: with HUMAN_AGENT inside content
   try {
     const response = await axios.post(
       `${MANYCHAT_BASE_URL}/sending/sendContent`,
-      bodyWithTag,
+      {
+        subscriber_id: numericId,
+        data: {
+          version: 'v2',
+          content: {
+            messages: [{ type: 'text', text }],
+          },
+        },
+      },
       { headers: getHeaders() }
     )
-    console.log('[ManyChat] sendTextMessage SUCCESS (with tag):', response.status, JSON.stringify(response.data))
-    return
+    console.log('[ManyChat] sendTextMessage SUCCESS:', response.status, JSON.stringify(response.data))
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const data = err.response?.data
-      console.warn('[ManyChat] attempt with HUMAN_AGENT tag failed:', err.response?.status, JSON.stringify(data))
-      // If "unsupported message tag", try without tag
-      if (err.response?.status === 400 && (
-        data?.message?.includes('Unsupported message tag') ||
-        data?.details?.messages?.[0]?.message?.includes('Unsupported message tag')
-      )) {
-        console.log('[ManyChat] retrying without message_tag...')
-      } else {
-        // Different error — check for 24h window
-        if (data?.code === 3011) {
-          throw new ManyChatWindowExpiredError(
-            '24-hour messaging window expired. The lead must send a new message before you can reply.'
-          )
-        }
-        throw err
-      }
-    } else {
-      throw err
-    }
-  }
-
-  // Attempt 2: without tag (works within 24h window)
-  try {
-    const response = await axios.post(
-      `${MANYCHAT_BASE_URL}/sending/sendContent`,
-      bodyWithoutTag,
-      { headers: getHeaders() }
-    )
-    console.log('[ManyChat] sendTextMessage SUCCESS (no tag):', response.status, JSON.stringify(response.data))
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data
-      console.error('[ManyChat] sendTextMessage FAILED (no tag):', err.response?.status, JSON.stringify(data))
+      console.error('[ManyChat] sendTextMessage FAILED:', err.response?.status, JSON.stringify(data))
       if (data?.code === 3011) {
         throw new ManyChatWindowExpiredError(
-          '24-hour messaging window expired. The lead must send a new message before you can reply.'
+          'ManyChat 24h window expired. Add a "Set Custom Field" action BEFORE the webhook step in your ManyChat DM flow so ManyChat counts inbound DMs as interactions.'
         )
       }
     }
