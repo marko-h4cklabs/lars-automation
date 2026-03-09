@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
         data: {
           version: 'v2',
           content: {
+            type: 'instagram',
             messages: [{ type: 'text', text: '[test] diagnostic ping from dashboard' }],
           },
         },

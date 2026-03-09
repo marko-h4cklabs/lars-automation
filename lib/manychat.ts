@@ -37,6 +37,7 @@ export async function sendTextMessage(
         data: {
           version: 'v2',
           content: {
+            type: 'instagram',
             messages: [{ type: 'text', text }],
           },
         },
@@ -79,6 +80,7 @@ export async function sendVoiceMessage(
         data: {
           version: 'v2',
           content: {
+            type: 'instagram',
             messages: [
               {
                 type: 'audio',
