@@ -31,6 +31,7 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
   const [errorConv, setErrorConv] = useState(false)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
   const [templateOpen, setTemplateOpen] = useState(false)
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [messagesPage, setMessagesPage] = useState(0)
@@ -95,6 +96,7 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     const content = text || input.trim()
     if (!content) return
     setSending(true)
+    setSendError(null)
 
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
@@ -110,7 +112,12 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
         const data = await res.json()
         addMessage(data.message)
         setInput('')
+      } else {
+        const data = await res.json().catch(() => ({ error: 'Failed to send message' }))
+        setSendError(data.error || 'Failed to send message')
       }
+    } catch {
+      setSendError('Network error — could not send message')
     } finally {
       setSending(false)
     }
@@ -247,6 +254,20 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
             onSend={handleSuggestSend}
             onUseThis={handleSuggestUse}
           />
+
+          {/* Send error banner */}
+          {sendError && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border-t border-red-500/20">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+              <span className="text-[10px] font-mono text-red-400 flex-1">{sendError}</span>
+              <button
+                onClick={() => setSendError(null)}
+                className="text-[9px] font-mono text-red-400 hover:text-red-300"
+              >
+                DISMISS
+              </button>
+            </div>
+          )}
 
           {/* Input area */}
           <div className="relative border-t border-[#1a1a1a] bg-[#0a0a0a]">

@@ -15,6 +15,13 @@ function toSubscriberId(id: string): number {
   return num
 }
 
+export class ManyChatWindowExpiredError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ManyChatWindowExpiredError'
+  }
+}
+
 export async function sendTextMessage(
   subscriberId: string,
   text: string
@@ -30,13 +37,19 @@ export async function sendTextMessage(
             messages: [{ type: 'text', text }],
           },
         },
-        message_tag: 'ACCOUNT_UPDATE',
       },
       { headers: getHeaders() }
     )
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.error('ManyChat API error:', err.response?.status, JSON.stringify(err.response?.data))
+      const data = err.response?.data
+      console.error('ManyChat API error:', err.response?.status, JSON.stringify(data))
+      // Code 3011 = 24h messaging window expired
+      if (data?.code === 3011) {
+        throw new ManyChatWindowExpiredError(
+          '24-hour messaging window expired. The lead must send a new message before you can reply.'
+        )
+      }
     }
     throw err
   }
