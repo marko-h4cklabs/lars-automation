@@ -27,6 +27,7 @@ export interface QueuePayload {
   source: string
   keyword?: string | null
   instagramUserId: string
+  subscriberId?: string | null
   username: string
   fullName: string
   bio: string

@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         // 2b. Check if lead stage changed to terminal state
         const { data: lead } = await supabase
           .from('leads')
-          .select('stage, instagram_user_id, username, full_name')
+          .select('stage, instagram_user_id, manychat_subscriber_id, username, full_name')
           .eq('id', job.lead_id)
           .single()
 
@@ -194,7 +194,7 @@ Reply with ONLY the message text. No quotes, no explanation.`
         // ═══════════════════════════════════════
         // STEP 4 — SEND VIA MANYCHAT
         // ═══════════════════════════════════════
-        await sendTextMessage(lead.instagram_user_id, messageContent)
+        await sendTextMessage(lead.manychat_subscriber_id || lead.instagram_user_id, messageContent)
 
         // Store in messages table
         await supabase.from('messages').insert({

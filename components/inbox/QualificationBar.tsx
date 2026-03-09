@@ -15,7 +15,7 @@ export function QualificationBar({ conversationId, collectedFields }: Qualificat
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    fetch('/api/qualification-fields')
+    fetch('/api/settings?section=qualification')
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (data?.fields) setFields(data.fields)

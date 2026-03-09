@@ -160,7 +160,7 @@ qualification_updates: only include fields you extracted from the lead's message
     const burstDelay = ctx.autopilotSettings?.burst_delay_ms || 2500
 
     await sendMultipleMessages(
-      ctx.lead.instagram_user_id,
+      ctx.lead.manychat_subscriber_id || ctx.lead.instagram_user_id,
       responseMessages,
       burstDelay
     )
@@ -188,7 +188,7 @@ qualification_updates: only include fields you extracted from the lead's message
       const calendlyUrl = integrations.calendly_link
       if (calendlyUrl) {
         const calendlyMsg = `here's my calendar, grab a time that works 👇\n${calendlyUrl}`
-        await sendTextMessage(ctx.lead.instagram_user_id, calendlyMsg)
+        await sendTextMessage(ctx.lead.manychat_subscriber_id || ctx.lead.instagram_user_id, calendlyMsg)
 
         await supabase.from('messages').insert({
           conversation_id: conversationId,
@@ -228,7 +228,7 @@ Keep it to 1-2 short sentences. Be warm but clear. Do not sound robotic.`,
         temperature: 0.7,
       })
 
-      await sendTextMessage(ctx.lead.instagram_user_id, closeMsg)
+      await sendTextMessage(ctx.lead.manychat_subscriber_id || ctx.lead.instagram_user_id, closeMsg)
 
       await supabase.from('messages').insert({
         conversation_id: conversationId,

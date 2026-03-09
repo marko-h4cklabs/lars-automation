@@ -4,6 +4,7 @@ interface RawManyChatBody {
   source?: string
   keyword?: string | null
   instagram_user_id?: string
+  subscriber_id?: string
   username?: string
   full_name?: string
   bio?: string
@@ -36,6 +37,7 @@ export function normalizePayload(
     source: (raw.source as LeadSource) || defaultSource,
     keyword: raw.keyword || null,
     instagramUserId,
+    subscriberId: raw.subscriber_id || null,
     username,
     fullName: raw.full_name || username,
     bio: raw.bio || '',

@@ -136,6 +136,7 @@ export interface User {
 export interface Lead {
   id: string
   instagram_user_id: string
+  manychat_subscriber_id: string | null
   username: string
   full_name: string | null
   bio: string | null
@@ -400,6 +401,7 @@ export interface NormalizedPayload {
   source: LeadSource
   keyword: string | null
   instagramUserId: string
+  subscriberId: string | null
   username: string
   fullName: string
   bio: string

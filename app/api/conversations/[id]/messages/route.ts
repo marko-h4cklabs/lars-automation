@@ -52,7 +52,7 @@ export async function POST(
   // Get conversation + lead
   const { data: conversation } = await supabase
     .from('conversations')
-    .select('lead_id, lead:leads!conversations_lead_id_fkey(instagram_user_id)')
+    .select('lead_id, lead:leads!conversations_lead_id_fkey(instagram_user_id, manychat_subscriber_id)')
     .eq('id', id)
     .single()
 
@@ -60,11 +60,12 @@ export async function POST(
     return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
   }
 
-  const leadData = conversation.lead as unknown as { instagram_user_id: string }
+  const leadData = conversation.lead as unknown as { instagram_user_id: string; manychat_subscriber_id: string | null }
+  const subscriberId = leadData.manychat_subscriber_id || leadData.instagram_user_id
 
   // Send via ManyChat
   try {
-    await sendTextMessage(leadData.instagram_user_id, content)
+    await sendTextMessage(subscriberId, content)
   } catch (err) {
     console.error('ManyChat send failed:', err)
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })

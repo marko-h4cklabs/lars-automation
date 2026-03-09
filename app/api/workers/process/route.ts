@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
           bio: payload.bio || existingLead.bio,
           profile_pic_url: payload.profilePicUrl || existingLead.profile_pic_url,
           follower_count: payload.followerCount || existingLead.follower_count,
+          manychat_subscriber_id: payload.subscriberId || existingLead.manychat_subscriber_id,
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -150,6 +151,7 @@ export async function POST(request: NextRequest) {
         .from('leads')
         .insert({
           instagram_user_id: instagramUserId,
+          manychat_subscriber_id: payload.subscriberId || null,
           username,
           full_name: payload.fullName || null,
           bio: payload.bio || null,
