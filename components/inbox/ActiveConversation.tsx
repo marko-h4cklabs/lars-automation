@@ -86,9 +86,18 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId])
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages + clear send error on new inbound
+  const prevMsgCountRef = useRef(0)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // If a new message arrived and it's inbound, clear window-expired error
+    if (activeMessages.length > prevMsgCountRef.current && sendError) {
+      const lastMsg = activeMessages[activeMessages.length - 1]
+      if (lastMsg?.direction === 'inbound') {
+        setSendError(null)
+      }
+    }
+    prevMsgCountRef.current = activeMessages.length
   }, [activeMessages.length])
 
   // Send message

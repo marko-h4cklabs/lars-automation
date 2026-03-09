@@ -101,5 +101,5 @@ export async function POST(
     .update({ updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  return NextResponse.json(message)
+  return NextResponse.json({ message })
 }
