@@ -30,7 +30,6 @@ export async function sendTextMessage(
             messages: [{ type: 'text', text }],
           },
         },
-        message_tag: 'HUMAN_AGENT',
       },
       { headers: getHeaders() }
     )
@@ -62,7 +61,6 @@ export async function sendVoiceMessage(
             ],
           },
         },
-        message_tag: 'HUMAN_AGENT',
       },
       { headers: getHeaders() }
     )
