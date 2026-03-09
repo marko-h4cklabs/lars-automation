@@ -36,6 +36,7 @@ export async function sendTextMessage(
         subscriber_id: numericId,
         data: {
           version: 'v2',
+          message_tag: 'HUMAN_AGENT',
           content: {
             messages: [{ type: 'text', text }],
           },
@@ -69,6 +70,7 @@ export async function sendVoiceMessage(
         subscriber_id: toSubscriberId(subscriberId),
         data: {
           version: 'v2',
+          message_tag: 'HUMAN_AGENT',
           content: {
             messages: [
               {
