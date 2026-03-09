@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const MANYCHAT_BASE_URL = 'https://api.manychat.com/ig'
+const MANYCHAT_BASE_URL = 'https://api.manychat.com/fb'
 
 function getHeaders() {
   return {
