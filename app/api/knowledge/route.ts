@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('kb_documents')
     .select('id, title, content, type, file_url, file_type, is_active, created_at, embedding')
-    .neq('file_type', 'chunk') // exclude chunks from list
+    .or('file_type.neq.chunk,file_type.is.null') // exclude chunks but include docs with null file_type
     .order('created_at', { ascending: false })
 
   if (type && type !== 'all') {
