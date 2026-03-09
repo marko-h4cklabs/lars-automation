@@ -104,10 +104,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    console.log('[KB] Creating document:', { title, type, file_type, contentLength: content.length })
     const id = await upsertDocument({ title, content, type, file_type })
+    console.log('[KB] Document created successfully:', id)
     return NextResponse.json({ id, message: 'Document created and embedded' })
   } catch (err) {
-    console.error('KB create error:', err)
-    return NextResponse.json({ error: 'Failed to create document' }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[KB] Create failed:', message, err)
+    return NextResponse.json({ error: `Failed to create document: ${message}` }, { status: 500 })
   }
 }

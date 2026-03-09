@@ -4,7 +4,10 @@ import { createAdminClient } from '@/lib/supabase'
 let _openai: OpenAI | null = null
 function getOpenAI() {
   if (!_openai) {
-    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set')
+    }
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   }
   return _openai
 }
@@ -147,29 +150,23 @@ export async function upsertDocument(doc: {
 
   if (chunks.length === 1) {
     // Short document — embed directly on the parent
-    try {
-      const embedding = await generateEmbedding(`${doc.title}\n\n${doc.content}`)
-      await supabase
-        .from('kb_documents')
-        .update({ embedding })
-        .eq('id', parentId)
-    } catch (err) {
-      console.error('Embedding failed for parent doc:', err)
-    }
+    console.log('[KB] Short doc, embedding directly on parent:', parentId)
+    const embedding = await generateEmbedding(`${doc.title}\n\n${doc.content}`)
+    const { error: embedErr } = await supabase
+      .from('kb_documents')
+      .update({ embedding })
+      .eq('id', parentId)
+    if (embedErr) console.error('[KB] Failed to store embedding:', embedErr.message)
   } else {
     // Long document — create chunks with embeddings
+    console.log(`[KB] Long doc, creating ${chunks.length} chunks for parent:`, parentId)
     for (let i = 0; i < chunks.length; i++) {
       const chunkTitle = `${doc.title} [${i + 1}/${chunks.length}]`
       const chunkContent = chunks[i]
 
-      let embedding: number[] | null = null
-      try {
-        embedding = await generateEmbedding(`${chunkTitle}\n\n${chunkContent}`)
-      } catch (err) {
-        console.error(`Embedding failed for chunk ${i + 1}:`, err)
-      }
+      const embedding = await generateEmbedding(`${chunkTitle}\n\n${chunkContent}`)
 
-      await supabase.from('kb_documents').insert({
+      const { error: chunkErr } = await supabase.from('kb_documents').insert({
         title: chunkTitle,
         content: chunkContent,
         type: doc.type,
@@ -178,6 +175,7 @@ export async function upsertDocument(doc: {
         embedding,
         is_active: doc.is_active ?? true,
       })
+      if (chunkErr) console.error(`[KB] Failed to insert chunk ${i + 1}:`, chunkErr.message)
     }
   }
 
