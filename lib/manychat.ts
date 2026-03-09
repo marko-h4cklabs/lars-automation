@@ -26,11 +26,14 @@ export async function sendTextMessage(
   subscriberId: string,
   text: string
 ): Promise<void> {
+  const numericId = toSubscriberId(subscriberId)
+  console.log('[ManyChat] sendTextMessage → subscriber_id:', numericId, 'text:', text.substring(0, 50))
+
   try {
-    await axios.post(
+    const response = await axios.post(
       `${MANYCHAT_BASE_URL}/sending/sendContent`,
       {
-        subscriber_id: toSubscriberId(subscriberId),
+        subscriber_id: numericId,
         data: {
           version: 'v2',
           content: {
@@ -40,10 +43,11 @@ export async function sendTextMessage(
       },
       { headers: getHeaders() }
     )
+    console.log('[ManyChat] sendTextMessage SUCCESS:', response.status, JSON.stringify(response.data))
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const data = err.response?.data
-      console.error('ManyChat API error:', err.response?.status, JSON.stringify(data))
+      console.error('[ManyChat] sendTextMessage FAILED:', err.response?.status, JSON.stringify(data))
       // Code 3011 = 24h messaging window expired
       if (data?.code === 3011) {
         throw new ManyChatWindowExpiredError(

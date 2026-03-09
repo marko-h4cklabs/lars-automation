@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const raw = await request.json()
+    console.log('[Webhook DM] raw payload keys:', Object.keys(raw), 'subscriber_id:', raw.subscriber_id, 'instagram_user_id:', raw.instagram_user_id)
     const payload = normalizePayload(raw, LeadSource.DM)
 
     // Rate limiting: global webhook limit

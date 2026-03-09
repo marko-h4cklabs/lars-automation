@@ -63,6 +63,14 @@ export async function POST(
   const leadData = conversation.lead as unknown as { instagram_user_id: string; manychat_subscriber_id: string | null }
   const subscriberId = leadData.manychat_subscriber_id || leadData.instagram_user_id
 
+  console.log('[Send] conversation:', id, 'lead_id:', conversation.lead_id)
+  console.log('[Send] instagram_user_id:', leadData.instagram_user_id, 'manychat_subscriber_id:', leadData.manychat_subscriber_id)
+  console.log('[Send] using subscriberId:', subscriberId)
+
+  if (!leadData.manychat_subscriber_id) {
+    console.warn('[Send] WARNING: manychat_subscriber_id is null, falling back to instagram_user_id — this may be wrong!')
+  }
+
   // Send via ManyChat
   try {
     await sendTextMessage(subscriberId, content)
