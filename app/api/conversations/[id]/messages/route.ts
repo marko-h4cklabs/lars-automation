@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { sendTextMessage, ManyChatWindowExpiredError } from '@/lib/manychat'
+import { sendTextMessage, ManyChatWindowExpiredError, getSubscriberInfoRaw } from '@/lib/manychat'
 import { MessageDirection, MessageType } from '@/types'
 
 export async function GET(
@@ -78,13 +78,21 @@ export async function POST(
   try {
     await sendTextMessage(subscriberId, content)
   } catch (err) {
+    // On any failure, log subscriber info for diagnosis
+    try {
+      const subInfo = await getSubscriberInfoRaw(subscriberId)
+      console.error('[Send] DIAGNOSTIC — subscriber info for', subscriberId, ':', JSON.stringify(subInfo, null, 2))
+    } catch (diagErr) {
+      console.error('[Send] DIAGNOSTIC — could not fetch subscriber info:', diagErr)
+    }
+
     if (err instanceof ManyChatWindowExpiredError) {
       return NextResponse.json(
         { error: err.message, code: 'WINDOW_EXPIRED' },
         { status: 422 }
       )
     }
-    console.error('ManyChat send failed:', err)
+    console.error('[Send] ManyChat send failed:', err)
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
   }
 

@@ -36,7 +36,6 @@ export async function sendTextMessage(
         subscriber_id: numericId,
         data: {
           version: 'v2',
-          message_tag: 'HUMAN_AGENT',
           content: {
             messages: [{ type: 'text', text }],
           },
@@ -49,9 +48,18 @@ export async function sendTextMessage(
     if (axios.isAxiosError(err)) {
       const data = err.response?.data
       console.error('[ManyChat] sendTextMessage FAILED:', err.response?.status, JSON.stringify(data))
+
+      // Diagnostic: fetch subscriber info to understand the window state
+      try {
+        const info = await getSubscriberInfoRaw(subscriberId)
+        console.error('[ManyChat] DIAGNOSTIC subscriber info:', JSON.stringify(info, null, 2))
+      } catch (diagErr) {
+        console.error('[ManyChat] DIAGNOSTIC getInfo also failed:', diagErr)
+      }
+
       if (data?.code === 3011) {
         throw new ManyChatWindowExpiredError(
-          'ManyChat 24h window expired. Add a "Set Custom Field" action BEFORE the webhook step in your ManyChat DM flow so ManyChat counts inbound DMs as interactions.'
+          'ManyChat 24h window expired — subscriber last interaction is too old. Have the lead send a new DM to reset the window.'
         )
       }
     }
@@ -70,7 +78,6 @@ export async function sendVoiceMessage(
         subscriber_id: toSubscriberId(subscriberId),
         data: {
           version: 'v2',
-          message_tag: 'HUMAN_AGENT',
           content: {
             messages: [
               {
@@ -85,7 +92,7 @@ export async function sendVoiceMessage(
     )
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.error('ManyChat API error:', err.response?.status, JSON.stringify(err.response?.data))
+      console.error('[ManyChat] sendVoiceMessage FAILED:', err.response?.status, JSON.stringify(err.response?.data))
     }
     throw err
   }
@@ -114,6 +121,7 @@ export interface SubscriberInfo {
   locale: string
 }
 
+// Returns parsed subscriber info
 export async function getSubscriberInfo(
   subscriberId: string
 ): Promise<SubscriberInfo> {
@@ -125,4 +133,18 @@ export async function getSubscriberInfo(
     }
   )
   return response.data.data
+}
+
+// Returns the FULL raw response for diagnostics (includes last_interaction, channels, etc.)
+export async function getSubscriberInfoRaw(
+  subscriberId: string
+): Promise<Record<string, unknown>> {
+  const response = await axios.get(
+    `${MANYCHAT_BASE_URL}/subscriber/getInfo`,
+    {
+      params: { subscriber_id: subscriberId },
+      headers: getHeaders(),
+    }
+  )
+  return response.data
 }
