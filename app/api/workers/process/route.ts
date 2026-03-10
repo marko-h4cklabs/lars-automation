@@ -208,23 +208,12 @@ export async function POST(request: NextRequest) {
       conversation = newConvo as Conversation
 
       // Mark as potentially having prior ManyChat history
+      // (the orange banner in ActiveConversation header handles the UI)
       try {
         await supabase
           .from('conversations')
           .update({ has_prior_history: true })
           .eq('id', conversation.id)
-
-        // Insert system message about prior history
-        await supabase.from('messages').insert({
-          conversation_id: conversation.id,
-          lead_id: lead.id,
-          direction: 'outbound',
-          type: 'text',
-          content: 'This contact may have prior conversation history in ManyChat before migration. Check ManyChat for full context.',
-          sent_by: 'system',
-          sent_at: new Date().toISOString(),
-          ai_generated: false,
-        })
       } catch {
         // Non-critical — continue processing
       }
