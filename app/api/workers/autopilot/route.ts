@@ -14,6 +14,7 @@ import {
 } from '@/types'
 import type { AIAutopilotResponse } from '@/types'
 import { HOT_LEAD_THRESHOLD } from '@/constants'
+import { buildStyleBlock } from '@/lib/promptStyle'
 
 export const maxDuration = 60
 
@@ -55,19 +56,7 @@ export async function POST(request: NextRequest) {
     // STEP 2 — PROMPT CONSTRUCTION
     // ═══════════════════════════════════════
     const styleRules = ctx.persona?.style_rules
-    const styleBlock = styleRules
-      ? `
-STYLE RULES:
-- Never use em dashes: ${styleRules.never_use_em_dash}
-- Vary capitalization naturally: ${styleRules.vary_capitalization}
-- Use contractions (don't, can't, etc.): ${styleRules.use_contractions}
-- Use casual shortcuts (rn, lmk, ngl, bet): ${styleRules.use_casual_shortcuts}
-- Max sentences per bubble: ${styleRules.max_sentences_per_bubble}
-- Max messages per burst: ${styleRules.max_messages_per_burst}
-- Match lead's vibe/energy: ${styleRules.match_lead_vibe}
-- Max emojis per burst: ${styleRules.max_emojis_per_burst}
-- NEVER use these phrases: ${styleRules.prohibited_phrases.join(', ')}`
-      : ''
+    const styleBlock = styleRules ? buildStyleBlock(styleRules) : ''
 
     const kbBlock = ctx.kbChunks.length > 0
       ? `\nKNOWLEDGE BASE (use this info to answer questions):\n${ctx.kbChunks.map((c) => `[${c.type.toUpperCase()}] ${c.title}:\n${c.content}`).join('\n\n')}`

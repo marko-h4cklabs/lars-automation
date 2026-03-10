@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { generate, generateJSON } from '@/lib/ai'
 import { searchKnowledgeBase } from '@/lib/workers/ragSearch'
 import type { PersonaSettings, StyleRules } from '@/types'
+import { buildStyleBlock } from '@/lib/promptStyle'
 
 interface SimMessage {
   role: 'lead' | 'setter' | 'ai'
@@ -84,18 +85,7 @@ export async function POST(req: NextRequest) {
 
   // ── Build style block ──
   const styleRules = persona?.style_rules as StyleRules | undefined
-  const styleBlock = styleRules
-    ? `STYLE RULES:
-- Never use em dashes: ${styleRules.never_use_em_dash}
-- Vary capitalization: ${styleRules.vary_capitalization}
-- Use contractions: ${styleRules.use_contractions}
-- Use casual shortcuts: ${styleRules.use_casual_shortcuts}
-- Max sentences per bubble: ${styleRules.max_sentences_per_bubble}
-- Max messages per burst: ${styleRules.max_messages_per_burst}
-- Match lead's vibe: ${styleRules.match_lead_vibe}
-- Max emojis per burst: ${styleRules.max_emojis_per_burst}
-${styleRules.prohibited_phrases?.length ? `- NEVER use: ${styleRules.prohibited_phrases.join(', ')}` : ''}`
-    : ''
+  const styleBlock = styleRules ? buildStyleBlock(styleRules) : ''
 
   const kbBlock = kbChunks.length > 0
     ? `\nKNOWLEDGE BASE:\n${kbChunks.map((c) => `[${c.type.toUpperCase()}] ${c.title}:\n${c.content}`).join('\n\n')}`

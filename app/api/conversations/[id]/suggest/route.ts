@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { generateJSON } from '@/lib/ai'
 import { assembleContext } from '@/lib/workers/contextAssembly'
 import type { AISuggestionResponse, SetterAISettings } from '@/types'
+import { buildStyleBlock } from '@/lib/promptStyle'
 
 export const maxDuration = 30
 
@@ -52,7 +53,7 @@ export async function POST(
 
     // 4. Build enhanced system prompt
     const personaBlock = ctx.persona
-      ? `\nPERSONA & STYLE RULES:\n${ctx.persona.base_prompt}\n- Never use em dashes: ${ctx.persona.style_rules.never_use_em_dash}\n- Use contractions: ${ctx.persona.style_rules.use_contractions}\n- Max sentences per bubble: ${ctx.persona.style_rules.max_sentences_per_bubble}\n- Max messages per burst: ${ctx.persona.style_rules.max_messages_per_burst}\n- Match lead's vibe: ${ctx.persona.style_rules.match_lead_vibe}\n- Max emojis per burst: ${ctx.persona.style_rules.max_emojis_per_burst}\n${ctx.persona.style_rules.prohibited_phrases.length > 0 ? `- NEVER say: ${ctx.persona.style_rules.prohibited_phrases.join(', ')}` : ''}`
+      ? `\nPERSONA:\n${ctx.persona.base_prompt}\n${buildStyleBlock(ctx.persona.style_rules)}`
       : ''
 
     const kbBlock = ctx.kbChunks.length > 0
