@@ -31,6 +31,7 @@ const STAGES: { value: LeadStage; label: string }[] = [
 export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps) {
   const [stageOpen, setStageOpen] = useState(false)
   const isAI = lead.assignment_type === 'ai'
+  const isUnassigned = !lead.assignment_type || lead.assignment_type === 'unassigned'
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-[#0a0a0a] border-b border-[#1a1a1a]">
@@ -50,6 +51,10 @@ export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps)
             <Badge variant="ai" className="text-[8px] py-0 px-1.5 gap-0.5">
               <Bot className="w-2.5 h-2.5" />
               AUTOPILOT
+            </Badge>
+          ) : isUnassigned ? (
+            <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5 bg-[#f0a030]/20 text-[#f0a030] border-[#f0a030]/30">
+              UNASSIGNED
             </Badge>
           ) : (
             <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5">
@@ -104,11 +109,19 @@ export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps)
         {/* Transfer button */}
         <button
           onClick={onTransfer}
-          className="flex items-center gap-1 px-2 py-1 bg-[#111] border border-[#222] rounded text-[9px] font-mono text-[#888] hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
-          title={isAI ? 'Transfer to human' : 'Transfer to AI'}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-mono font-bold transition-all',
+            isAI
+              ? 'bg-[#111] border border-[#222] text-[#888] hover:text-[#f0a030] hover:border-[#f0a030]/30'
+              : 'bg-[#00ff88]/15 border border-[#00ff88]/40 text-[#00ff88] hover:bg-[#00ff88]/25'
+          )}
+          title={isAI ? 'Transfer to human' : 'Assign AI autopilot'}
         >
-          <ArrowRightLeft className="w-3 h-3" />
-          {isAI ? 'TAKE OVER' : 'TO AI'}
+          {isAI ? (
+            <><UserRound className="w-3 h-3" /> TAKE OVER</>
+          ) : (
+            <><Bot className="w-3 h-3" /> ASSIGN AI</>
+          )}
         </button>
 
         {/* Calendly link */}

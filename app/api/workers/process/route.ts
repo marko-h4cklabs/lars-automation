@@ -57,6 +57,16 @@ export async function POST(request: NextRequest) {
 
   const { instagramUserId, username } = payload
 
+  // ═══════════════════════════════════════
+  // EARLY FILTER — reject follows and comments
+  // ═══════════════════════════════════════
+  // Follows/comments are handled by ManyChat directly.
+  // They should never create leads or appear in the dashboard.
+  if (payload.source === 'follow' || payload.source === 'comment') {
+    console.log(`[Process] Ignoring ${payload.source} from @${username} — handled by ManyChat`)
+    return NextResponse.json({ status: 'ignored', reason: `${payload.source} handled by manychat` })
+  }
+
   try {
     // Check if this is an internal bundle-check call
     const isBundleCheck = (payload as QueuePayload & { _bundleCheck?: boolean })._bundleCheck
