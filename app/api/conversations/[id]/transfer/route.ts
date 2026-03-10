@@ -6,7 +6,7 @@ import { NotificationType } from '@/types'
 import type { AutopilotSettings } from '@/types'
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -14,25 +14,46 @@ export async function POST(
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Transfer conversation to AI
-  const { error: convError } = await supabase
-    .from('conversations')
-    .update({
-      assigned_to: null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-
-  if (convError) return NextResponse.json({ error: convError.message }, { status: 500 })
-
-  // Get lead_id and update lead assignment
+  // Get current lead assignment to determine direction
   const { data: conv } = await supabase
     .from('conversations')
-    .select('lead_id, lead:leads!conversations_lead_id_fkey(username)')
+    .select('lead_id, lead:leads!conversations_lead_id_fkey(username, assignment_type)')
     .eq('id', id)
     .single()
 
-  if (conv) {
+  if (!conv) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+
+  const leadData = conv.lead as unknown as { username: string; assignment_type: string }
+  const username = leadData?.username || 'Lead'
+  const currentType = leadData?.assignment_type
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+  if (currentType === 'ai') {
+    // ── AI → HUMAN (take over) ──
+    // Assign to the current user who clicked "TAKE OVER"
+    await supabase
+      .from('conversations')
+      .update({ assigned_to: session.user.id, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    await supabase
+      .from('leads')
+      .update({
+        assigned_to: session.user.id,
+        assignment_type: 'setter',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', conv.lead_id)
+
+    return NextResponse.json({ status: 'transferred', direction: 'human', conversationId: id })
+
+  } else {
+    // ── HUMAN/UNASSIGNED → AI ──
+    await supabase
+      .from('conversations')
+      .update({ assigned_to: null, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
     await supabase
       .from('leads')
       .update({
@@ -42,23 +63,15 @@ export async function POST(
       })
       .eq('id', conv.lead_id)
 
-    const leadData = conv.lead as unknown as { username: string }
-    const username = leadData?.username || 'Lead'
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-    // Create notification
     createNotification({
       type: NotificationType.AITakeover,
       leadId: conv.lead_id,
       conversationId: id,
       message: `@${username} transferred to AI autopilot`,
-      metadata: {
-        username,
-        conversationUrl: `${appUrl}/inbox/${id}`,
-      },
+      metadata: { username, conversationUrl: `${appUrl}/inbox/${id}` },
     }).catch(() => {})
 
-    // Immediately trigger autopilot so AI pulls context and responds now
+    // Trigger autopilot immediately
     const { data: autopilotSettings } = await supabase
       .from('autopilot_settings')
       .select('*')
@@ -74,15 +87,12 @@ export async function POST(
 
       await getQStash().publishJSON({
         url: `${appUrl}/api/workers/autopilot`,
-        body: {
-          conversationId: id,
-          leadId: conv.lead_id,
-        },
+        body: { conversationId: id, leadId: conv.lead_id },
         delay,
         retries: 3,
       })
     }
-  }
 
-  return NextResponse.json({ status: 'transferred', conversationId: id })
+    return NextResponse.json({ status: 'transferred', direction: 'ai', conversationId: id })
+  }
 }
