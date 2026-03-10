@@ -18,7 +18,10 @@ import * as path from 'path'
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
-const DEFAULT_INBOX = '/Users/markosrnec5/Documents/DMs-Lars/first-batch/messages/inbox'
+const DEFAULT_INBOXES = [
+  '/Users/markosrnec5/Documents/DMs-Lars/first-batch/messages/inbox',
+  '/Users/markosrnec5/Documents/DMs-Lars/your_instagram_activity 3/messages/inbox',
+]
 const PROGRESS_FILE = path.join(__dirname, '.import-progress.json')
 const MIN_TEXT_MESSAGES = 3
 const LARS_NAME_PATTERN = /lars/i
@@ -30,7 +33,7 @@ const DRY_RUN = args.includes('--dry-run')
 const RESET = args.includes('--reset')
 const BATCH_SIZE = getArgInt('--batch-size', 10)
 const CONCURRENCY = getArgInt('--concurrency', 3)
-const INBOX_DIR = getArgStr('--inbox', DEFAULT_INBOX)
+const INBOX_OVERRIDE = args.includes('--inbox') ? getArgStr('--inbox', '') : null
 const API_URL = process.env.API_URL || 'https://blackops-dm-app.vercel.app'
 const IMPORT_SECRET = process.env.IMPORT_SECRET
 
@@ -216,23 +219,44 @@ async function main() {
     process.exit(1)
   }
 
-  if (!fs.existsSync(INBOX_DIR)) {
-    console.error(`Error: Inbox directory not found: ${INBOX_DIR}`)
+  const inboxDirs = INBOX_OVERRIDE ? [INBOX_OVERRIDE] : DEFAULT_INBOXES
+
+  // Scan folders from all inbox directories
+  const folders: { folder: string; inboxDir: string }[] = []
+  for (const inboxDir of inboxDirs) {
+    if (!fs.existsSync(inboxDir)) {
+      console.warn(`Warning: Inbox directory not found, skipping: ${inboxDir}`)
+      continue
+    }
+    const entries = fs.readdirSync(inboxDir).filter(f => {
+      const msgFile = path.join(inboxDir, f, 'message_1.json')
+      return fs.existsSync(msgFile)
+    })
+    console.log(`  ${inboxDir}: ${entries.length} folders`)
+    for (const f of entries) {
+      folders.push({ folder: f, inboxDir })
+    }
+  }
+
+  if (folders.length === 0) {
+    console.error('Error: No conversation folders found in any inbox directory')
     process.exit(1)
   }
 
-  // Scan folders
-  const folders = fs.readdirSync(INBOX_DIR).filter(f => {
-    const msgFile = path.join(INBOX_DIR, f, 'message_1.json')
-    return fs.existsSync(msgFile)
+  // Deduplicate by folder name (same convo may exist in both exports)
+  const seen = new Set<string>()
+  const uniqueFolders = folders.filter(f => {
+    if (seen.has(f.folder)) return false
+    seen.add(f.folder)
+    return true
   })
 
-  console.log(`Found ${folders.length} conversation folders`)
+  console.log(`\nTotal: ${folders.length} folders (${uniqueFolders.length} unique, ${folders.length - uniqueFolders.length} duplicates across exports)`)
 
   // Load progress for resume
   const progress = loadProgress()
   const alreadyDone = new Set([...progress.completed, ...progress.failed])
-  const pending = folders.filter(f => !alreadyDone.has(f))
+  const pending = uniqueFolders.filter(f => !alreadyDone.has(f.folder))
 
   console.log(`Already processed: ${alreadyDone.size} (${progress.completed.length} ok, ${progress.failed.length} failed)`)
   console.log(`Remaining: ${pending.length}`)
@@ -241,9 +265,9 @@ async function main() {
   const documents: { folder: string; title: string; content: string }[] = []
   let skipped = 0
 
-  for (const folder of pending) {
+  for (const { folder, inboxDir } of pending) {
     try {
-      const raw = fs.readFileSync(path.join(INBOX_DIR, folder, 'message_1.json'), 'utf-8')
+      const raw = fs.readFileSync(path.join(inboxDir, folder, 'message_1.json'), 'utf-8')
       const convo: IGConversation = JSON.parse(raw)
       const formatted = formatConversation(convo, folder)
       if (formatted) {
