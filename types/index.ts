@@ -188,6 +188,8 @@ export interface Message {
   ai_generated: boolean
   template_id: string | null
   bundle_id: string | null
+  is_trigger_outbound?: boolean
+  trigger_type?: string | null
 }
 
 export interface AISuggestion {

@@ -1,16 +1,38 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Bot, Mic, Image as ImageIcon, FileText } from 'lucide-react'
+import { Bot, Mic, Image as ImageIcon, FileText, Zap } from 'lucide-react'
 import type { Message } from '@/types'
 
 interface MessageBubbleProps {
-  message: Pick<Message, 'id' | 'content' | 'direction' | 'type' | 'sent_at' | 'ai_generated' | 'voice_url' | 'sent_by'>
+  message: Pick<Message, 'id' | 'content' | 'direction' | 'type' | 'sent_at' | 'ai_generated' | 'voice_url' | 'sent_by' | 'is_trigger_outbound' | 'trigger_type'>
   showTimestamp?: boolean
 }
 
 export function MessageBubble({ message, showTimestamp = true }: MessageBubbleProps) {
   const isOutbound = message.direction === 'outbound'
+
+  // Trigger outbound messages render as compact orange alerts
+  if (message.is_trigger_outbound) {
+    return (
+      <div className="flex w-full justify-center mb-2 animate-slide-in-up">
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0a030]/10 border border-[#f0a030]/20">
+          <Zap className="w-2.5 h-2.5 text-[#f0a030]" />
+          <span className="text-[9px] font-mono text-[#f0a030]">
+            {message.trigger_type === 'keyword' ? 'Keyword trigger' : 'Auto-reply'} sent
+          </span>
+          <span className="text-[8px] font-mono text-[#f0a030]/60 truncate max-w-[200px]">
+            {message.content}
+          </span>
+          {showTimestamp && (
+            <span className="text-[7px] font-mono text-[#f0a030]/40 ml-1">
+              {formatTime(message.sent_at)}
+            </span>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn('flex w-full mb-2 animate-slide-in-up', isOutbound ? 'justify-end' : 'justify-start')}>
