@@ -34,7 +34,7 @@ const RESET = args.includes('--reset')
 const BATCH_SIZE = getArgInt('--batch-size', 10)
 const CONCURRENCY = getArgInt('--concurrency', 3)
 const INBOX_OVERRIDE = args.includes('--inbox') ? getArgStr('--inbox', '') : null
-const API_URL = process.env.API_URL || 'https://blackops-dm-app.vercel.app'
+const API_URL = process.env.API_URL || 'https://lars-automation.vercel.app'
 const IMPORT_SECRET = process.env.IMPORT_SECRET
 
 function getArgInt(flag: string, def: number): number {

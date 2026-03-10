@@ -248,6 +248,8 @@ export async function POST(request: NextRequest) {
     // ═══════════════════════════════════════
     // STEP 6 — SMART KEYWORD CHECK
     // ═══════════════════════════════════════
+    let keywordTriggerFired = false
+    let keywordUsed: string | null = null
     {
       const combinedText = allPayloads.map((p) => p.messageText).join(' ').toLowerCase()
 
@@ -288,6 +290,8 @@ export async function POST(request: NextRequest) {
         if (matchedTrigger) {
           // Only fire keyword trigger on first messages (message_count <= 1)
           if (currentMsgCount <= 1 || isNewConversation) {
+            keywordTriggerFired = true
+            keywordUsed = matchedTrigger.keyword
             // Resolve template variables
             const resolvedContent = matchedTrigger.response_template
               .replace(/\{username\}/g, lead.username || '')
@@ -462,7 +466,11 @@ export async function POST(request: NextRequest) {
     // ═══════════════════════════════════════
     // STEP 10 — RESPONSE ROUTING
     // ═══════════════════════════════════════
-    if (assignmentType === 'ai' || !assignedTo) {
+    if (keywordTriggerFired) {
+      // Keyword trigger already sent the outbound template.
+      // Do NOT send AI autopilot — wait for lead to reply to the outbound message.
+      console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — skipping AI autopilot, waiting for lead reply`)
+    } else if (assignmentType === 'ai' || !assignedTo) {
       // AI Autopilot — schedule delayed response
       const { data: autopilotSettings } = await supabase
         .from('autopilot_settings')
