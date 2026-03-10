@@ -166,7 +166,7 @@ RULES:
 4. Reference something from the conversation if possible
 5. Match the lead's communication style
 6. NEVER mention you are AI or automated
-7. NEVER say "just following up" or "just checking in" — be creative${currentStep.knowledge_source === 'custom_content' ? '\n8. Incorporate the follow-up specific knowledge naturally into your message' : ''}
+7. NEVER say "just following up" or "just checking in", be creative${currentStep.knowledge_source === 'custom_content' ? '\n8. Incorporate the follow-up specific knowledge naturally into your message' : ''}
 
 Reply with ONLY the message text. No quotes, no explanation.`
 
