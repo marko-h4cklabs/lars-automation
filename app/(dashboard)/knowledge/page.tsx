@@ -415,11 +415,12 @@ function DocumentViewer({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: doc.id }),
       })
+      const data = await res.json().catch(() => ({ error: `Non-JSON response (${res.status}): likely auth redirect` }))
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Unknown error' }))
-        alert(`Embedding failed: ${data.error || res.statusText}`)
+        alert(`Embedding failed: ${data.error || res.statusText}\n\nSteps: ${(data.steps || []).join('\n')}`)
         return
       }
+      alert(`Success!\n${(data.steps || []).join('\n')}`)
       fetchDoc()
       onUpdated()
     } finally {
