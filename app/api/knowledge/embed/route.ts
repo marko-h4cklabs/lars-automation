@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
   if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 })
 
   try {
+    console.log('[Embed] Starting for doc:', doc.id, doc.title, 'content length:', doc.content.length)
     await upsertDocument({
       id: doc.id,
       title: doc.title,
@@ -43,9 +44,11 @@ export async function POST(req: NextRequest) {
       file_type: doc.file_type,
       is_active: doc.is_active,
     })
+    console.log('[Embed] Success for doc:', doc.id)
     return NextResponse.json({ message: 'Embeddings regenerated successfully' })
   } catch (err) {
-    console.error('Embedding regeneration error:', err)
-    return NextResponse.json({ error: 'Failed to regenerate embeddings' }, { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[Embed] Failed for doc:', doc.id, message, err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

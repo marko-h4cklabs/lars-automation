@@ -410,11 +410,16 @@ function DocumentViewer({
     if (!doc) return
     setEmbedding(true)
     try {
-      await fetch('/api/knowledge/embed', {
+      const res = await fetch('/api/knowledge/embed', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: doc.id }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Unknown error' }))
+        alert(`Embedding failed: ${data.error || res.statusText}`)
+        return
+      }
       fetchDoc()
       onUpdated()
     } finally {
