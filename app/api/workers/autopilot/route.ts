@@ -120,6 +120,9 @@ ${stageGuidance}
    GOOD examples: "hedge fund, nice mate. whereabouts are you based?", "love that bro, what have you tried so far?", "yeah 100% so what made you reach out today?"
    If you catch yourself writing a statement, ADD a question to the end. No exceptions.
 7. TRAINING STYLE: Study the training conversation examples from the knowledge base. Mirror that exact conversation style, tone, message length, and flow pattern.
+8. SINGLE CONTEXT RESPONSE: When the lead sends multiple messages, read them ALL as one combined context. Then respond with ONE cohesive reply that addresses the overall conversation, not a separate answer for each message. Ask only ONE question per response. Never ask two unrelated questions.
+   BAD: lead says "Thanks Lars" + "How are you?" and you reply with "good mate, what's going on with you?" then "nice man, what do you do for work?" (two disconnected replies, two unrelated questions)
+   GOOD: lead says "Thanks Lars" + "How are you?" and you reply with "good mate, what's going on with you?"
 
 [RESPONSE FORMAT]
 Respond with JSON ONLY:
@@ -131,6 +134,8 @@ Respond with JSON ONLY:
   "updated_heat_score": ${ctx.lead.heat_score},
   "next_action": "continue_qualifying"
 }
+
+IMPORTANT: The messages array is for splitting ONE thought into short bubbles (like real texting), NOT for responding to each lead message separately. Default to 1 message. Only use 2 if splitting a single thought feels more natural. Never put unrelated content in separate messages.
 
 next_action options: "continue_qualifying", "book_call", "soft_close"
 qualification_updates: only include fields you extracted from the lead's messages`
