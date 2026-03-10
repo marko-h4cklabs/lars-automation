@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { LeadAvatar } from '@/components/ui/lead-avatar'
 import { HeatScore } from '@/components/ui/heat-score'
 import { Badge } from '@/components/ui/badge'
-import { Bot, UserRound, ChevronDown, ArrowRightLeft, Phone } from 'lucide-react'
+import { Bot, UserRound, ChevronDown, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lead, LeadStage, Conversation } from '@/types'
 
