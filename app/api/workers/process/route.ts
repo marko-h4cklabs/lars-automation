@@ -207,15 +207,17 @@ export async function POST(request: NextRequest) {
 
       conversation = newConvo as Conversation
 
-      // Mark as potentially having prior ManyChat history
-      // (the orange banner in ActiveConversation header handles the UI)
-      try {
-        await supabase
-          .from('conversations')
-          .update({ has_prior_history: true })
-          .eq('id', conversation.id)
-      } catch {
-        // Non-critical — continue processing
+      // Only mark prior history if lead already existed before this message
+      // (they had conversations in ManyChat/Instagram before our app)
+      if (existingLead) {
+        try {
+          await supabase
+            .from('conversations')
+            .update({ has_prior_history: true })
+            .eq('id', conversation.id)
+        } catch {
+          // Non-critical — continue processing
+        }
       }
     }
 
@@ -470,6 +472,11 @@ export async function POST(request: NextRequest) {
       // Keyword trigger already sent the outbound template.
       // Do NOT send AI autopilot — wait for lead to reply to the outbound message.
       console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — skipping AI autopilot, waiting for lead reply`)
+    } else if (existingLead && isNewConversation) {
+      // HARD RULE: Lead already existed in DB before this conversation.
+      // This means they had prior chats on Instagram/ManyChat before the app.
+      // Do NOT let AI autopilot respond — only setters can handle these.
+      console.log(`[Process] Existing lead @${username} starting new conversation — AI autopilot BLOCKED (prior history)`)
     } else if (assignmentType === 'ai' || !assignedTo) {
       // AI Autopilot — schedule delayed response
       const { data: autopilotSettings } = await supabase
