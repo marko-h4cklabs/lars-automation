@@ -33,6 +33,9 @@
     },
     "app/api/testing/simulate/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/workers/bulk-import/route.ts": {
+      "maxDuration": 60
     }
   }
 }
