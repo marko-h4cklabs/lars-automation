@@ -499,20 +499,26 @@ export async function POST(request: NextRequest) {
         .single()
 
       const settings = autopilotSettings as AutopilotSettings | null
-      const minDelay = settings?.min_delay_seconds || 8
-      const maxDelay = settings?.max_delay_seconds || 45
-      const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-      await getQStash().publishJSON({
-        url: `${appUrl}/api/workers/autopilot`,
-        body: {
-          conversationId: conversation.id,
-          leadId: lead.id,
-        },
-        delay,
-        retries: 3,
-      })
+      // Global AI kill switch — if disabled, skip autopilot entirely
+      if (settings?.enabled === false) {
+        console.log(`[Process] AI autopilot DISABLED globally — skipping for @${username}`)
+      } else {
+        const minDelay = settings?.min_delay_seconds || 8
+        const maxDelay = settings?.max_delay_seconds || 45
+        const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+        await getQStash().publishJSON({
+          url: `${appUrl}/api/workers/autopilot`,
+          body: {
+            conversationId: conversation.id,
+            leadId: lead.id,
+          },
+          delay,
+          retries: 3,
+        })
+      }
     } else {
       // Setter assigned — push notification via centralized system
       createNotification({

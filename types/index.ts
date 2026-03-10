@@ -316,6 +316,7 @@ export interface SetterAISettings {
 
 export interface AutopilotSettings {
   id: string
+  enabled: boolean
   min_delay_seconds: number
   max_delay_seconds: number
   max_messages_per_burst: number

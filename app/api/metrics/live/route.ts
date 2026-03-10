@@ -50,10 +50,10 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .eq('role', 'setter'),
 
-    // Autopilot active check
+    // Autopilot active check (reads enabled field)
     supabase
       .from('autopilot_settings')
-      .select('id')
+      .select('id, enabled')
       .limit(1)
       .single(),
 
@@ -76,7 +76,7 @@ export async function GET() {
     queuedMessages: queuedResult.count || 0,
     onlineSetters: onlineSettersResult.count || 0,
     totalSetters: totalSettersResult.count || 0,
-    aiActive: !!autopilotResult.data,
+    aiActive: !!(autopilotResult.data && (autopilotResult.data as { enabled?: boolean }).enabled !== false),
     todayBooked: bookedResult.count || 0,
     todayNewLeads: newLeadsResult.count || 0,
   }
