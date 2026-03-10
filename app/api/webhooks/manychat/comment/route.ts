@@ -1,27 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { normalizePayload } from '@/lib/webhooks/normalizePayload'
-import { validateManyChatWebhook, logWebhookEvent } from '@/lib/webhooks/security'
-import { pushMessage } from '@/lib/queue'
-import { LeadSource } from '@/types'
+import { validateManyChatWebhook } from '@/lib/webhooks/security'
 
+/**
+ * Comment webhook — disabled.
+ * Comments and comment responses are handled entirely by ManyChat flows.
+ * We accept the request so ManyChat doesn't error, but do not process it.
+ */
 export async function POST(request: NextRequest) {
   const rejection = await validateManyChatWebhook(request)
   if (rejection) return rejection
 
-  try {
-    const raw = await request.json()
-    const payload = normalizePayload(raw, LeadSource.Comment)
-
-    await pushMessage(payload)
-
-    logWebhookEvent('webhook.manychat.comment', 'lead', payload.instagramUserId, {
-      username: payload.username,
-      source: payload.source,
-    })
-
-    return NextResponse.json({ status: 'queued' })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 400 })
-  }
+  return NextResponse.json({ status: 'ignored', reason: 'comments handled by manychat' })
 }
