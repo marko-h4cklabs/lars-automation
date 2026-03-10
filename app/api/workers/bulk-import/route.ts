@@ -80,3 +80,63 @@ export async function POST(req: NextRequest) {
     summary: { succeeded, duplicates, failed, total: documents.length },
   })
 }
+
+/**
+ * DELETE /api/workers/bulk-import
+ * Bulk delete KB documents by type. Authenticated via x-import-secret header.
+ * Query params: type (e.g. "training") — required
+ * Deletes chunks first, then parent docs.
+ */
+export async function DELETE(req: NextRequest) {
+  const secret = req.headers.get('x-import-secret')
+  if (!secret || secret !== process.env.IMPORT_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const docType = req.nextUrl.searchParams.get('type')
+  if (!docType) {
+    return NextResponse.json({ error: 'type query param is required' }, { status: 400 })
+  }
+
+  const supabase = createAdminClient()
+
+  // Get all parent doc IDs of this type (exclude chunks)
+  const { data: parents, error: fetchError } = await supabase
+    .from('kb_documents')
+    .select('id')
+    .eq('type', docType)
+    .or('file_type.neq.chunk,file_type.is.null')
+
+  if (fetchError) {
+    return NextResponse.json({ error: fetchError.message }, { status: 500 })
+  }
+
+  const parentIds = (parents || []).map((d) => d.id)
+  if (parentIds.length === 0) {
+    return NextResponse.json({ deleted: 0, chunks_deleted: 0, message: 'No documents found' })
+  }
+
+  // Delete chunks that reference these parents
+  const { count: chunksDeleted } = await supabase
+    .from('kb_documents')
+    .delete({ count: 'exact' })
+    .eq('file_type', 'chunk')
+    .in('file_url', parentIds)
+
+  // Delete the parent docs
+  const { count: docsDeleted, error: delError } = await supabase
+    .from('kb_documents')
+    .delete({ count: 'exact' })
+    .eq('type', docType)
+    .or('file_type.neq.chunk,file_type.is.null')
+
+  if (delError) {
+    return NextResponse.json({ error: delError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({
+    deleted: docsDeleted || 0,
+    chunks_deleted: chunksDeleted || 0,
+    message: `Deleted ${docsDeleted} ${docType} documents and ${chunksDeleted || 0} chunks`,
+  })
+}
