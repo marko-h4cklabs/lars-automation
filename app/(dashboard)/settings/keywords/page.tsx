@@ -194,28 +194,31 @@ function TriggerEditor({ trigger, onSave, onCancel, saving }: {
 }) {
   const [t, setT] = useState(trigger)
 
-  // Split stored template into individual messages (||| delimiter)
-  const messages = (t.response_template || '').split('|||').map((m) => m.trim()).filter(Boolean)
-  if (messages.length === 0) messages.push('')
+  // Track messages as separate state so empty fields don't get filtered out
+  const [messages, setMessages] = useState<string[]>(() => {
+    const parts = (trigger.response_template || '').split('|||').map((m) => m.trim())
+    return parts.length > 0 && parts.some(Boolean) ? parts : ['']
+  })
 
-  const updateMessages = (msgs: string[]) => {
-    setT({ ...t, response_template: msgs.join('|||') })
+  const syncTemplate = (msgs: string[]) => {
+    setMessages(msgs)
+    setT((prev) => ({ ...prev, response_template: msgs.filter(Boolean).join('|||') }))
   }
 
   const setMessage = (idx: number, val: string) => {
     const updated = [...messages]
     updated[idx] = val
-    updateMessages(updated)
+    syncTemplate(updated)
   }
 
   const addMessage = () => {
-    updateMessages([...messages, ''])
+    setMessages((prev) => [...prev, ''])
   }
 
   const removeMessage = (idx: number) => {
     if (messages.length <= 1) return
     const updated = messages.filter((_, i) => i !== idx)
-    updateMessages(updated)
+    syncTemplate(updated)
   }
 
   return (
