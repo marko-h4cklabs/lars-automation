@@ -2,9 +2,8 @@ import type { StyleRules } from '@/types'
 
 // The DB stores extra fields beyond the TypeScript interface.
 // This helper safely accesses them.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ext(rules: StyleRules): Record<string, any> {
-  return rules as Record<string, any>
+function ext(rules: StyleRules): Record<string, unknown> {
+  return rules as unknown as Record<string, unknown>
 }
 
 /**
