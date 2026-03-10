@@ -14,7 +14,7 @@ import { calculateAssignment } from '@/lib/workers/distribution'
 import { createNotification } from '@/lib/notifications'
 import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import { getDisplayName, getFirstName } from '@/lib/nameValidator'
-import { sendTextMessage } from '@/lib/manychat'
+import { sendTextMessage, sendMultipleMessages } from '@/lib/manychat'
 import {
   LeadStage,
   LeadSource,
@@ -302,12 +302,19 @@ export async function POST(request: NextRequest) {
               .replace(/\{lead_first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
               .replace(/\{first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
 
+            // Split by ||| for multi-message triggers, trim each part
+            const triggerMessages = resolvedContent.split('|||').map((m: string) => m.trim()).filter(Boolean)
+
             // Send keyword-triggered response via ManyChat
             const triggerSubId = payload.subscriberId || lead.manychat_subscriber_id
             if (triggerSubId) {
               try {
-                await sendTextMessage(triggerSubId, resolvedContent)
-                console.log(`[Process] Keyword trigger sent to ${triggerSubId}:`, resolvedContent.slice(0, 80))
+                if (triggerMessages.length > 1) {
+                  await sendMultipleMessages(triggerSubId, triggerMessages, 1500)
+                } else {
+                  await sendTextMessage(triggerSubId, triggerMessages[0] || resolvedContent)
+                }
+                console.log(`[Process] Keyword trigger sent to ${triggerSubId}: ${triggerMessages.length} msg(s)`)
               } catch (sendErr) {
                 console.error(`[Process] Keyword trigger send failed for ${triggerSubId}:`, sendErr)
               }
@@ -315,21 +322,27 @@ export async function POST(request: NextRequest) {
               console.warn(`[Process] No subscriber ID for keyword trigger, cannot send to ${lead.username}`)
             }
 
-            await supabase.from('messages').insert({
-              conversation_id: conversation.id,
-              lead_id: lead.id,
-              direction: MessageDirection.Outbound,
-              type: MessageType.Template,
-              content: resolvedContent,
-              sent_by: 'system',
-              sent_at: new Date().toISOString(),
-              ai_generated: false,
-              is_trigger_outbound: true,
-              trigger_type: payload.source === 'follow' ? 'follow'
-                : payload.source === 'comment' ? 'comment_keyword'
-                : payload.source === 'story_reply' ? 'story_keyword'
-                : 'dm_keyword',
-            })
+            const triggerType = payload.source === 'follow' ? 'follow'
+              : payload.source === 'comment' ? 'comment_keyword'
+              : payload.source === 'story_reply' ? 'story_keyword'
+              : 'dm_keyword'
+
+            // Store each message separately
+            const triggerSentAt = new Date()
+            for (let i = 0; i < triggerMessages.length; i++) {
+              await supabase.from('messages').insert({
+                conversation_id: conversation.id,
+                lead_id: lead.id,
+                direction: MessageDirection.Outbound,
+                type: MessageType.Template,
+                content: triggerMessages[i],
+                sent_by: 'system',
+                sent_at: new Date(triggerSentAt.getTime() + i * 1500).toISOString(),
+                ai_generated: false,
+                is_trigger_outbound: true,
+                trigger_type: triggerType,
+              })
+            }
           } else {
             // Keyword detected mid-conversation — suppress trigger, mark messages
             for (const msg of storedMessages) {

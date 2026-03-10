@@ -227,7 +227,7 @@ function TriggerEditor({ trigger, onSave, onCancel, saving }: {
         <textarea value={t.response_template} onChange={(e) => setT({ ...t, response_template: e.target.value })} rows={3}
           placeholder="Hey {username}! Thanks for reaching out..."
           className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30" />
-        <p className="text-[8px] font-mono text-[#444] mt-1">Variables: {'{username}'} {'{first_name}'}</p>
+        <p className="text-[8px] font-mono text-[#444] mt-1">Variables: {'{username}'} {'{first_name}'} &middot; Use ||| to split into multiple messages</p>
       </div>
       <div className="flex gap-2">
         <button onClick={() => onSave(t)} disabled={saving || !t.keyword}
