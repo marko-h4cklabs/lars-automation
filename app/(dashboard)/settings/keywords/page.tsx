@@ -114,7 +114,11 @@ export default function KeywordsPage() {
                 <td className="px-3 py-2 text-[10px] font-mono text-[#ccc] font-bold">{t.keyword}</td>
                 <td className="px-3 py-2 text-[9px] font-mono text-[#666]">{t.match_type}</td>
                 <td className="px-3 py-2 text-[9px] font-mono text-[#666]">{t.source}</td>
-                <td className="px-3 py-2 text-[9px] font-mono text-[#555] truncate max-w-[200px]">{t.response_template}</td>
+                <td className="px-3 py-2 text-[9px] font-mono text-[#555] truncate max-w-[200px]">
+                  {t.response_template.includes('|||')
+                    ? <span>{t.response_template.split('|||').length} messages</span>
+                    : t.response_template}
+                </td>
                 <td className="px-3 py-2">
                   <button onClick={() => toggleActive(t)}
                     className={cn('w-8 h-4 rounded-full transition-colors relative',
@@ -189,6 +193,31 @@ function TriggerEditor({ trigger, onSave, onCancel, saving }: {
   trigger: Trigger; onSave: (t: Trigger) => void; onCancel: () => void; saving: boolean
 }) {
   const [t, setT] = useState(trigger)
+
+  // Split stored template into individual messages (||| delimiter)
+  const messages = (t.response_template || '').split('|||').map((m) => m.trim()).filter(Boolean)
+  if (messages.length === 0) messages.push('')
+
+  const updateMessages = (msgs: string[]) => {
+    setT({ ...t, response_template: msgs.join('|||') })
+  }
+
+  const setMessage = (idx: number, val: string) => {
+    const updated = [...messages]
+    updated[idx] = val
+    updateMessages(updated)
+  }
+
+  const addMessage = () => {
+    updateMessages([...messages, ''])
+  }
+
+  const removeMessage = (idx: number) => {
+    if (messages.length <= 1) return
+    const updated = messages.filter((_, i) => i !== idx)
+    updateMessages(updated)
+  }
+
   return (
     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-4 space-y-3">
       <div className="flex justify-between items-center">
@@ -223,11 +252,36 @@ function TriggerEditor({ trigger, onSave, onCancel, saving }: {
         </div>
       </div>
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Response Template</label>
-        <textarea value={t.response_template} onChange={(e) => setT({ ...t, response_template: e.target.value })} rows={3}
-          placeholder="Hey {username}! Thanks for reaching out..."
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30" />
-        <p className="text-[8px] font-mono text-[#444] mt-1">Variables: {'{username}'} {'{first_name}'} &middot; Use ||| to split into multiple messages</p>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-[8px] font-mono text-[#555] uppercase">Messages</label>
+          <span className="text-[8px] font-mono text-[#444]">{messages.length} message{messages.length > 1 ? 's' : ''} &middot; sent 1.5s apart</span>
+        </div>
+        <div className="space-y-2">
+          {messages.map((msg, idx) => (
+            <div key={idx} className="flex gap-2 items-start">
+              <span className="text-[8px] font-mono text-[#444] mt-2 shrink-0 w-4 text-right">{idx + 1}.</span>
+              <textarea
+                value={msg}
+                onChange={(e) => setMessage(idx, e.target.value)}
+                rows={2}
+                placeholder={idx === 0 ? 'Hey {first_name}!' : 'Next message...'}
+                className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+              />
+              {messages.length > 1 && (
+                <button onClick={() => removeMessage(idx)} className="text-[#444] hover:text-[#f05050] mt-1.5 shrink-0">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={addMessage}
+          className="flex items-center gap-1 mt-2 px-2 py-1 text-[8px] font-mono text-[#666] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
+        >
+          <Plus className="w-2.5 h-2.5" /> ADD MESSAGE
+        </button>
+        <p className="text-[8px] font-mono text-[#444] mt-1.5">Variables: {'{username}'} {'{first_name}'}</p>
       </div>
       <div className="flex gap-2">
         <button onClick={() => onSave(t)} disabled={saving || !t.keyword}
