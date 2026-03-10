@@ -14,6 +14,7 @@ import { calculateAssignment } from '@/lib/workers/distribution'
 import { createNotification } from '@/lib/notifications'
 import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import { getDisplayName, getFirstName } from '@/lib/nameValidator'
+import { sendTextMessage } from '@/lib/manychat'
 import {
   LeadStage,
   LeadSource,
@@ -306,7 +307,19 @@ export async function POST(request: NextRequest) {
               .replace(/\{lead_first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
               .replace(/\{first_name\}/g, getFirstName(lead.full_name || lead.username, 'man'))
 
-            // Send keyword-triggered response
+            // Send keyword-triggered response via ManyChat
+            const triggerSubId = payload.subscriberId || lead.manychat_subscriber_id
+            if (triggerSubId) {
+              try {
+                await sendTextMessage(triggerSubId, resolvedContent)
+                console.log(`[Process] Keyword trigger sent to ${triggerSubId}:`, resolvedContent.slice(0, 80))
+              } catch (sendErr) {
+                console.error(`[Process] Keyword trigger send failed for ${triggerSubId}:`, sendErr)
+              }
+            } else {
+              console.warn(`[Process] No subscriber ID for keyword trigger, cannot send to ${lead.username}`)
+            }
+
             await supabase.from('messages').insert({
               conversation_id: conversation.id,
               lead_id: lead.id,
