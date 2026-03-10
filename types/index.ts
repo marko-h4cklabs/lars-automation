@@ -40,6 +40,7 @@ export enum AssignmentType {
   Setter2 = 'setter2',
   Setter = 'setter',
   AI = 'ai',
+  Unassigned = 'unassigned',
 }
 
 export enum ConversationStatus {

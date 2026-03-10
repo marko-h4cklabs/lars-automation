@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createNotification } from '@/lib/notifications'
+import { qstash as getQStash } from '@/lib/queue'
 import { NotificationType } from '@/types'
+import type { AutopilotSettings } from '@/types'
 
 export async function POST(
   _request: NextRequest,
@@ -44,17 +46,42 @@ export async function POST(
     const username = leadData?.username || 'Lead'
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    // Create notification via centralized system (handles in-app + Slack)
+    // Create notification
     createNotification({
       type: NotificationType.AITakeover,
       leadId: conv.lead_id,
       conversationId: id,
-      message: `🤖 @${username} transferred to AI autopilot`,
+      message: `@${username} transferred to AI autopilot`,
       metadata: {
         username,
         conversationUrl: `${appUrl}/inbox/${id}`,
       },
     }).catch(() => {})
+
+    // Immediately trigger autopilot so AI pulls context and responds now
+    const { data: autopilotSettings } = await supabase
+      .from('autopilot_settings')
+      .select('*')
+      .limit(1)
+      .single()
+
+    const settings = autopilotSettings as AutopilotSettings | null
+
+    if (settings?.enabled !== false) {
+      const minDelay = settings?.min_delay_seconds || 8
+      const maxDelay = settings?.max_delay_seconds || 45
+      const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
+
+      await getQStash().publishJSON({
+        url: `${appUrl}/api/workers/autopilot`,
+        body: {
+          conversationId: id,
+          leadId: conv.lead_id,
+        },
+        delay,
+        retries: 3,
+      })
+    }
   }
 
   return NextResponse.json({ status: 'transferred', conversationId: id })

@@ -10,7 +10,7 @@ import {
 import type { QueuePayload } from '@/lib/queue'
 import { transcribeVoice } from '@/lib/voice'
 import { triageLead } from '@/lib/workers/triage'
-import { calculateAssignment } from '@/lib/workers/distribution'
+// Distribution removed — manual-first assignment mode
 import { createNotification } from '@/lib/notifications'
 import { verifyQStashSignature, getVerifiedBody } from '@/lib/qstash-verify'
 import { getDisplayName, getFirstName } from '@/lib/nameValidator'
@@ -23,13 +23,12 @@ import {
   MessageType,
   ConversationStatus,
   FollowUpJobStatus,
+  AssignmentType,
 } from '@/types'
 import type {
   Lead,
   Conversation,
   Message,
-  DistributionSettings,
-  User,
   AutopilotSettings,
   KeywordTrigger,
 } from '@/types'
@@ -433,47 +432,29 @@ export async function POST(request: NextRequest) {
     }
 
     // ═══════════════════════════════════════
-    // STEP 9 — ASSIGNMENT
+    // STEP 9 — ASSIGNMENT (manual-first mode)
     // ═══════════════════════════════════════
+    // New leads stay UNASSIGNED until admin manually assigns AI or a
+    // setter from the inbox. Only already-assigned conversations keep
+    // their current assignment.
     let assignedTo = conversation.assigned_to
     let assignmentType = lead.assignment_type
 
-    if (!assignedTo || isNewConversation) {
-      const { data: distSettings } = await supabase
-        .from('distribution_settings')
-        .select('*')
-        .limit(1)
-        .single()
+    if (isNewConversation || !assignedTo) {
+      // Leave unassigned — admin picks from inbox
+      assignedTo = null
+      assignmentType = AssignmentType.Unassigned
 
-      const { data: onlineSetters } = await supabase
-        .from('users')
-        .select('*')
-        .in('role', ['setter', 'admin'])
-        .eq('status', 'online')
-        .eq('receives_leads', true)
-
-      if (distSettings) {
-        const allocations = (distSettings as DistributionSettings).setter_allocations || []
-        const result = calculateAssignment(
-          allocations,
-          (onlineSetters || []) as User[]
-        )
-        assignedTo = result.assignedTo
-        assignmentType = result.assignmentType
-      }
-
-      // Update conversation assignment
       await supabase
         .from('conversations')
-        .update({ assigned_to: assignedTo })
+        .update({ assigned_to: null })
         .eq('id', conversation.id)
 
-      // Update lead assignment
       await supabase
         .from('leads')
         .update({
-          assigned_to: assignedTo,
-          assignment_type: assignmentType,
+          assigned_to: null,
+          assignment_type: AssignmentType.Unassigned,
         })
         .eq('id', lead.id)
     }
@@ -483,15 +464,9 @@ export async function POST(request: NextRequest) {
     // ═══════════════════════════════════════
     if (keywordTriggerFired) {
       // Keyword trigger already sent the outbound template.
-      // Do NOT send AI autopilot — wait for lead to reply to the outbound message.
       console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — skipping AI autopilot, waiting for lead reply`)
-    } else if (existingLead && isNewConversation) {
-      // HARD RULE: Lead already existed in DB before this conversation.
-      // This means they had prior chats on Instagram/ManyChat before the app.
-      // Do NOT let AI autopilot respond — only setters can handle these.
-      console.log(`[Process] Existing lead @${username} starting new conversation — AI autopilot BLOCKED (prior history)`)
-    } else if (assignmentType === 'ai' || !assignedTo) {
-      // AI Autopilot — schedule delayed response
+    } else if (assignmentType === 'ai') {
+      // AI was MANUALLY assigned previously — continue autopilot for ongoing messages
       const { data: autopilotSettings } = await supabase
         .from('autopilot_settings')
         .select('*')
@@ -500,7 +475,6 @@ export async function POST(request: NextRequest) {
 
       const settings = autopilotSettings as AutopilotSettings | null
 
-      // Global AI kill switch — if disabled, skip autopilot entirely
       if (settings?.enabled === false) {
         console.log(`[Process] AI autopilot DISABLED globally — skipping for @${username}`)
       } else {
@@ -519,8 +493,8 @@ export async function POST(request: NextRequest) {
           retries: 3,
         })
       }
-    } else {
-      // Setter assigned — push notification via centralized system
+    } else if (assignedTo) {
+      // Setter assigned — push notification
       createNotification({
         type: NotificationType.HotLead,
         leadId: lead.id,
@@ -529,6 +503,9 @@ export async function POST(request: NextRequest) {
         message: `New message from @${username}`,
         metadata: { username },
       }).catch(() => {})
+    } else {
+      // Unassigned — waiting for manual assignment from inbox
+      console.log(`[Process] @${username} — unassigned, waiting for manual assignment`)
     }
 
     // ═══════════════════════════════════════
