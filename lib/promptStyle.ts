@@ -1,5 +1,12 @@
 import type { StyleRules } from '@/types'
 
+// The DB stores extra fields beyond the TypeScript interface.
+// This helper safely accesses them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ext(rules: StyleRules): Record<string, any> {
+  return rules as Record<string, any>
+}
+
 /**
  * Build a strong, directive style block from persona style_rules.
  * Used by both autopilot and simulation prompts.
@@ -11,7 +18,7 @@ export function buildStyleBlock(rules: StyleRules): string {
   if (rules.never_use_em_dash) {
     lines.push('- NEVER use dashes of any kind: no "-", no "--", no "—". This is STRICTLY PROHIBITED.')
   }
-  if ((rules as Record<string, unknown>).no_bullet_points) {
+  if (ext(rules).no_bullet_points) {
     lines.push('- NEVER use bullet points, numbered lists, or any list formatting in messages.')
   }
 
@@ -25,10 +32,10 @@ export function buildStyleBlock(rules: StyleRules): string {
   if (rules.use_casual_shortcuts) {
     lines.push('- Use casual shortcuts naturally: rn, lmk, ngl, bet, tbh, fr.')
   }
-  if ((rules as Record<string, unknown>).imperfect_punctuation) {
+  if (ext(rules).imperfect_punctuation) {
     lines.push('- Use imperfect punctuation like real texting — occasional missing periods, no question marks on rhetorical questions.')
   }
-  if ((rules as Record<string, unknown>).multi_message_bursts) {
+  if (ext(rules).multi_message_bursts) {
     lines.push('- Split thoughts into 2-3 short separate messages instead of one long block.')
   }
 
@@ -41,16 +48,16 @@ export function buildStyleBlock(rules: StyleRules): string {
   if (rules.match_lead_vibe) {
     lines.push("- MATCH the lead's energy and writing style exactly.")
   }
-  if ((rules as Record<string, unknown>).vibe_length_matching) {
+  if (ext(rules).vibe_length_matching) {
     lines.push("- MATCH the lead's message LENGTH: if they send 3 words, reply with 3-8 words. Short messages get short replies.")
   }
-  if ((rules as Record<string, unknown>).vibe_pace_matching) {
+  if (ext(rules).vibe_pace_matching) {
     lines.push("- MATCH the lead's PACE: if they send quick short messages, respond with quick short messages, not paragraphs.")
   }
-  if ((rules as Record<string, unknown>).vibe_formality_matching) {
+  if (ext(rules).vibe_formality_matching) {
     lines.push("- MATCH the lead's FORMALITY level: if they are casual/informal, be casual. If formal, be slightly more polished.")
   }
-  if ((rules as Record<string, unknown>).vibe_emoji_mirroring) {
+  if (ext(rules).vibe_emoji_mirroring) {
     lines.push("- MIRROR the lead's emoji usage: if they don't use emojis, you don't either. If they do, match their frequency.")
   }
 
@@ -60,13 +67,13 @@ export function buildStyleBlock(rules: StyleRules): string {
   }
 
   // Signature phrases
-  const signatures = (rules as Record<string, unknown>).signature_phrases as string[] | undefined
+  const signatures = ext(rules).signature_phrases as string[] | undefined
   if (signatures?.length) {
     lines.push(`- Naturally incorporate these signature phrases when appropriate: ${signatures.join(', ')}`)
   }
 
   // Custom rules
-  const customRules = (rules as Record<string, unknown>).custom_rules as string[] | undefined
+  const customRules = ext(rules).custom_rules as string[] | undefined
   if (customRules?.length) {
     for (const rule of customRules) {
       lines.push(`- ${rule}`)
