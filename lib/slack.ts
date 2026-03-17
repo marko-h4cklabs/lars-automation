@@ -2,8 +2,10 @@
  * Slack notification system using Incoming Webhooks + Block Kit.
  *
  * Webhook URLs are read from the notification_settings DB table (set via Settings > Notifications).
- * Supports:
- * - Dual webhooks: alerts (hot leads + bookings) and system (offline/takeover)
+ * Two channels:
+ * - alerts webhook: Hot lead alerts (high heat score)
+ * - bookings webhook (stored as slack_webhook_system): Call booked alerts
+ * Also supports:
  * - Rate limiting: max 1 Slack message per lead per 60 minutes
  * - Retry with exponential backoff: 3 attempts
  * - Rich Block Kit formatting per notification type
@@ -116,11 +118,12 @@ async function getWebhookForType(type: NotificationType): Promise<string | undef
   const webhooks = await getSlackWebhooks()
   switch (type) {
     case NotificationType.HotLead:
-    case NotificationType.CallBooked:
     case NotificationType.Disqualified:
       return webhooks.alerts
+    case NotificationType.CallBooked:
+      return webhooks.system || webhooks.alerts // bookings webhook, falls back to alerts
     case NotificationType.SetterOffline:
-      return webhooks.system || webhooks.alerts
+      return webhooks.alerts // setter offline goes to alerts channel
     default:
       return webhooks.alerts
   }

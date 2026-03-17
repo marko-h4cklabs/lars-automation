@@ -39,8 +39,8 @@ export default function NotificationsPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [testing, setTesting] = useState<'alerts' | 'system' | null>(null)
-  const [testResult, setTestResult] = useState<string | null>(null)
+  const [testing, setTesting] = useState<'alerts' | 'bookings' | null>(null)
+  const [testResult, setTestResult] = useState<{ channel: string; msg: string } | null>(null)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [error, setError] = useState(false)
 
@@ -77,33 +77,29 @@ export default function NotificationsPage() {
     }
   }
 
-  const testSlack = async (channel: 'alerts' | 'system') => {
+  const testSlack = async (channel: 'alerts' | 'bookings') => {
     const url =
       channel === 'alerts'
         ? settings.slack_webhook_alerts
-        : settings.slack_webhook_system || settings.slack_webhook_alerts
+        : settings.slack_webhook_system
 
     if (!url) {
-      setTestResult('Missing webhook URL')
+      setTestResult({ channel, msg: 'Missing webhook URL' })
       return
     }
 
     setTesting(channel)
     setTestResult(null)
     try {
-      const res = await fetch(url, {
+      const res = await fetch('/api/settings/test-slack', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text:
-            channel === 'alerts'
-              ? '🟢 BlackOps test — Alerts channel connected!'
-              : '🟢 BlackOps test — System channel connected!',
-        }),
+        body: JSON.stringify({ url, channel }),
       })
-      setTestResult(res.ok ? 'Message sent!' : 'Failed. Check URL.')
+      const data = await res.json()
+      setTestResult({ channel, msg: res.ok ? 'Message sent!' : data.error || 'Failed. Check URL.' })
     } catch {
-      setTestResult('Network error. Check URL.')
+      setTestResult({ channel, msg: 'Network error.' })
     } finally {
       setTesting(null)
     }
@@ -133,11 +129,14 @@ export default function NotificationsPage() {
           Slack Webhooks
         </span>
 
-        {/* Alerts Webhook */}
+        {/* Hot Lead Alerts Webhook */}
         <div>
-          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">
-            Alerts Webhook URL (Hot Leads + Bookings)
+          <label className="text-sm font-mono text-[#555] uppercase block mb-1">
+            Hot Lead Alerts Webhook
           </label>
+          <span className="text-[11px] font-mono text-[#444] block mb-2">
+            Fires when a lead scores above the heat threshold
+          </span>
           <input
             type="password"
             value={settings.slack_webhook_alerts}
@@ -151,33 +150,36 @@ export default function NotificationsPage() {
             <button
               onClick={() => testSlack('alerts')}
               disabled={testing === 'alerts'}
-              className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
             >
               {testing === 'alerts' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}{' '}
-              TEST ALERTS
+              TEST
             </button>
-            {testResult && testing === null && (
+            {testResult && testResult.channel === 'alerts' && testing === null && (
               <span
                 className={cn(
                   'text-xs font-mono',
-                  testResult.includes('sent') ? 'text-[#00ff88]' : 'text-[#f05050]'
+                  testResult.msg.includes('sent') ? 'text-[#00ff88]' : 'text-[#f05050]'
                 )}
               >
-                {testResult}
+                {testResult.msg}
               </span>
             )}
           </div>
         </div>
 
-        {/* System Webhook */}
+        {/* Booking Alerts Webhook */}
         <div>
-          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">
-            System Webhook URL (Offline + AI Takeover) — optional, falls back to Alerts
+          <label className="text-sm font-mono text-[#555] uppercase block mb-1">
+            Booking Alerts Webhook
           </label>
+          <span className="text-[11px] font-mono text-[#444] block mb-2">
+            Fires when a lead books a call via Calendly
+          </span>
           <input
             type="password"
             value={settings.slack_webhook_system}
@@ -185,21 +187,31 @@ export default function NotificationsPage() {
               setSettings((p) => ({ ...p, slack_webhook_system: e.target.value }))
             }
             className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
-            placeholder="https://hooks.slack.com/services/... (optional)"
+            placeholder="https://hooks.slack.com/services/..."
           />
           <div className="flex items-center gap-2 mt-2">
             <button
-              onClick={() => testSlack('system')}
-              disabled={testing === 'system'}
-              className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
+              onClick={() => testSlack('bookings')}
+              disabled={testing === 'bookings'}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
             >
-              {testing === 'system' ? (
+              {testing === 'bookings' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}{' '}
-              TEST SYSTEM
+              TEST
             </button>
+            {testResult && testResult.channel === 'bookings' && testing === null && (
+              <span
+                className={cn(
+                  'text-xs font-mono',
+                  testResult.msg.includes('sent') ? 'text-[#00ff88]' : 'text-[#f05050]'
+                )}
+              >
+                {testResult.msg}
+              </span>
+            )}
           </div>
         </div>
       </div>
