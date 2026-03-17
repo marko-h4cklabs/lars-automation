@@ -70,6 +70,6 @@
 
 @layer utilities {
   .label-caps {
-    @apply text-[8px] font-mono uppercase tracking-[0.15em] text-[#666];
+    @apply text-[11px] font-mono uppercase tracking-[0.12em] text-[#666];
   }
 }

@@ -38,11 +38,11 @@ export function QualificationBar({ conversationId, collectedFields }: Qualificat
       >
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider">
+            <span className="text-xs font-mono text-[#666] uppercase tracking-wider">
               Qualification
             </span>
             <span className={cn(
-              'text-[9px] font-mono font-bold',
+              'text-xs font-mono font-bold',
               pct === 100 ? 'text-[#00ff88]' : pct >= 50 ? 'text-[#f0a030]' : 'text-[#666]'
             )}>
               {collected.length}/{total}
@@ -60,9 +60,9 @@ export function QualificationBar({ conversationId, collectedFields }: Qualificat
           </div>
         </div>
         {expanded ? (
-          <ChevronUp className="w-3 h-3 text-[#444]" />
+          <ChevronUp className="w-4 h-4 text-[#444]" />
         ) : (
-          <ChevronDown className="w-3 h-3 text-[#444]" />
+          <ChevronDown className="w-4 h-4 text-[#444]" />
         )}
       </button>
 
@@ -78,18 +78,18 @@ export function QualificationBar({ conversationId, collectedFields }: Qualificat
               return (
                 <div key={field.id} className="flex items-center gap-2 py-0.5">
                   {isCollected ? (
-                    <CheckCircle2 className="w-3 h-3 text-[#00ff88] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#00ff88] shrink-0" />
                   ) : (
-                    <Circle className="w-3 h-3 text-[#333] shrink-0" />
+                    <Circle className="w-4 h-4 text-[#333] shrink-0" />
                   )}
                   <span className={cn(
-                    'text-[10px] font-mono flex-1',
+                    'text-[13px] font-mono flex-1',
                     isCollected ? 'text-[#888]' : 'text-[#444]'
                   )}>
                     {field.field_label}
                   </span>
                   {isCollected && (
-                    <span className="text-[9px] font-mono text-[#00ff88] truncate max-w-[120px]">
+                    <span className="text-xs font-mono text-[#00ff88] truncate max-w-[120px]">
                       {String(value)}
                     </span>
                   )}

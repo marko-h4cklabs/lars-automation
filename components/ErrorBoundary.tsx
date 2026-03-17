@@ -41,7 +41,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <h2 className="text-[#f0f0f0] font-mono text-sm font-bold mb-2">
               Something went wrong
             </h2>
-            <p className="text-[#555] font-mono text-[10px] mb-4">
+            <p className="text-[#555] font-mono text-[13px] mb-4">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
@@ -49,7 +49,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 this.setState({ hasError: false, error: null })
                 window.location.reload()
               }}
-              className="px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
+              className="px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
             >
               RELOAD PAGE
             </button>

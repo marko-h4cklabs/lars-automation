@@ -66,11 +66,11 @@ export default function CopilotPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">{setterName} Co-Pilot Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Personal AI assistant preferences for {setterName}.</p>
+      <p className="text-[13px] font-mono text-[#555] mb-6">Personal AI assistant preferences for {setterName}.</p>
 
       {/* Response style */}
       <div className="mb-6">
-        <label className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2 block">Response Style</label>
+        <label className="text-xs font-mono text-[#666] uppercase tracking-wider mb-2 block">Response Style</label>
         <div className="flex gap-2">
           {[
             { value: 'casual', label: 'Casual', desc: 'Relaxed, friendly approach' },
@@ -87,11 +87,11 @@ export default function CopilotPage() {
                   : 'bg-[#0d0d0d] border-[#1a1a1a] hover:border-[#333]'
               )}
             >
-              <span className={cn('text-[10px] font-mono font-bold block',
+              <span className={cn('text-[13px] font-mono font-bold block',
                 settings.response_style === opt.value ? 'text-[#00ff88]' : 'text-[#888]')}>
                 {opt.label}
               </span>
-              <span className="text-[8px] font-mono text-[#555]">{opt.desc}</span>
+              <span className="text-[11px] font-mono text-[#555]">{opt.desc}</span>
             </button>
           ))}
         </div>
@@ -99,12 +99,12 @@ export default function CopilotPage() {
 
       {/* Suggestions count */}
       <div className="mb-6">
-        <label className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2 block">Suggestions to Generate</label>
+        <label className="text-xs font-mono text-[#666] uppercase tracking-wider mb-2 block">Suggestions to Generate</label>
         <div className="flex gap-2">
           {[1, 2].map((n) => (
             <button key={n}
               onClick={() => setSettings((p) => ({ ...p, suggestions_count: n }))}
-              className={cn('w-12 h-9 rounded border text-[11px] font-mono font-bold transition-colors',
+              className={cn('w-12 h-9 rounded border text-sm font-mono font-bold transition-colors',
                 settings.suggestions_count === n
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30'
                   : 'text-[#666] border-[#222] hover:border-[#444]')}>
@@ -117,8 +117,8 @@ export default function CopilotPage() {
       {/* Auto-score toggle */}
       <div className="flex items-center justify-between mb-6 p-3 bg-[#0d0d0d] rounded-lg border border-[#1a1a1a]">
         <div>
-          <span className="text-[10px] font-mono text-[#ccc] block">Auto-score Leads</span>
-          <span className="text-[8px] font-mono text-[#555]">Show real-time heat score updates</span>
+          <span className="text-[13px] font-mono text-[#ccc] block">Auto-score Leads</span>
+          <span className="text-[11px] font-mono text-[#555]">Show real-time heat score updates</span>
         </div>
         <button onClick={() => setSettings((p) => ({ ...p, auto_score_leads: !p.auto_score_leads }))}
           className={cn('w-9 h-5 rounded-full transition-colors relative',
@@ -130,20 +130,20 @@ export default function CopilotPage() {
 
       {/* Custom instructions */}
       <div className="mb-6">
-        <label className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2 block">Custom Instructions</label>
+        <label className="text-xs font-mono text-[#666] uppercase tracking-wider mb-2 block">Custom Instructions</label>
         <textarea
           value={settings.custom_prompt_additions}
           onChange={(e) => setSettings((p) => ({ ...p, custom_prompt_additions: e.target.value }))}
           rows={6}
           placeholder="e.g., Always mention our 30-day money-back guarantee early in the conversation..."
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
         />
-        <span className="text-[8px] font-mono text-[#444]">{settings.custom_prompt_additions.length} characters</span>
+        <span className="text-[11px] font-mono text-[#444]">{settings.custom_prompt_additions.length} characters</span>
       </div>
 
       <button onClick={save} disabled={saving}
-        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors">
-        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE SETTINGS
+        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors">
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE SETTINGS
       </button>
     </div>
   )

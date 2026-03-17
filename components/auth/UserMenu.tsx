@@ -58,7 +58,7 @@ export function UserMenu() {
             {user.name?.charAt(0) || '?'}
           </div>
           <Circle
-            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${
+            className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 ${
               isOnline ? 'text-[#00ff88] fill-[#00ff88]' : 'text-[#444] fill-[#444]'
             }`}
           />
@@ -67,7 +67,7 @@ export function UserMenu() {
         <span className="text-[#f0f0f0] text-xs font-mono hidden sm:inline">
           {user.name}
         </span>
-        <ChevronDown className="w-3 h-3 text-[#666]" />
+        <ChevronDown className="w-4 h-4 text-[#666]" />
       </button>
 
       {open && (
@@ -77,7 +77,7 @@ export function UserMenu() {
             <p className="text-[#f0f0f0] text-sm font-mono">{user.name}</p>
             <p className="text-[#666] text-xs font-mono mt-0.5">{user.email}</p>
             <span
-              className={`inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${
+              className={`inline-block mt-2 px-2 py-0.5 rounded text-[13px] font-mono uppercase tracking-wider ${
                 roleBadgeColor[user.role] || roleBadgeColor.viewer
               }`}
             >
@@ -94,7 +94,7 @@ export function UserMenu() {
               <span className="text-[#888]">Status</span>
               <div className="flex items-center gap-2">
                 <Circle
-                  className={`w-2.5 h-2.5 ${
+                  className={`w-3.5 h-3.5 ${
                     isOnline ? 'text-[#00ff88] fill-[#00ff88]' : 'text-[#444] fill-[#444]'
                   }`}
                 />

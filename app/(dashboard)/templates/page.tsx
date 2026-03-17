@@ -143,21 +143,21 @@ export default function TemplatesPage() {
               </button>
               <button
                 onClick={() => setSelectedId('new')}
-                className="flex items-center gap-1 px-2 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[8px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[11px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
               >
-                <Plus className="w-2.5 h-2.5" /> NEW
+                <Plus className="w-3.5 h-3.5" /> NEW
               </button>
             </div>
           </div>
 
           {/* Search */}
           <div className="relative mb-3">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#444]" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#444]" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search templates..."
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded pl-7 pr-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+              className="w-full bg-[#111] border border-[#1a1a1a] rounded pl-7 pr-2.5 py-1.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
             />
           </div>
 
@@ -166,19 +166,19 @@ export default function TemplatesPage() {
             <button
               onClick={() => setCategory(null)}
               className={cn(
-                'w-full flex items-center justify-between px-2 py-1 rounded text-[9px] font-mono transition-colors',
+                'w-full flex items-center justify-between px-3 py-1.5 rounded text-xs font-mono transition-colors',
                 !category ? 'bg-[#111] text-[#f0f0f0]' : 'text-[#666] hover:text-[#ccc]'
               )}
             >
               <span>All Templates</span>
-              <span className="text-[8px] text-[#555]">{templates.length}</span>
+              <span className="text-[11px] text-[#555]">{templates.length}</span>
             </button>
             {CATEGORIES.map((c) => (
               <button
                 key={c.value}
                 onClick={() => setCategory(category === c.value ? null : c.value)}
                 className={cn(
-                  'w-full flex items-center justify-between px-2 py-1 rounded text-[9px] font-mono transition-colors',
+                  'w-full flex items-center justify-between px-3 py-1.5 rounded text-xs font-mono transition-colors',
                   category === c.value ? 'bg-[#111] text-[#f0f0f0]' : 'text-[#666] hover:text-[#ccc]'
                 )}
               >
@@ -186,7 +186,7 @@ export default function TemplatesPage() {
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
                   {c.label}
                 </span>
-                <span className="text-[8px] text-[#555]">{categoryCounts[c.value] || 0}</span>
+                <span className="text-[11px] text-[#555]">{categoryCounts[c.value] || 0}</span>
               </button>
             ))}
           </div>
@@ -201,7 +201,7 @@ export default function TemplatesPage() {
           ) : sortedTemplates.length === 0 ? (
             <div className="p-4 text-center">
               <FileText className="w-6 h-6 text-[#222] mx-auto mb-2" />
-              <p className="text-[10px] font-mono text-[#444]">No templates</p>
+              <p className="text-[13px] font-mono text-[#444]">No templates</p>
             </div>
           ) : (
             <div className="p-2 space-y-0.5">
@@ -221,21 +221,21 @@ export default function TemplatesPage() {
                       onClick={(e) => { e.stopPropagation(); toggleFavorite(t.id, t.is_favorite) }}
                       className={cn('shrink-0', t.is_favorite ? 'text-[#ff9f43]' : 'text-[#222] hover:text-[#555]')}
                     >
-                      <Star className="w-3 h-3" fill={t.is_favorite ? 'currentColor' : 'none'} />
+                      <Star className="w-4 h-4" fill={t.is_favorite ? 'currentColor' : 'none'} />
                     </button>
-                    <span className="text-[10px] font-mono font-bold text-[#f0f0f0] truncate">{t.name}</span>
-                    <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded border shrink-0',
+                    <span className="text-[13px] font-mono font-bold text-[#f0f0f0] truncate">{t.name}</span>
+                    <span className={cn('text-[10px] font-mono uppercase px-1 py-0.5 rounded border shrink-0',
                       CAT_COLORS[t.category] || CAT_COLORS.closer)}>
                       {t.category.replace('_', ' ')}
                     </span>
                   </div>
-                  <p className="text-[9px] font-mono text-[#555] truncate pl-[18px]">{t.content.slice(0, 60)}</p>
+                  <p className="text-xs font-mono text-[#555] truncate pl-[18px]">{t.content.slice(0, 60)}</p>
                   <div className="flex items-center gap-2 mt-0.5 pl-[18px]">
                     {t.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="text-[7px] font-mono text-[#444] bg-[#111] px-1 rounded">{tag}</span>
+                      <span key={tag} className="text-[10px] font-mono text-[#444] bg-[#111] px-1 rounded">{tag}</span>
                     ))}
                     {t.usage_count > 0 && (
-                      <span className="text-[7px] font-mono text-[#444] ml-auto">{t.usage_count}x used</span>
+                      <span className="text-[10px] font-mono text-[#444] ml-auto">{t.usage_count}x used</span>
                     )}
                   </div>
                 </button>
@@ -264,8 +264,8 @@ export default function TemplatesPage() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <FileText className="w-8 h-8 text-[#1a1a1a] mx-auto mb-3" />
-              <p className="text-[11px] font-mono text-[#555] mb-1">Select a template to edit</p>
-              <p className="text-[9px] font-mono text-[#333]">or create a new one</p>
+              <p className="text-sm font-mono text-[#555] mb-1">Select a template to edit</p>
+              <p className="text-xs font-mono text-[#333]">or create a new one</p>
             </div>
           </div>
         )}
@@ -392,19 +392,19 @@ function TemplateEditor({
     <div className="p-6 max-w-3xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[11px] font-mono font-bold text-[#f0f0f0]">
+        <h2 className="text-sm font-mono font-bold text-[#f0f0f0]">
           {isNew ? 'New Template' : 'Edit Template'}
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMode(mode === 'edit' ? 'preview' : 'edit')}
-            className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
           >
-            {mode === 'edit' ? <Eye className="w-2.5 h-2.5" /> : <Pencil className="w-2.5 h-2.5" />}
+            {mode === 'edit' ? <Eye className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
             {mode === 'edit' ? 'PREVIEW' : 'EDIT'}
           </button>
           {isNew && (
-            <button onClick={onCancel} className="px-2 py-1 text-[8px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
+            <button onClick={onCancel} className="px-3 py-1.5 text-[11px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
               CANCEL
             </button>
           )}
@@ -416,20 +416,20 @@ function TemplateEditor({
           {/* Name + Category */}
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Template Name</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Template Name</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Warm opener — story reply"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
               />
             </div>
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Category</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Category</label>
               <select
                 value={cat}
                 onChange={(e) => setCat(e.target.value)}
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -440,10 +440,10 @@ function TemplateEditor({
 
           {/* Tags */}
           <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Tags</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Tags</label>
             <div className="flex flex-wrap gap-1 mb-1.5">
               {tags.map((tag) => (
-                <span key={tag} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#111] border border-[#1a1a1a] rounded text-[8px] font-mono text-[#888]">
+                <span key={tag} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#111] border border-[#1a1a1a] rounded text-[11px] font-mono text-[#888]">
                   {tag}
                   <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="text-[#444] hover:text-[#f05050]">
                     <X className="w-2 h-2" />
@@ -457,33 +457,33 @@ function TemplateEditor({
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTag()}
                 placeholder="Add tag..."
-                className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-1 text-[9px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30 w-40"
+                className="bg-[#111] border border-[#1a1a1a] rounded px-3 py-1.5 text-xs font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30 w-40"
               />
-              <button onClick={addTag} className="text-[8px] font-mono text-[#555] hover:text-[#00ff88]">
-                <Plus className="w-3 h-3" />
+              <button onClick={addTag} className="text-[11px] font-mono text-[#555] hover:text-[#00ff88]">
+                <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Content */}
           <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Message Content</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Message Content</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
               placeholder={"Hey {lead_name}! Thanks for reaching out...\n\n---\n\nWhat's your main goal right now?"}
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-y focus:border-[#00ff88]/30 leading-relaxed"
+              className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-y focus:border-[#00ff88]/30 leading-relaxed"
             />
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[8px] font-mono text-[#444]">
+              <span className="text-[11px] font-mono text-[#444]">
                 Use &quot;---&quot; on a new line to split into multiple messages
               </span>
               <div className="flex items-center gap-3">
                 {segments.length > 1 && (
-                  <span className="text-[8px] font-mono text-[#00ff88]">{segments.length} messages</span>
+                  <span className="text-[11px] font-mono text-[#00ff88]">{segments.length} messages</span>
                 )}
-                <span className="text-[8px] font-mono text-[#444]">{content.length} chars</span>
+                <span className="text-[11px] font-mono text-[#444]">{content.length} chars</span>
               </div>
             </div>
           </div>
@@ -492,7 +492,7 @@ function TemplateEditor({
           {segments.length > 1 && (
             <div className="flex gap-2">
               {segments.map((seg, i) => (
-                <span key={i} className="text-[8px] font-mono text-[#555] bg-[#111] px-1.5 py-0.5 rounded">
+                <span key={i} className="text-[11px] font-mono text-[#555] bg-[#111] px-1.5 py-0.5 rounded">
                   Msg {i + 1}: {seg.length} chars
                 </span>
               ))}
@@ -501,16 +501,16 @@ function TemplateEditor({
 
           {/* Variable reference */}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3">
-            <span className="text-[8px] font-mono text-[#555] uppercase block mb-1.5">Available Variables</span>
+            <span className="text-[11px] font-mono text-[#555] uppercase block mb-1.5">Available Variables</span>
             <div className="grid grid-cols-2 gap-1">
               {VARIABLES.map((v) => (
                 <button
                   key={v.key}
                   onClick={() => setContent((prev) => prev + `{${v.key}}`)}
-                  className="flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-[#111] transition-colors"
+                  className="flex items-center gap-2 text-left px-3 py-1.5 rounded hover:bg-[#111] transition-colors"
                 >
-                  <code className="text-[9px] font-mono text-[#00ff88]">{`{${v.key}}`}</code>
-                  <span className="text-[8px] font-mono text-[#555]">{v.desc}</span>
+                  <code className="text-xs font-mono text-[#00ff88]">{`{${v.key}}`}</code>
+                  <span className="text-[11px] font-mono text-[#555]">{v.desc}</span>
                 </button>
               ))}
             </div>
@@ -521,9 +521,9 @@ function TemplateEditor({
             <button
               onClick={save}
               disabled={saving || !name || !content}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
             >
-              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {isNew ? 'CREATE TEMPLATE' : 'SAVE CHANGES'}
             </button>
             {!isNew && (
@@ -531,15 +531,15 @@ function TemplateEditor({
                 <button
                   onClick={duplicate}
                   disabled={saving}
-                  className="flex items-center gap-1 px-3 py-2 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] disabled:opacity-50 transition-colors"
                 >
-                  <Copy className="w-3 h-3" /> DUPLICATE
+                  <Copy className="w-4 h-4" /> DUPLICATE
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-1 px-3 py-2 text-[9px] font-mono text-[#f05050] border border-[#f05050]/30 rounded hover:bg-[#f05050]/10 transition-colors ml-auto"
+                  className="flex items-center gap-1 px-3 py-2 text-xs font-mono text-[#f05050] border border-[#f05050]/30 rounded hover:bg-[#f05050]/10 transition-colors ml-auto"
                 >
-                  <Trash2 className="w-3 h-3" /> DELETE
+                  <Trash2 className="w-4 h-4" /> DELETE
                 </button>
               </>
             )}
@@ -548,14 +548,14 @@ function TemplateEditor({
           {/* Delete confirm */}
           {showDeleteConfirm && (
             <div className="p-3 bg-[#f05050]/5 border border-[#f05050]/20 rounded-lg">
-              <p className="text-[10px] font-mono text-[#f05050] mb-2">Delete this template?</p>
+              <p className="text-[13px] font-mono text-[#f05050] mb-2">Delete this template?</p>
               <div className="flex gap-2">
                 <button onClick={handleDelete} disabled={deleting}
-                  className="px-3 py-1 bg-[#f05050]/10 border border-[#f05050]/30 rounded text-[8px] font-mono text-[#f05050] disabled:opacity-50">
+                  className="px-3 py-1 bg-[#f05050]/10 border border-[#f05050]/30 rounded text-[11px] font-mono text-[#f05050] disabled:opacity-50">
                   {deleting ? 'DELETING...' : 'YES, DELETE'}
                 </button>
                 <button onClick={() => setShowDeleteConfirm(false)}
-                  className="px-3 py-1 text-[8px] font-mono text-[#666] border border-[#222] rounded">CANCEL</button>
+                  className="px-3 py-1 text-[11px] font-mono text-[#666] border border-[#222] rounded">CANCEL</button>
               </div>
             </div>
           )}
@@ -564,16 +564,16 @@ function TemplateEditor({
         /* PREVIEW MODE */
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className={cn('text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border',
+            <span className={cn('text-[11px] font-mono uppercase px-1.5 py-0.5 rounded border',
               CAT_COLORS[cat] || CAT_COLORS.closer)}>
               {cat.replace('_', ' ')}
             </span>
             {tags.map((tag) => (
-              <span key={tag} className="text-[7px] font-mono text-[#444] bg-[#111] px-1 rounded">{tag}</span>
+              <span key={tag} className="text-[10px] font-mono text-[#444] bg-[#111] px-1 rounded">{tag}</span>
             ))}
           </div>
 
-          <p className="text-[8px] font-mono text-[#555] mb-4">
+          <p className="text-[11px] font-mono text-[#555] mb-4">
             Preview with example values — each bubble is a separate message
           </p>
 
@@ -582,13 +582,13 @@ function TemplateEditor({
             {segments.map((seg, i) => (
               <div key={i} className="flex justify-end">
                 <div className="bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg px-3 py-2 max-w-[90%]">
-                  <span className="text-[10px] font-mono text-[#ccc] leading-relaxed whitespace-pre-wrap">
+                  <span className="text-[13px] font-mono text-[#ccc] leading-relaxed whitespace-pre-wrap">
                     {replaceVars(seg)}
                   </span>
                   <div className="flex items-center justify-end gap-2 mt-1">
-                    <span className="text-[7px] font-mono text-[#444]">{seg.length} chars</span>
+                    <span className="text-[10px] font-mono text-[#444]">{seg.length} chars</span>
                     {i === 0 && segments.length > 1 && (
-                      <span className="text-[7px] font-mono text-[#555]">{i + 1}/{segments.length}</span>
+                      <span className="text-[10px] font-mono text-[#555]">{i + 1}/{segments.length}</span>
                     )}
                   </div>
                 </div>
@@ -597,7 +597,7 @@ function TemplateEditor({
           </div>
 
           {segments.length > 1 && (
-            <p className="text-[8px] font-mono text-[#555] text-right">
+            <p className="text-[11px] font-mono text-[#555] text-right">
               {segments.length} messages sent with burst delay
             </p>
           )}
@@ -667,19 +667,19 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl w-full max-w-lg">
         <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
-          <span className="text-[11px] font-mono font-bold text-[#f0f0f0]">Import Templates</span>
+          <span className="text-sm font-mono font-bold text-[#f0f0f0]">Import Templates</span>
           <button onClick={onClose} className="text-[#444] hover:text-[#888]"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-4 space-y-4">
           <div className="flex gap-2">
             <button onClick={() => setMode('json')}
-              className={cn('px-3 py-1 rounded text-[9px] font-mono border',
+              className={cn('px-3 py-1 rounded text-xs font-mono border',
                 mode === 'json' ? 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/5' : 'text-[#666] border-[#222]')}>
               JSON
             </button>
             <button onClick={() => setMode('text')}
-              className={cn('px-3 py-1 rounded text-[9px] font-mono border',
+              className={cn('px-3 py-1 rounded text-xs font-mono border',
                 mode === 'text' ? 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/5' : 'text-[#666] border-[#222]')}>
               Plain Text
             </button>
@@ -687,9 +687,9 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
 
           {mode === 'text' && (
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Default Category</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Default Category</label>
               <select value={importCat} onChange={(e) => setImportCat(e.target.value)}
-                className="bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none">
+                className="bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none">
                 {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
@@ -702,17 +702,17 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
             placeholder={mode === 'json'
               ? '[{"name":"Warm opener","content":"Hey {lead_name}!","category":"opener","tags":["warm"]}]'
               : 'Paste templates separated by blank lines...\n\nEach paragraph becomes a separate template.'}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
           />
 
-          {error && <p className="text-[9px] font-mono text-[#f05050]">{error}</p>}
-          {count > 0 && <p className="text-[9px] font-mono text-[#00ff88]">{count} templates imported!</p>}
+          {error && <p className="text-xs font-mono text-[#f05050]">{error}</p>}
+          {count > 0 && <p className="text-xs font-mono text-[#00ff88]">{count} templates imported!</p>}
 
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-3 py-1.5 text-[9px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
+            <button onClick={onClose} className="px-3 py-1.5 text-xs font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
             <button onClick={importTemplates} disabled={importing || !input.trim()}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
-              {importing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />} IMPORT
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
+              {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} IMPORT
             </button>
           </div>
         </div>

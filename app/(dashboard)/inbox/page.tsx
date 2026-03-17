@@ -31,7 +31,7 @@ export default function InboxPage() {
               <span className="text-[#333] text-xl font-mono">&larr;</span>
             </div>
             <p className="text-[#444] font-mono text-xs">Select a conversation</p>
-            <p className="text-[#333] font-mono text-[10px] mt-1">Choose a lead from the list to start</p>
+            <p className="text-[#333] font-mono text-[13px] mt-1">Choose a lead from the list to start</p>
           </div>
         </div>
       )}

@@ -40,20 +40,20 @@ export function LeadCard({ lead, onClick, isDragging }: LeadCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1">
             <div className="flex items-center gap-1 min-w-0">
-              <span className="text-[11px] font-mono font-bold text-[#f0f0f0] truncate">
+              <span className="text-sm font-mono font-bold text-[#f0f0f0] truncate">
                 @{lead.username}
               </span>
               {lead.assigned_to && (
-                <UserRound className="w-2.5 h-2.5 text-[#555] shrink-0" />
+                <UserRound className="w-3.5 h-3.5 text-[#555] shrink-0" />
               )}
             </div>
             <HeatScore score={lead.heat_score} size="sm" />
           </div>
-          <p className="text-[9px] font-mono text-[#555] truncate mt-0.5">{preview}</p>
+          <p className="text-xs font-mono text-[#555] truncate mt-0.5">{preview}</p>
           <div className="flex items-center gap-1 mt-1">
-            <Badge variant="source" className="text-[7px] py-0 px-1">{lead.source}</Badge>
+            <Badge variant="source" className="text-[10px] py-0 px-1">{lead.source}</Badge>
             {lead.last_message?.sent_at && (
-              <span className="text-[7px] font-mono text-[#333] ml-auto">
+              <span className="text-[10px] font-mono text-[#333] ml-auto">
                 {formatTimeAgo(lead.last_message.sent_at)}
               </span>
             )}

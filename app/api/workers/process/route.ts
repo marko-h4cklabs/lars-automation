@@ -57,13 +57,50 @@ export async function POST(request: NextRequest) {
   const { instagramUserId, username } = payload
 
   // ═══════════════════════════════════════
-  // EARLY FILTER — reject follows and comments
+  // EARLY FILTER — reject follows (can't DM followers)
   // ═══════════════════════════════════════
-  // Follows/comments are handled by ManyChat directly.
-  // They should never create leads or appear in the dashboard.
-  if (payload.source === 'follow' || payload.source === 'comment') {
-    console.log(`[Process] Ignoring ${payload.source} from @${username} — handled by ManyChat`)
-    return NextResponse.json({ status: 'ignored', reason: `${payload.source} handled by manychat` })
+  if (payload.source === 'follow') {
+    console.log(`[Process] Ignoring follow from @${username}`)
+    return NextResponse.json({ status: 'ignored', reason: 'follow not actionable' })
+  }
+
+  // ═══════════════════════════════════════
+  // COMMENT GATE — only proceed if a keyword trigger matches
+  // ═══════════════════════════════════════
+  // Comments only create leads when the comment text matches a keyword trigger.
+  // This avoids flooding the inbox with random commenters.
+  if (payload.source === 'comment') {
+    const commentCheckClient = createAdminClient()
+    const { data: commentTriggers } = await commentCheckClient
+      .from('keyword_triggers')
+      .select('*')
+      .eq('is_active', true)
+
+    if (!commentTriggers || commentTriggers.length === 0) {
+      console.log(`[Process] Comment from @${username} — no triggers configured, skipping`)
+      return NextResponse.json({ status: 'ignored', reason: 'no keyword triggers configured' })
+    }
+
+    const commentText = payload.messageText.toLowerCase()
+    const hasKeywordMatch = (commentTriggers as KeywordTrigger[]).some((t) => {
+      if (t.source !== 'any' && t.source !== 'comment') return false
+      const kw = t.keyword.toLowerCase()
+      switch (t.match_type) {
+        case 'exact': return commentText === kw
+        case 'contains': return commentText.includes(kw)
+        case 'starts_with': return commentText.startsWith(kw)
+        case 'regex':
+          try { return new RegExp(kw, 'i').test(commentText) }
+          catch { return false }
+        default: return false
+      }
+    })
+
+    if (!hasKeywordMatch) {
+      console.log(`[Process] Comment from @${username} — no keyword match, skipping`)
+      return NextResponse.json({ status: 'ignored', reason: 'comment without keyword match' })
+    }
+    // Keyword matched — fall through to full pipeline
   }
 
   try {
@@ -278,6 +315,9 @@ export async function POST(request: NextRequest) {
 
       if (triggers && triggers.length > 0) {
         const matchedTrigger = (triggers as KeywordTrigger[]).find((t) => {
+          // Filter by trigger source — ensure triggers only fire for their configured source
+          if (t.source !== 'any' && t.source !== payload.source) return false
+
           const kw = t.keyword.toLowerCase()
           switch (t.match_type) {
             case 'exact':

@@ -86,18 +86,18 @@ export function PipelineView({ leads, onLeadClick, onStageChange }: PipelineView
           <div className="flex items-center justify-between px-3 py-2 border-b border-[#1a1a1a]">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: col.color }} />
-              <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: col.color }}>
+              <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: col.color }}>
                 {col.label}
               </span>
             </div>
-            <span className="text-[9px] font-mono text-[#444] font-bold">{col.leads.length}</span>
+            <span className="text-xs font-mono text-[#444] font-bold">{col.leads.length}</span>
           </div>
 
           {/* Cards */}
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {col.leads.length === 0 ? (
               <div className="flex items-center justify-center py-6">
-                <span className="text-[8px] font-mono text-[#222]">Empty</span>
+                <span className="text-[11px] font-mono text-[#222]">Empty</span>
               </div>
             ) : (
               col.leads.map((lead) => (

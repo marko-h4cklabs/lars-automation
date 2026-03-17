@@ -74,7 +74,7 @@ export default function FollowupsPage() {
   return (
     <div className="p-6 max-w-3xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Follow-Up Sequences</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Automated follow-up message chains for leads who go quiet.</p>
+      <p className="text-[13px] font-mono text-[#555] mb-6">Automated follow-up message chains for leads who go quiet.</p>
 
       {sequences.length === 0 && (
         <EmptyState
@@ -92,15 +92,15 @@ export default function FollowupsPage() {
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#111] transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Timer className="w-3 h-3 text-[#00ff88]" />
-                <span className="text-[11px] font-mono text-[#ccc] font-bold">{seq.name || 'Untitled'}</span>
-                <span className="text-[8px] font-mono text-[#555]">{seq.steps.length} steps</span>
+                <Timer className="w-4 h-4 text-[#00ff88]" />
+                <span className="text-sm font-mono text-[#ccc] font-bold">{seq.name || 'Untitled'}</span>
+                <span className="text-[11px] font-mono text-[#555]">{seq.steps.length} steps</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={cn('text-[8px] font-mono', seq.is_active ? 'text-[#00ff88]' : 'text-[#555]')}>
+                <span className={cn('text-[11px] font-mono', seq.is_active ? 'text-[#00ff88]' : 'text-[#555]')}>
                   {seq.is_active ? 'ACTIVE' : 'PAUSED'}
                 </span>
-                {editingIdx === idx ? <ChevronUp className="w-3 h-3 text-[#444]" /> : <ChevronDown className="w-3 h-3 text-[#444]" />}
+                {editingIdx === idx ? <ChevronUp className="w-4 h-4 text-[#444]" /> : <ChevronDown className="w-4 h-4 text-[#444]" />}
               </div>
             </button>
 
@@ -123,9 +123,9 @@ export default function FollowupsPage() {
           setSequences((prev) => [...prev, { name: '', is_active: false, steps: [{ delay_hours: 24, message_type: 'text', content: '', ai_personalized: false }] }])
           setEditingIdx(sequences.length)
         }}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
       >
-        <Plus className="w-3 h-3" /> ADD SEQUENCE
+        <Plus className="w-4 h-4" /> ADD SEQUENCE
       </button>
 
       <ConfirmDialog
@@ -167,14 +167,14 @@ function SequenceEditor({ sequence, onSave, onDelete, onCancel, saving }: {
       {/* Sequence name + active toggle */}
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Name</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Name</label>
           <input value={seq.name} onChange={(e) => setSeq({ ...seq, name: e.target.value })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="e.g. 24h Follow-Up" />
         </div>
         <label className="flex items-end gap-1.5 pb-1 cursor-pointer">
           <input type="checkbox" checked={seq.is_active} onChange={(e) => setSeq({ ...seq, is_active: e.target.checked })} className="accent-[#00ff88]" />
-          <span className="text-[9px] font-mono text-[#888]">Active</span>
+          <span className="text-xs font-mono text-[#888]">Active</span>
         </label>
       </div>
 
@@ -182,23 +182,23 @@ function SequenceEditor({ sequence, onSave, onDelete, onCancel, saving }: {
       <div className="space-y-2">
         {seq.steps.map((step, idx) => (
           <div key={idx} className="flex gap-2 items-start bg-[#111] rounded p-2.5 border border-[#1a1a1a]">
-            <span className="text-[9px] font-mono text-[#444] mt-1 shrink-0">#{idx + 1}</span>
+            <span className="text-xs font-mono text-[#444] mt-1 shrink-0">#{idx + 1}</span>
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
                 <div className="w-24">
-                  <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Delay</label>
+                  <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Delay</label>
                   <div className="flex items-center gap-1">
                     <input type="number" min={1} value={step.delay_hours}
                       onChange={(e) => updateStep(idx, { delay_hours: parseInt(e.target.value) || 1 })}
-                      className="w-12 bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-[9px] font-mono text-[#ccc] outline-none" />
-                    <span className="text-[8px] font-mono text-[#555]">hrs</span>
+                      className="w-12 bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-xs font-mono text-[#ccc] outline-none" />
+                    <span className="text-[11px] font-mono text-[#555]">hrs</span>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Type</label>
+                  <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Type</label>
                   <select value={step.message_type}
                     onChange={(e) => updateStep(idx, { message_type: e.target.value as Step['message_type'], ai_personalized: e.target.value === 'ai_personalized' })}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-[9px] font-mono text-[#ccc] outline-none">
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-xs font-mono text-[#ccc] outline-none">
                     <option value="text">Text</option>
                     <option value="ai_personalized">AI Personalized</option>
                     <option value="template">Template</option>
@@ -210,17 +210,17 @@ function SequenceEditor({ sequence, onSave, onDelete, onCancel, saving }: {
                 onChange={(e) => updateStep(idx, { content: e.target.value })}
                 rows={2}
                 placeholder={step.message_type === 'ai_personalized' ? 'AI context/prompt...' : 'Message content...'}
-                className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-xs font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
               />
 
               {/* Knowledge Source — only for ai_personalized steps */}
               {step.message_type === 'ai_personalized' && (
                 <div className="space-y-2 bg-[#080808] border border-[#1a1a1a] rounded p-2">
-                  <label className="text-[7px] font-mono text-[#444] uppercase">Knowledge Source</label>
+                  <label className="text-[10px] font-mono text-[#444] uppercase">Knowledge Source</label>
                   <select
                     value={step.knowledge_source || 'general'}
                     onChange={(e) => updateStep(idx, { knowledge_source: e.target.value as Step['knowledge_source'] })}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-[9px] font-mono text-[#ccc] outline-none"
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-1.5 py-1 text-xs font-mono text-[#ccc] outline-none"
                   >
                     <option value="general">General Knowledge Base (all docs)</option>
                     <option value="custom_content">Follow-up Specific Content</option>
@@ -232,33 +232,33 @@ function SequenceEditor({ sequence, onSave, onDelete, onCancel, saving }: {
                       onChange={(e) => updateStep(idx, { custom_content: e.target.value })}
                       rows={3}
                       placeholder="Paste specific content for this follow-up step..."
-                      className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+                      className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-2 py-1.5 text-xs font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
                     />
                   )}
                 </div>
               )}
             </div>
             <button onClick={() => removeStep(idx)} className="text-[#444] hover:text-[#f05050] mt-1 shrink-0">
-              <X className="w-3 h-3" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         ))}
       </div>
 
       <button onClick={addStep}
-        className="text-[8px] font-mono text-[#666] hover:text-[#00ff88] flex items-center gap-1">
-        <Plus className="w-2.5 h-2.5" /> Add Step
+        className="text-[11px] font-mono text-[#666] hover:text-[#00ff88] flex items-center gap-1">
+        <Plus className="w-3.5 h-3.5" /> Add Step
       </button>
 
       <div className="flex gap-2 pt-2 border-t border-[#1a1a1a]">
         <button onClick={() => onSave(seq)} disabled={saving || !seq.name}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
-          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE
         </button>
-        <button onClick={onCancel} className="px-3 py-1.5 text-[9px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
+        <button onClick={onCancel} className="px-3 py-1.5 text-xs font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
         {sequence.id && (
-          <button onClick={onDelete} className="ml-auto flex items-center gap-1 px-3 py-1.5 text-[9px] font-mono text-[#f05050] border border-[#f05050]/20 rounded hover:bg-[#f05050]/10">
-            <Trash2 className="w-3 h-3" /> DELETE
+          <button onClick={onDelete} className="ml-auto flex items-center gap-1 px-3 py-1.5 text-xs font-mono text-[#f05050] border border-[#f05050]/20 rounded hover:bg-[#f05050]/10">
+            <Trash2 className="w-4 h-4" /> DELETE
           </button>
         )}
       </div>

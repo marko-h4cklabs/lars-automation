@@ -100,13 +100,13 @@ export default function TeamPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Team Management</h1>
-          <p className="text-[10px] font-mono text-[#555]">Manage users, roles, and access to the platform.</p>
+          <p className="text-[13px] font-mono text-[#555]">Manage users, roles, and access to the platform.</p>
         </div>
         <button
           onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
         >
-          <Plus className="w-3 h-3" /> INVITE USER
+          <Plus className="w-4 h-4" /> INVITE USER
         </button>
       </div>
 
@@ -120,30 +120,30 @@ export default function TeamPage() {
         <table className="w-full">
           <thead>
             <tr className="bg-[#0d0d0d] border-b border-[#1a1a1a]">
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Name</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Email</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Role</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Status</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Last Seen</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Slack ID</th>
-              <th className="px-3 py-2 text-left text-[8px] font-mono text-[#555] uppercase">Actions</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Name</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Email</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Role</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Status</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Last Seen</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Slack ID</th>
+              <th className="px-3 py-2 text-left text-[11px] font-mono text-[#555] uppercase">Actions</th>
             </tr>
           </thead>
           <tbody>
             {members.map((m) => (
               <tr key={m.id} className="border-b border-[#111] hover:bg-[#0d0d0d]">
                 <td className="px-3 py-2">
-                  <span className="text-[10px] font-mono font-bold text-[#f0f0f0]">{m.full_name || '-'}</span>
+                  <span className="text-[13px] font-mono font-bold text-[#f0f0f0]">{m.full_name || '-'}</span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[10px] font-mono text-[#888]">{m.email}</span>
+                  <span className="text-[13px] font-mono text-[#888]">{m.email}</span>
                 </td>
                 <td className="px-3 py-2">
                   <select
                     value={m.role}
                     onChange={(e) => changeRole(m.id, e.target.value)}
                     disabled={saving}
-                    className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-[9px] font-mono text-[#ccc] outline-none"
+                    className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-xs font-mono text-[#ccc] outline-none"
                   >
                     <option value="admin">Admin</option>
                     <option value="setter">Setter</option>
@@ -152,17 +152,17 @@ export default function TeamPage() {
                 </td>
                 <td className="px-3 py-2">
                   <span className={cn(
-                    'inline-flex items-center gap-1 text-[8px] font-mono uppercase px-1.5 py-0.5 rounded',
+                    'inline-flex items-center gap-1 text-[11px] font-mono uppercase px-1.5 py-0.5 rounded',
                     m.is_active
                       ? 'text-[#00ff88] bg-[#00ff88]/10'
                       : 'text-[#f05050] bg-[#f05050]/10'
                   )}>
-                    {m.is_active ? <ShieldCheck className="w-2.5 h-2.5" /> : <Shield className="w-2.5 h-2.5" />}
+                    {m.is_active ? <ShieldCheck className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
                     {m.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[9px] font-mono text-[#555]">
+                  <span className="text-xs font-mono text-[#555]">
                     {m.last_seen_at ? formatTimeAgo(m.last_seen_at) : 'Never'}
                   </span>
                 </td>
@@ -173,19 +173,19 @@ export default function TeamPage() {
                         value={slackInput}
                         onChange={(e) => setSlackInput(e.target.value)}
                         placeholder="Slack ID"
-                        className="w-24 bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-[9px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                        className="w-24 bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-xs font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
                       />
                       <button onClick={() => saveSlack(m.id)} className="text-[#00ff88] hover:text-[#00ff88]/80">
-                        <ShieldCheck className="w-3 h-3" />
+                        <ShieldCheck className="w-4 h-4" />
                       </button>
                       <button onClick={() => { setEditSlackId(null); setSlackInput('') }} className="text-[#444] hover:text-[#888]">
-                        <X className="w-3 h-3" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => { setEditSlackId(m.id); setSlackInput(m.slack_user_id || '') }}
-                      className="text-[9px] font-mono text-[#666] hover:text-[#ccc]"
+                      className="text-xs font-mono text-[#666] hover:text-[#ccc]"
                     >
                       {m.slack_user_id || 'Set...'}
                     </button>
@@ -196,13 +196,13 @@ export default function TeamPage() {
                     onClick={() => setConfirmUser({ id: m.id, active: m.is_active })}
                     disabled={saving}
                     className={cn(
-                      'flex items-center gap-1 text-[8px] font-mono px-1.5 py-0.5 border rounded transition-colors disabled:opacity-50',
+                      'flex items-center gap-1 text-[11px] font-mono px-1.5 py-0.5 border rounded transition-colors disabled:opacity-50',
                       m.is_active
                         ? 'text-[#f05050] border-[#f05050]/30 hover:bg-[#f05050]/10'
                         : 'text-[#00ff88] border-[#00ff88]/30 hover:bg-[#00ff88]/10'
                     )}
                   >
-                    {m.is_active ? <UserX className="w-2.5 h-2.5" /> : <UserCheck className="w-2.5 h-2.5" />}
+                    {m.is_active ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
                     {m.is_active ? 'DEACTIVATE' : 'ACTIVATE'}
                   </button>
                 </td>
@@ -210,7 +210,7 @@ export default function TeamPage() {
             ))}
             {members.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-[10px] font-mono text-[#444]">
+                <td colSpan={7} className="px-3 py-8 text-center text-[13px] font-mono text-[#444]">
                   No team members yet. Invite your first user above.
                 </td>
               </tr>
@@ -268,42 +268,42 @@ function InviteDialog({ onClose, onInvited }: { onClose: () => void; onInvited: 
   return (
     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6 space-y-3">
       <div className="flex justify-between items-center">
-        <span className="text-[9px] font-mono text-[#00ff88] uppercase">Invite New User</span>
+        <span className="text-xs font-mono text-[#00ff88] uppercase">Invite New User</span>
         <button onClick={onClose} className="text-[#444] hover:text-[#888]">
-          <X className="w-3 h-3" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       {success ? (
-        <p className="text-[10px] font-mono text-[#00ff88]">Invite sent successfully!</p>
+        <p className="text-[13px] font-mono text-[#00ff88]">Invite sent successfully!</p>
       ) : (
         <>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Email</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@example.com"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
               />
             </div>
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Full Name</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Full Name</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
               />
             </div>
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Role</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Role</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none"
               >
                 <option value="admin">Admin</option>
                 <option value="setter">Setter</option>
@@ -311,13 +311,13 @@ function InviteDialog({ onClose, onInvited }: { onClose: () => void; onInvited: 
               </select>
             </div>
           </div>
-          {error && <p className="text-[9px] font-mono text-[#f05050]">{error}</p>}
+          {error && <p className="text-xs font-mono text-[#f05050]">{error}</p>}
           <button
             onClick={invite}
             disabled={sending || !email}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50"
           >
-            {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} SEND INVITE
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} SEND INVITE
           </button>
         </>
       )}

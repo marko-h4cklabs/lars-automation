@@ -22,7 +22,7 @@ export function Tooltip({ content, side = 'top', children, className }: TooltipP
       {children}
       <div
         className={cn(
-          'absolute z-50 px-2 py-1 rounded bg-[#1a1a1a] border border-[#333] text-[#ccc] font-mono text-[9px] whitespace-nowrap',
+          'absolute z-50 px-3 py-1.5 rounded bg-[#1a1a1a] border border-[#333] text-[#ccc] font-mono text-xs whitespace-nowrap',
           'opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity duration-150',
           sideClasses[side]
         )}

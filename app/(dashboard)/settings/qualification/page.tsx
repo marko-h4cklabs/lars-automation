@@ -100,7 +100,7 @@ export default function QualificationPage() {
   return (
     <div className="p-6 max-w-3xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Qualification Fields</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Configure the fields used to qualify leads before booking a call.</p>
+      <p className="text-[13px] font-mono text-[#555] mb-6">Configure the fields used to qualify leads before booking a call.</p>
 
       {/* Fields list */}
       {fields.length === 0 && !newField && !editingId && (
@@ -123,19 +123,19 @@ export default function QualificationPage() {
               dragIdx === idx ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-[#0d0d0d] border-[#1a1a1a]'
             )}
           >
-            <GripVertical className="w-3 h-3 text-[#333] cursor-grab shrink-0" />
+            <GripVertical className="w-4 h-4 text-[#333] cursor-grab shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-[#ccc] font-bold">{field.field_label}</span>
-                <span className="text-[8px] font-mono text-[#444]">{field.field_key}</span>
-                <span className="text-[8px] font-mono text-[#555] px-1 py-0 bg-[#111] rounded">{field.field_type}</span>
-                {field.is_required && <span className="text-[8px] font-mono text-[#f05050]">REQ</span>}
+                <span className="text-[13px] font-mono text-[#ccc] font-bold">{field.field_label}</span>
+                <span className="text-[11px] font-mono text-[#444]">{field.field_key}</span>
+                <span className="text-[11px] font-mono text-[#555] px-1 py-0 bg-[#111] rounded">{field.field_type}</span>
+                {field.is_required && <span className="text-[11px] font-mono text-[#f05050]">REQ</span>}
               </div>
             </div>
-            <span className="text-[9px] font-mono text-[#666]">W:{field.weight}</span>
+            <span className="text-xs font-mono text-[#666]">W:{field.weight}</span>
             <button
               onClick={() => setEditingId(editingId === field.id ? null : (field.id || null))}
-              className="text-[8px] font-mono text-[#666] hover:text-[#ccc] px-2 py-0.5 border border-[#222] rounded"
+              className="text-[11px] font-mono text-[#666] hover:text-[#ccc] px-2 py-0.5 border border-[#222] rounded"
             >
               EDIT
             </button>
@@ -143,7 +143,7 @@ export default function QualificationPage() {
               onClick={() => field.id && setDeleteFieldId(field.id)}
               className="text-[#444] hover:text-[#f05050]"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         ))}
@@ -166,16 +166,16 @@ export default function QualificationPage() {
             field_key: '', field_label: '', field_type: 'text',
             options: null, weight: 5, is_required: false, display_order: fields.length,
           })}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
         >
-          <Plus className="w-3 h-3" /> ADD FIELD
+          <Plus className="w-4 h-4" /> ADD FIELD
         </button>
       )}
 
       {/* Auto-Disqualify Rules */}
       <div className="mt-8 pt-6 border-t border-[#1a1a1a]">
-        <h2 className="text-[11px] font-mono font-bold text-[#f0f0f0] mb-1">Auto-Disqualify Rules</h2>
-        <p className="text-[9px] font-mono text-[#555] mb-4">
+        <h2 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Auto-Disqualify Rules</h2>
+        <p className="text-xs font-mono text-[#555] mb-4">
           When AI detects disqualifying criteria in any field, what should happen?
         </p>
 
@@ -195,8 +195,8 @@ export default function QualificationPage() {
               className="accent-[#00ff88]"
             />
             <div>
-              <div className="text-[10px] font-mono text-[#ccc]">Flag for setter review</div>
-              <div className="text-[8px] font-mono text-[#555]">Creates notification, doesn&apos;t auto-close the lead</div>
+              <div className="text-[13px] font-mono text-[#ccc]">Flag for setter review</div>
+              <div className="text-[11px] font-mono text-[#555]">Creates notification, doesn&apos;t auto-close the lead</div>
             </div>
           </label>
 
@@ -215,8 +215,8 @@ export default function QualificationPage() {
               className="accent-[#f05050]"
             />
             <div>
-              <div className="text-[10px] font-mono text-[#ccc]">Auto soft-close</div>
-              <div className="text-[8px] font-mono text-[#555]">AI sends disqualification message and closes the lead</div>
+              <div className="text-[13px] font-mono text-[#ccc]">Auto soft-close</div>
+              <div className="text-[11px] font-mono text-[#555]">AI sends disqualification message and closes the lead</div>
             </div>
           </label>
         </div>
@@ -232,9 +232,9 @@ export default function QualificationPage() {
             setSavingDisqualify(false)
           }}
           disabled={savingDisqualify}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50"
         >
-          {savingDisqualify ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE RULE
+          {savingDisqualify ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE RULE
         </button>
       </div>
 
@@ -258,23 +258,23 @@ function FieldEditor({ field, onSave, onCancel, saving }: {
     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Field Key</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Field Key</label>
           <input value={f.field_key} onChange={(e) => setF({ ...f, field_key: e.target.value })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="e.g. monthly_budget" />
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Label</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Label</label>
           <input value={f.field_label} onChange={(e) => setF({ ...f, field_label: e.target.value })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="e.g. Monthly Budget" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Type</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Type</label>
           <select value={f.field_type} onChange={(e) => setF({ ...f, field_type: e.target.value })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none">
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none">
             <option value="text">Text</option>
             <option value="number">Number</option>
             <option value="boolean">Boolean</option>
@@ -282,46 +282,46 @@ function FieldEditor({ field, onSave, onCancel, saving }: {
           </select>
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Weight (0-10)</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Weight (0-10)</label>
           <input type="number" min={0} max={10} value={f.weight}
             onChange={(e) => setF({ ...f, weight: parseInt(e.target.value) || 0 })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
         </div>
         <div className="flex items-end gap-3 pb-1">
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input type="checkbox" checked={f.is_required} onChange={(e) => setF({ ...f, is_required: e.target.checked })} className="accent-[#00ff88]" />
-            <span className="text-[9px] font-mono text-[#888]">Required</span>
+            <span className="text-xs font-mono text-[#888]">Required</span>
           </label>
         </div>
       </div>
       {/* Qualifying criteria */}
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">What answer qualifies this lead?</label>
+        <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">What answer qualifies this lead?</label>
         <textarea
           value={f.qualifying_criteria || ''}
           onChange={(e) => setF({ ...f, qualifying_criteria: e.target.value })}
           placeholder="e.g. Lead is above 35 years old, or mentions being a business owner, or says they have tried other programs before"
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30 resize-none h-16"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30 resize-none h-16"
         />
       </div>
 
       {/* Disqualifying criteria */}
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">What answer disqualifies this lead?</label>
+        <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">What answer disqualifies this lead?</label>
         <textarea
           value={f.disqualifying_criteria || ''}
           onChange={(e) => setF({ ...f, disqualifying_criteria: e.target.value })}
           placeholder="e.g. Lead is under 25, or mentions they are a student with no income, or says they just want free advice"
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#f05050]/30 resize-none h-16"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#f05050]/30 resize-none h-16"
         />
       </div>
 
       <div className="flex gap-2">
         <button onClick={() => onSave(f)} disabled={saving || !f.field_key || !f.field_label}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
-          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE
         </button>
-        <button onClick={onCancel} className="px-3 py-1.5 text-[9px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
+        <button onClick={onCancel} className="px-3 py-1.5 text-xs font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
           CANCEL
         </button>
       </div>

@@ -107,10 +107,10 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
         className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0d0d0d] transition-colors"
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Sparkles className="w-3 h-3 text-[#00ff88] shrink-0" />
-          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider shrink-0">Co-Pilot</span>
+          <Sparkles className="w-4 h-4 text-[#00ff88] shrink-0" />
+          <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider shrink-0">Co-Pilot</span>
           {suggestionData?.context_summary && expanded && (
-            <span className="text-[8px] font-mono text-[#444] ml-2 truncate">
+            <span className="text-[11px] font-mono text-[#444] ml-2 truncate">
               — {suggestionData.context_summary}
             </span>
           )}
@@ -119,11 +119,11 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
           <button
             onClick={(e) => { e.stopPropagation(); generateSuggestions() }}
             disabled={isGeneratingSuggestions}
-            className="flex items-center gap-1 px-2 py-0.5 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors disabled:opacity-50"
           >
             {isGeneratingSuggestions ? (
               <>
-                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 THINKING...
               </>
             ) : optionA ? (
@@ -134,8 +134,8 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
           </button>
           {optionA && (
             expanded
-              ? <ChevronUp className="w-3 h-3 text-[#444]" />
-              : <ChevronDown className="w-3 h-3 text-[#444]" />
+              ? <ChevronUp className="w-4 h-4 text-[#444]" />
+              : <ChevronDown className="w-4 h-4 text-[#444]" />
           )}
         </div>
       </button>
@@ -163,7 +163,7 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
                 <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
                   <div className="flex items-center gap-2">
                     <span className={cn(
-                      'w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-bold',
+                      'w-5 h-5 rounded flex items-center justify-center text-xs font-mono font-bold',
                       recommended === key
                         ? 'bg-[#00ff88]/15 text-[#00ff88]'
                         : 'bg-[#1a1a1a] text-[#666]'
@@ -171,18 +171,18 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
                       {label}
                     </span>
                     {recommended === key && (
-                      <span className="text-[7px] font-mono text-[#00ff88] uppercase tracking-widest">
+                      <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-widest">
                         RECOMMENDED
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
-                      <Target className="w-2.5 h-2.5 text-[#444]" />
-                      <span className="text-[8px] font-mono text-[#555]">{option.targeting_field}</span>
+                      <Target className="w-3.5 h-3.5 text-[#444]" />
+                      <span className="text-[11px] font-mono text-[#555]">{option.targeting_field}</span>
                     </div>
                     <span className={cn(
-                      'px-1.5 py-0.5 rounded text-[8px] font-mono font-bold border',
+                      'px-1.5 py-0.5 rounded text-[11px] font-mono font-bold border',
                       confidenceBg(option.confidence),
                       confidenceColor(option.confidence)
                     )}>
@@ -195,15 +195,15 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
                 <div className="px-3 py-1.5 space-y-1">
                   {option.messages.map((msg, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <MessageSquare className="w-2.5 h-2.5 text-[#333] shrink-0 mt-0.5" />
-                      <p className="text-[11px] font-mono text-[#ccc] leading-relaxed">{msg}</p>
+                      <MessageSquare className="w-3.5 h-3.5 text-[#333] shrink-0 mt-0.5" />
+                      <p className="text-sm font-mono text-[#ccc] leading-relaxed">{msg}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Reasoning */}
                 <p className={cn(
-                  'px-3 pb-1.5 text-[9px] font-mono italic transition-colors',
+                  'px-3 pb-1.5 text-xs font-mono italic transition-colors',
                   hoveredOption === key ? 'text-[#888]' : 'text-[#444]'
                 )}>
                   {option.reasoning}
@@ -213,25 +213,25 @@ export function AISuggestPanel({ conversationId, onSend, onUseThis }: AISuggestP
                 <div className="flex items-center gap-2 px-3 pb-2.5">
                   <button
                     onClick={() => handleUseThis(key)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111] border border-[#222] rounded text-[9px] font-mono text-[#888] hover:text-[#ccc] hover:border-[#444] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111] border border-[#222] rounded text-xs font-mono text-[#888] hover:text-[#ccc] hover:border-[#444] transition-colors"
                   >
-                    <MessageSquare className="w-3 h-3" />
+                    <MessageSquare className="w-4 h-4" />
                     USE THIS
                   </button>
                   <button
                     onClick={() => handleSendNow(key)}
                     disabled={sendingOption === key}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-mono transition-colors',
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono transition-colors',
                       recommended === key
                         ? 'bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] hover:bg-[#00ff88]/20'
                         : 'bg-[#111] border border-[#222] text-[#888] hover:text-[#00ff88] hover:border-[#00ff88]/30'
                     )}
                   >
                     {sendingOption === key ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <Send className="w-3 h-3" />
+                      <Send className="w-4 h-4" />
                     )}
                     SEND NOW
                   </button>

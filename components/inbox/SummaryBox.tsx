@@ -45,18 +45,18 @@ export function SummaryBox({ conversationId }: SummaryBoxProps) {
     <div className="border-t border-[#1a1a1a] bg-[#080808] px-3 py-2">
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-1.5">
-          <Brain className="w-3 h-3 text-[#00ff88]" />
-          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Summary</span>
+          <Brain className="w-4 h-4 text-[#00ff88]" />
+          <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">Summary</span>
         </div>
         <button
           onClick={regenerate}
           disabled={regenerating}
-          className="flex items-center gap-1 text-[8px] font-mono text-[#555] hover:text-[#00ff88] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1 text-[11px] font-mono text-[#555] hover:text-[#00ff88] transition-colors disabled:opacity-50"
         >
           {regenerating ? (
-            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
-            <RefreshCw className="w-2.5 h-2.5" />
+            <RefreshCw className="w-3.5 h-3.5" />
           )}
           {regenerating ? 'UPDATING' : 'REFRESH'}
         </button>
@@ -66,15 +66,15 @@ export function SummaryBox({ conversationId }: SummaryBoxProps) {
         <div className="h-12 bg-[#111] rounded animate-pulse" />
       ) : summary ? (
         <>
-          <p className="text-[10px] font-mono text-[#888] leading-relaxed">{summary}</p>
+          <p className="text-[13px] font-mono text-[#888] leading-relaxed">{summary}</p>
           {updatedAt && (
-            <p className="text-[8px] font-mono text-[#333] mt-1">
+            <p className="text-[11px] font-mono text-[#333] mt-1">
               Updated {new Date(updatedAt).toLocaleString()}
             </p>
           )}
         </>
       ) : (
-        <p className="text-[10px] font-mono text-[#444] italic">No summary available</p>
+        <p className="text-[13px] font-mono text-[#444] italic">No summary available</p>
       )}
     </div>
   )

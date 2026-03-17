@@ -203,16 +203,16 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
       {(conversation as ConversationDetail & { has_prior_history?: boolean }).has_prior_history && (
         <div className="flex items-center gap-2 px-4 py-2 bg-[#f0a030]/10 border-b border-[#f0a030]/20">
           <AlertTriangle className="w-3.5 h-3.5 text-[#f0a030] shrink-0" />
-          <span className="text-[10px] font-mono text-[#f0a030] flex-1">
+          <span className="text-[13px] font-mono text-[#f0a030] flex-1">
             This lead had prior conversations before migration. History may be incomplete.
           </span>
           <a
             href="https://manychat.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[9px] font-mono text-[#f0a030] hover:text-[#ffb54c] shrink-0"
+            className="flex items-center gap-1 text-xs font-mono text-[#f0a030] hover:text-[#ffb54c] shrink-0"
           >
-            View in ManyChat <ExternalLink className="w-3 h-3" />
+            View in ManyChat <ExternalLink className="w-4 h-4" />
           </a>
         </div>
       )}
@@ -227,7 +227,7 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
             {hasMoreMessages && (
               <button
                 onClick={loadOlderMessages}
-                className="w-full py-2 text-[9px] font-mono text-[#444] hover:text-[#666] transition-colors"
+                className="w-full py-2 text-xs font-mono text-[#444] hover:text-[#666] transition-colors"
                 disabled={isLoadingMessages}
               >
                 {isLoadingMessages ? 'Loading...' : '↑ Load older messages'}
@@ -259,10 +259,10 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
           {sendError && (
             <div className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border-t border-red-500/20">
               <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-              <span className="text-[10px] font-mono text-red-400 flex-1">{sendError}</span>
+              <span className="text-[13px] font-mono text-red-400 flex-1">{sendError}</span>
               <button
                 onClick={() => setSendError(null)}
-                className="text-[9px] font-mono text-red-400 hover:text-red-300"
+                className="text-xs font-mono text-red-400 hover:text-red-300"
               >
                 DISMISS
               </button>

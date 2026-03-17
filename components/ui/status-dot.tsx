@@ -19,8 +19,8 @@ const pulseColors = {
 }
 
 const sizeStyles = {
-  sm: 'w-2.5 h-2.5',
-  md: 'w-3 h-3',
+  sm: 'w-3.5 h-3.5',
+  md: 'w-4 h-4',
 }
 
 export function StatusDot({ status, size = 'sm', className }: StatusDotProps) {

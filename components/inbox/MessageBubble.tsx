@@ -17,15 +17,15 @@ export function MessageBubble({ message, showTimestamp = true }: MessageBubblePr
     return (
       <div className="flex w-full justify-center mb-2 animate-slide-in-up">
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0a030]/10 border border-[#f0a030]/20">
-          <Zap className="w-2.5 h-2.5 text-[#f0a030]" />
-          <span className="text-[9px] font-mono text-[#f0a030]">
+          <Zap className="w-3.5 h-3.5 text-[#f0a030]" />
+          <span className="text-xs font-mono text-[#f0a030]">
             {message.trigger_type === 'keyword' ? 'Keyword trigger' : 'Auto-reply'} sent
           </span>
-          <span className="text-[8px] font-mono text-[#f0a030]/60 truncate max-w-[200px]">
+          <span className="text-[11px] font-mono text-[#f0a030]/60 truncate max-w-[200px]">
             {message.content}
           </span>
           {showTimestamp && (
-            <span className="text-[7px] font-mono text-[#f0a030]/40 ml-1">
+            <span className="text-[10px] font-mono text-[#f0a030]/40 ml-1">
               {formatTime(message.sent_at)}
             </span>
           )}
@@ -60,18 +60,18 @@ export function MessageBubble({ message, showTimestamp = true }: MessageBubblePr
                   ))}
                 </div>
                 {message.content && (
-                  <p className="text-[10px] text-[#666] mt-1 italic">{message.content}</p>
+                  <p className="text-[13px] text-[#666] mt-1 italic">{message.content}</p>
                 )}
               </div>
             </div>
           ) : message.type === 'image' ? (
             <div className="flex items-center gap-2 text-[#666]">
               <ImageIcon className="w-3.5 h-3.5 shrink-0" />
-              <span className="text-[10px]">[Image]</span>
+              <span className="text-[13px]">[Image]</span>
             </div>
           ) : message.type === 'template' ? (
             <div className="flex items-start gap-2">
-              <FileText className="w-3 h-3 text-[#555] shrink-0 mt-0.5" />
+              <FileText className="w-4 h-4 text-[#555] shrink-0 mt-0.5" />
               <span>{message.content}</span>
             </div>
           ) : (
@@ -81,7 +81,7 @@ export function MessageBubble({ message, showTimestamp = true }: MessageBubblePr
 
         {/* Timestamp */}
         {showTimestamp && (
-          <span className="text-[8px] font-mono text-[#333] mt-0.5 px-1">
+          <span className="text-[11px] font-mono text-[#333] mt-0.5 px-1">
             {formatTime(message.sent_at)}
           </span>
         )}

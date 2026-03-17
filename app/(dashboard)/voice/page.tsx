@@ -147,7 +147,7 @@ export default function VoicePage() {
     <div className="h-[calc(100vh-48px)] overflow-y-auto">
       <div className="p-6 max-w-3xl">
         <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Voice System</h1>
-        <p className="text-[10px] font-mono text-[#555] mb-6">Configure voice generation, templates, and auto-response behavior.</p>
+        <p className="text-[13px] font-mono text-[#555] mb-6">Configure voice generation, templates, and auto-response behavior.</p>
 
         {/* ── SECTION 1: Voice Profile ── */}
         <Section
@@ -230,12 +230,12 @@ function Section({
         <div className="flex items-center gap-3">
           {open ? <ChevronDown className="w-3.5 h-3.5 text-[#00ff88]" /> : <ChevronRight className="w-3.5 h-3.5 text-[#555]" />}
           <div className="text-left">
-            <span className="text-[11px] font-mono font-bold text-[#f0f0f0] block">{title}</span>
+            <span className="text-sm font-mono font-bold text-[#f0f0f0] block">{title}</span>
             <div className="flex items-center gap-1.5">
               {statusColor && (
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
               )}
-              <span className="text-[8px] font-mono text-[#555]">{subtitle}</span>
+              <span className="text-[11px] font-mono text-[#555]">{subtitle}</span>
             </div>
           </div>
         </div>
@@ -304,7 +304,7 @@ function VoiceProfileSection({
         profile.voice_id ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-[#f05050]/5 border-[#f05050]/20'
       )}>
         {profile.voice_id ? <CheckCircle2 className="w-3.5 h-3.5 text-[#00ff88]" /> : <AlertCircle className="w-3.5 h-3.5 text-[#f05050]" />}
-        <span className={cn('text-[10px] font-mono', profile.voice_id ? 'text-[#00ff88]' : 'text-[#f05050]')}>
+        <span className={cn('text-[13px] font-mono', profile.voice_id ? 'text-[#00ff88]' : 'text-[#f05050]')}>
           {profile.voice_id ? 'Voice model configured' : 'Voice model not configured — enter your ElevenLabs Voice ID'}
         </span>
       </div>
@@ -312,20 +312,20 @@ function VoiceProfileSection({
       {/* Voice ID + Name */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">ElevenLabs Voice ID</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">ElevenLabs Voice ID</label>
           <input
             value={profile.voice_id}
             onChange={(e) => set('voice_id', e.target.value)}
             placeholder="Enter Voice ID from ElevenLabs"
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
           />
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Voice Name</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Voice Name</label>
           <input
             value={profile.voice_name}
             onChange={(e) => set('voice_name', e.target.value)}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
           />
         </div>
       </div>
@@ -339,26 +339,26 @@ function VoiceProfileSection({
         <SliderField label="Style Exaggeration" value={profile.style} onChange={(v) => set('style', v)}
           desc="Amplifies style of the original voice" />
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Speaker Boost</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Speaker Boost</label>
           <button
             onClick={() => set('use_speaker_boost', !profile.use_speaker_boost)}
             className="flex items-center gap-2"
           >
             {profile.use_speaker_boost ? <ToggleRight className="w-5 h-5 text-[#00ff88]" /> : <ToggleLeft className="w-5 h-5 text-[#333]" />}
-            <span className="text-[9px] font-mono text-[#888]">{profile.use_speaker_boost ? 'ON' : 'OFF'}</span>
+            <span className="text-xs font-mono text-[#888]">{profile.use_speaker_boost ? 'ON' : 'OFF'}</span>
           </button>
-          <span className="text-[8px] font-mono text-[#444]">Enhances voice clarity</span>
+          <span className="text-[11px] font-mono text-[#444]">Enhances voice clarity</span>
         </div>
       </div>
 
       {/* Model + Language */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Model</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Model</label>
           <select
             value={profile.model_id}
             onChange={(e) => set('model_id', e.target.value)}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none"
           >
             <option value="eleven_multilingual_v2">Multilingual v2 (recommended)</option>
             <option value="eleven_monolingual_v1">Monolingual v1</option>
@@ -366,41 +366,41 @@ function VoiceProfileSection({
           </select>
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Language Hint</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Language Hint</label>
           <input
             value={profile.language_hint}
             onChange={(e) => set('language_hint', e.target.value)}
             placeholder="en"
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
           />
-          <span className="text-[8px] font-mono text-[#444]">Norwegian-English: use &quot;en&quot;</span>
+          <span className="text-[11px] font-mono text-[#444]">Norwegian-English: use &quot;en&quot;</span>
         </div>
       </div>
 
       {/* Test Voice */}
       <div className="bg-[#0d0d0d] rounded-lg border border-[#1a1a1a] p-3 space-y-2">
-        <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Test Voice</span>
+        <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">Test Voice</span>
         <textarea
           value={testText}
           onChange={(e) => setTestText(e.target.value)}
           rows={2}
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none resize-none focus:border-[#00ff88]/30"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none resize-none focus:border-[#00ff88]/30"
         />
         <div className="flex items-center gap-2">
           <button
             onClick={testVoice}
             disabled={testing || !testText || !profile.voice_id}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
           >
-            {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Volume2 className="w-3 h-3" />}
+            {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
             {testing ? 'GENERATING...' : 'GENERATE & PLAY'}
           </button>
           {testUrl && (
             <button
               onClick={playTest}
-              className="flex items-center gap-1 px-2 py-1.5 text-[9px] font-mono text-[#00ff88] border border-[#00ff88]/30 rounded hover:bg-[#00ff88]/10 transition-colors"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-mono text-[#00ff88] border border-[#00ff88]/30 rounded hover:bg-[#00ff88]/10 transition-colors"
             >
-              {playing ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              {playing ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {playing ? 'PLAYING' : 'REPLAY'}
             </button>
           )}
@@ -411,9 +411,9 @@ function VoiceProfileSection({
       <button
         onClick={onSave}
         disabled={saving}
-        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
       >
-        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE VOICE PROFILE
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE VOICE PROFILE
       </button>
     </div>
   )
@@ -483,13 +483,13 @@ function VoiceGenerator({ templates }: { templates: VoiceTemplate[] }) {
       {/* Quick-load templates */}
       {templates.length > 0 && (
         <div>
-          <span className="text-[8px] font-mono text-[#555] uppercase block mb-1.5">Quick Load Template</span>
+          <span className="text-[11px] font-mono text-[#555] uppercase block mb-1.5">Quick Load Template</span>
           <div className="flex gap-1.5 flex-wrap">
             {templates.slice(0, 6).map((t) => (
               <button
                 key={t.id}
                 onClick={() => loadTemplate(t)}
-                className="px-2 py-0.5 text-[8px] font-mono text-[#888] bg-[#111] border border-[#1a1a1a] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
+                className="px-2 py-0.5 text-[11px] font-mono text-[#888] bg-[#111] border border-[#1a1a1a] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
               >
                 {t.name}
               </button>
@@ -500,19 +500,19 @@ function VoiceGenerator({ templates }: { templates: VoiceTemplate[] }) {
 
       {/* Script input */}
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Script</label>
+        <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Script</label>
         <textarea
           value={script}
           onChange={(e) => { setScript(e.target.value); setAudioUrl(null) }}
           rows={4}
           placeholder="Type what you want to say in the voice message..."
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
         />
         <div className="flex justify-between mt-1">
-          <span className="text-[8px] font-mono text-[#444]">
+          <span className="text-[11px] font-mono text-[#444]">
             Variables: {'{lead_name}'}, {'{goal_mention}'}
           </span>
-          <span className={cn('text-[8px] font-mono', script.length > 500 ? 'text-[#ff9f43]' : 'text-[#444]')}>
+          <span className={cn('text-[11px] font-mono', script.length > 500 ? 'text-[#ff9f43]' : 'text-[#444]')}>
             {script.length}/500 recommended
           </span>
         </div>
@@ -523,17 +523,17 @@ function VoiceGenerator({ templates }: { templates: VoiceTemplate[] }) {
         <button
           onClick={generate}
           disabled={generating || !script.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
         >
-          {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mic className="w-3 h-3" />}
+          {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
           {generating ? 'GENERATING...' : 'GENERATE VOICE'}
         </button>
         {audioUrl && (
           <button
             onClick={generate}
-            className="flex items-center gap-1 px-2.5 py-2 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-2 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
           >
-            <RefreshCw className="w-3 h-3" /> REGENERATE
+            <RefreshCw className="w-4 h-4" /> REGENERATE
           </button>
         )}
       </div>
@@ -576,7 +576,7 @@ function VoiceGenerator({ templates }: { templates: VoiceTemplate[] }) {
                 />
               ))}
             </div>
-            <span className="text-[9px] font-mono text-[#666] shrink-0">
+            <span className="text-xs font-mono text-[#666] shrink-0">
               {durationMs > 0 ? `${(durationMs / 1000).toFixed(1)}s` : '--'}
             </span>
           </div>
@@ -585,15 +585,15 @@ function VoiceGenerator({ templates }: { templates: VoiceTemplate[] }) {
             <a
               href={audioUrl}
               download="voice-message.mp3"
-              className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
             >
-              <Download className="w-2.5 h-2.5" /> DOWNLOAD
+              <Download className="w-3.5 h-3.5" /> DOWNLOAD
             </a>
             <button
               onClick={copyUrl}
-              className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
             >
-              {copied ? <Check className="w-2.5 h-2.5 text-[#00ff88]" /> : <Copy className="w-2.5 h-2.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-[#00ff88]" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'COPIED' : 'COPY URL'}
             </button>
           </div>
@@ -649,7 +649,7 @@ function VoiceTemplatesSection({
       <div className="flex gap-1.5">
         <button
           onClick={() => setFilter('all')}
-          className={cn('px-2 py-0.5 rounded text-[7px] font-mono uppercase border transition-colors',
+          className={cn('px-2 py-0.5 rounded text-[10px] font-mono uppercase border transition-colors',
             filter === 'all' ? 'text-[#00ff88] bg-[#00ff88]/10 border-[#00ff88]/30' : 'text-[#555] border-[#1a1a1a]'
           )}
         >
@@ -659,7 +659,7 @@ function VoiceTemplatesSection({
           <button
             key={c.value}
             onClick={() => setFilter(c.value)}
-            className={cn('px-2 py-0.5 rounded text-[7px] font-mono uppercase border transition-colors',
+            className={cn('px-2 py-0.5 rounded text-[10px] font-mono uppercase border transition-colors',
               filter === c.value ? 'text-[#00ff88] bg-[#00ff88]/10 border-[#00ff88]/30' : 'text-[#555] border-[#1a1a1a]'
             )}
           >
@@ -674,31 +674,31 @@ function VoiceTemplatesSection({
           <div key={t.id} className="flex items-start gap-2 p-2.5 bg-[#0d0d0d] rounded-lg border border-[#1a1a1a]">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-mono font-bold text-[#ccc]">{t.name}</span>
-                <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded border', CAT_COLORS[t.category] || CAT_COLORS.opener)}>
+                <span className="text-[13px] font-mono font-bold text-[#ccc]">{t.name}</span>
+                <span className={cn('text-[10px] font-mono uppercase px-1 py-0.5 rounded border', CAT_COLORS[t.category] || CAT_COLORS.opener)}>
                   {t.category}
                 </span>
               </div>
-              <p className="text-[9px] font-mono text-[#666] truncate">{t.script}</p>
+              <p className="text-xs font-mono text-[#666] truncate">{t.script}</p>
             </div>
             <div className="flex gap-1 shrink-0">
               <button
                 onClick={() => setEditing(t)}
                 className="p-1 text-[#555] hover:text-[#ccc]"
               >
-                <Pencil className="w-3 h-3" />
+                <Pencil className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setDeleteId(t.id)}
                 className="p-1 text-[#555] hover:text-[#f05050]"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         ))}
         {filtered.length === 0 && (
-          <p className="text-[10px] font-mono text-[#444] py-4 text-center">No templates in this category</p>
+          <p className="text-[13px] font-mono text-[#444] py-4 text-center">No templates in this category</p>
         )}
       </div>
 
@@ -715,9 +715,9 @@ function VoiceTemplatesSection({
       {!editing && (
         <button
           onClick={() => setEditing({ id: '', name: '', script: '', category: 'opener', created_at: '' })}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 transition-colors"
         >
-          <Plus className="w-3 h-3" /> ADD TEMPLATE
+          <Plus className="w-4 h-4" /> ADD TEMPLATE
         </button>
       )}
 
@@ -743,20 +743,20 @@ function TemplateEditor({
   return (
     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3 space-y-3">
       <div className="flex justify-between items-center">
-        <span className="text-[9px] font-mono text-[#00ff88] uppercase">{template.id ? 'Edit' : 'New'} Template</span>
-        <button onClick={onCancel} className="text-[#444] hover:text-[#888]"><X className="w-3 h-3" /></button>
+        <span className="text-xs font-mono text-[#00ff88] uppercase">{template.id ? 'Edit' : 'New'} Template</span>
+        <button onClick={onCancel} className="text-[#444] hover:text-[#888]"><X className="w-4 h-4" /></button>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="col-span-2">
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Name</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Name</label>
           <input value={t.name} onChange={(e) => setT({ ...t, name: e.target.value })}
             placeholder="e.g., Warm opener"
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30" />
         </div>
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Category</label>
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Category</label>
           <select value={t.category} onChange={(e) => setT({ ...t, category: e.target.value })}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none">
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none">
             {TEMPLATE_CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
@@ -764,17 +764,17 @@ function TemplateEditor({
         </div>
       </div>
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Script</label>
+        <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Script</label>
         <textarea value={t.script} onChange={(e) => setT({ ...t, script: e.target.value })} rows={3}
           placeholder="Hey {lead_name}! Thanks for reaching out..."
-          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30" />
+          className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30" />
       </div>
       <div className="flex gap-2">
         <button onClick={() => onSave(t)} disabled={saving || !t.name || !t.script}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
-          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE
         </button>
-        <button onClick={onCancel} className="px-3 py-1.5 text-[9px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
+        <button onClick={onCancel} className="px-3 py-1.5 text-xs font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">CANCEL</button>
       </div>
     </div>
   )
@@ -800,13 +800,13 @@ function AutoVoiceSection({
 
   return (
     <div className="space-y-4">
-      <p className="text-[9px] font-mono text-[#555]">
+      <p className="text-xs font-mono text-[#555]">
         Configure how the AI responds when a lead sends a voice message.
       </p>
 
       {/* Mode selector */}
       <div>
-        <label className="text-[8px] font-mono text-[#555] uppercase block mb-2">Voice Reply Mode</label>
+        <label className="text-[11px] font-mono text-[#555] uppercase block mb-2">Voice Reply Mode</label>
         <div className="grid grid-cols-3 gap-2">
           {modes.map((m) => (
             <button
@@ -819,11 +819,11 @@ function AutoVoiceSection({
                   : 'bg-[#0d0d0d] border-[#1a1a1a] hover:border-[#333]'
               )}
             >
-              <span className={cn('text-[10px] font-mono font-bold block mb-0.5',
+              <span className={cn('text-[13px] font-mono font-bold block mb-0.5',
                 settings.mode === m.value ? 'text-[#00ff88]' : 'text-[#888]')}>
                 {m.label}
               </span>
-              <span className="text-[8px] font-mono text-[#555]">{m.desc}</span>
+              <span className="text-[11px] font-mono text-[#555]">{m.desc}</span>
             </button>
           ))}
         </div>
@@ -865,9 +865,9 @@ function AutoVoiceSection({
       <button
         onClick={onSave}
         disabled={saving}
-        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
       >
-        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE AUTO-VOICE SETTINGS
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE AUTO-VOICE SETTINGS
       </button>
     </div>
   )
@@ -886,8 +886,8 @@ function SliderField({
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <label className="text-[8px] font-mono text-[#555] uppercase">{label}</label>
-        <span className="text-[9px] font-mono text-[#00ff88] font-bold">{value}{unit}</span>
+        <label className="text-[11px] font-mono text-[#555] uppercase">{label}</label>
+        <span className="text-xs font-mono text-[#00ff88] font-bold">{value}{unit}</span>
       </div>
       <input
         type="range"
@@ -897,7 +897,7 @@ function SliderField({
         onChange={(e) => onChange(parseInt(e.target.value))}
         className="w-full accent-[#00ff88] h-1"
       />
-      {desc && <span className="text-[8px] font-mono text-[#444]">{desc}</span>}
+      {desc && <span className="text-[11px] font-mono text-[#444]">{desc}</span>}
     </div>
   )
 }

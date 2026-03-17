@@ -73,7 +73,7 @@ export function NotificationBell() {
             {/* Pulsing ring */}
             <span className="absolute w-4 h-4 rounded-full bg-[#ff4500]/40 animate-ping" />
             {/* Solid badge */}
-            <span className="relative w-4 h-4 bg-[#ff4500] rounded-full flex items-center justify-center text-[8px] font-mono text-white font-bold">
+            <span className="relative w-4 h-4 bg-[#ff4500] rounded-full flex items-center justify-center text-[11px] font-mono text-white font-bold">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           </span>

@@ -57,7 +57,7 @@ export function ConfirmDialog({
           <div>
             <h3 className="text-[#f0f0f0] font-mono text-sm font-bold">{title}</h3>
             {description && (
-              <p className="text-[#555] font-mono text-[10px] mt-1">{description}</p>
+              <p className="text-[#555] font-mono text-[13px] mt-1">{description}</p>
             )}
           </div>
         </div>
@@ -65,7 +65,7 @@ export function ConfirmDialog({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 text-[10px] font-mono text-[#888] border border-[#222] rounded hover:border-[#333] hover:text-[#ccc] transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-[13px] font-mono text-[#888] border border-[#222] rounded hover:border-[#333] hover:text-[#ccc] transition-colors disabled:opacity-50"
           >
             CANCEL
           </button>
@@ -73,13 +73,13 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={loading}
             className={cn(
-              'px-4 py-2 text-[10px] font-mono rounded transition-colors disabled:opacity-50 flex items-center gap-1.5',
+              'px-4 py-2 text-[13px] font-mono rounded transition-colors disabled:opacity-50 flex items-center gap-1.5',
               isDanger
                 ? 'bg-[#f05050]/10 border border-[#f05050]/30 text-[#f05050] hover:bg-[#f05050]/20'
                 : 'bg-[#ff9f43]/10 border border-[#ff9f43]/30 text-[#ff9f43] hover:bg-[#ff9f43]/20'
             )}
           >
-            {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {confirmLabel}
           </button>
         </div>

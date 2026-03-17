@@ -53,7 +53,7 @@ export async function GET(
 
 /**
  * POST /api/conversations/[id]/followup — Enroll in a follow-up sequence.
- * Body: { sequenceId: string }
+ * Body: { sequenceId: string } OR { custom: true, delay_hours, message_type, content }
  */
 export async function POST(
   req: NextRequest,
@@ -64,8 +64,46 @@ export async function POST(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { sequenceId } = body
 
+  // Custom one-off follow-up
+  if (body.custom) {
+    const { delay_hours = 24, message_type = 'text', content = '' } = body
+    if (!content && message_type === 'text') {
+      return NextResponse.json({ error: 'Content required for text follow-ups' }, { status: 400 })
+    }
+
+    // Create a temporary single-step sequence
+    const { data: seq, error: seqErr } = await supabase
+      .from('follow_up_sequences')
+      .insert({
+        name: `Custom (${delay_hours}h)`,
+        is_active: true,
+        steps: [{
+          delay_hours,
+          message_type,
+          content,
+          ai_personalized: message_type === 'ai_personalized',
+          knowledge_source: message_type === 'ai_personalized' ? 'custom_content' : undefined,
+          custom_content: message_type === 'ai_personalized' ? content : undefined,
+        }],
+      })
+      .select('id')
+      .single()
+
+    if (seqErr || !seq) {
+      return NextResponse.json({ error: 'Failed to create custom sequence' }, { status: 500 })
+    }
+
+    const result = await enrollInSequence(params.id, seq.id)
+    if (!result) {
+      return NextResponse.json({ error: 'Failed to enroll' }, { status: 404 })
+    }
+
+    return NextResponse.json({ status: 'enrolled', jobId: result.jobId, custom: true })
+  }
+
+  // Standard sequence enrollment
+  const { sequenceId } = body
   if (!sequenceId) {
     return NextResponse.json({ error: 'sequenceId required' }, { status: 400 })
   }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   FlaskConical, Play, User, Zap, Brain, Flame, Target,
   FileText, AlertTriangle, Sparkles, RotateCcw, Save, Copy,
@@ -119,6 +119,40 @@ export default function TestingPage() {
   const [loading, setLoading] = useState(false)
   const [leadInput, setLeadInput] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const initialized = useRef(false)
+
+  // ── Restore session from sessionStorage on mount ──
+  useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+    try {
+      const saved = sessionStorage.getItem('testing-session')
+      if (!saved) return
+      const s = JSON.parse(saved)
+      if (s.config) setConfig(s.config)
+      if (s.lead) setLead(s.lead)
+      if (s.messages?.length) setMessages(s.messages)
+      if (s.analysis) setAnalysis(s.analysis)
+      if (s.kbChunks) setKbChunks(s.kbChunks)
+      if (s.appliedRules) setAppliedRules(s.appliedRules)
+      if (s.metrics) setMetrics(s.metrics)
+      if (s.suggestions) setSuggestions(s.suggestions)
+      if (s.leadInput) setLeadInput(s.leadInput)
+    } catch { /* ignore corrupt data */ }
+  }, [])
+
+  // ── Save session to sessionStorage on state changes ──
+  const saveSession = useCallback(() => {
+    try {
+      sessionStorage.setItem('testing-session', JSON.stringify({
+        config, lead, messages, analysis, kbChunks, appliedRules, metrics, suggestions, leadInput,
+      }))
+    } catch { /* ignore */ }
+  }, [config, lead, messages, analysis, kbChunks, appliedRules, metrics, suggestions, leadInput])
+
+  useEffect(() => {
+    if (initialized.current) saveSession()
+  }, [saveSession])
 
   // ── Fetch personas ──
   useEffect(() => {
@@ -247,17 +281,17 @@ export default function TestingPage() {
       <div className="w-[280px] border-r border-[#1a1a1a] flex flex-col shrink-0 overflow-y-auto">
         <div className="px-4 py-3 border-b border-[#1a1a1a] flex items-center gap-2">
           <FlaskConical className="w-3.5 h-3.5 text-[#00ff88]" />
-          <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-wider font-bold">Test Config</span>
+          <span className="text-[13px] font-mono text-[#00ff88] uppercase tracking-wider font-bold">Test Config</span>
         </div>
 
         <div className="p-4 space-y-4">
           {/* Persona */}
           <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Persona</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Persona</label>
             <select
               value={config.personaId}
               onChange={(e) => setConfig((c) => ({ ...c, personaId: e.target.value }))}
-              className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc]"
+              className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-xs font-mono text-[#ccc]"
             >
               <option value="">Global (default)</option>
               {personas.map((p) => (
@@ -268,7 +302,7 @@ export default function TestingPage() {
 
           {/* KB toggle */}
           <div className="flex items-center justify-between">
-            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider">Knowledge Base</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase tracking-wider">Knowledge Base</label>
             <button
               onClick={() => setConfig((c) => ({ ...c, useKB: !c.useKB }))}
               className={cn(
@@ -277,7 +311,7 @@ export default function TestingPage() {
               )}
             >
               <span className={cn(
-                'absolute top-0.5 w-3 h-3 rounded-full transition-all',
+                'absolute top-0.5 w-4 h-4 rounded-full transition-all',
                 config.useKB ? 'left-4.5 bg-[#00ff88]' : 'left-0.5 bg-[#555]'
               )} style={{ left: config.useKB ? '18px' : '2px' }} />
             </button>
@@ -285,14 +319,14 @@ export default function TestingPage() {
 
           {/* Response style */}
           <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Response Style</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Response Style</label>
             <div className="flex gap-1">
               {['casual', 'balanced', 'aggressive'].map((s) => (
                 <button
                   key={s}
                   onClick={() => setConfig((c) => ({ ...c, responseStyle: s }))}
                   className={cn(
-                    'flex-1 py-1 rounded text-[8px] font-mono capitalize transition-colors',
+                    'flex-1 py-1 rounded text-[11px] font-mono capitalize transition-colors',
                     config.responseStyle === s
                       ? 'bg-[#54a0ff]/10 text-[#54a0ff] border border-[#54a0ff]/30'
                       : 'text-[#444] border border-[#222]'
@@ -306,45 +340,45 @@ export default function TestingPage() {
 
           {/* Custom prompt */}
           <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Custom Instructions</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Custom Instructions</label>
             <textarea
               value={config.customPrompt}
               onChange={(e) => setConfig((c) => ({ ...c, customPrompt: e.target.value }))}
               placeholder="Extra instructions for this test..."
-              className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] resize-none h-14 outline-none"
+              className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-xs font-mono text-[#ccc] placeholder:text-[#333] resize-none h-14 outline-none"
             />
           </div>
 
           {/* Divider */}
           <div className="border-t border-[#1a1a1a] pt-3">
-            <label className="text-[8px] font-mono text-[#ff9f43] uppercase tracking-wider block mb-2">Fake Lead Profile</label>
+            <label className="text-[11px] font-mono text-[#ff9f43] uppercase tracking-wider block mb-2">Fake Lead Profile</label>
           </div>
 
           {/* Lead fields */}
           <div className="space-y-2">
             <div>
-              <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Username</label>
+              <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Username</label>
               <input
                 value={lead.username}
                 onChange={(e) => setLead((l) => ({ ...l, username: e.target.value }))}
-                className="w-full bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc] outline-none"
+                className="w-full bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc] outline-none"
               />
             </div>
             <div>
-              <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Bio</label>
+              <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Bio</label>
               <textarea
                 value={lead.bio}
                 onChange={(e) => setLead((l) => ({ ...l, bio: e.target.value }))}
-                className="w-full bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc] resize-none h-10 outline-none"
+                className="w-full bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc] resize-none h-10 outline-none"
               />
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Source</label>
+                <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Source</label>
                 <select
                   value={lead.source}
                   onChange={(e) => setLead((l) => ({ ...l, source: e.target.value }))}
-                  className="w-full bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc]"
+                  className="w-full bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc]"
                 >
                   <option value="dm">DM</option>
                   <option value="story_reply">Story Reply</option>
@@ -353,23 +387,23 @@ export default function TestingPage() {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Age Hint</label>
+                <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Age Hint</label>
                 <input
                   value={lead.ageHint}
                   onChange={(e) => setLead((l) => ({ ...l, ageHint: e.target.value }))}
-                  className="w-full bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc] outline-none"
+                  className="w-full bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc] outline-none"
                 />
               </div>
             </div>
             <div>
-              <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">Writing Style</label>
+              <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">Writing Style</label>
               <div className="grid grid-cols-2 gap-1">
                 {['casual', 'formal', 'minimal', 'verbose'].map((s) => (
                   <button
                     key={s}
                     onClick={() => setLead((l) => ({ ...l, writingStyle: s }))}
                     className={cn(
-                      'py-1 rounded text-[8px] font-mono capitalize transition-colors',
+                      'py-1 rounded text-[11px] font-mono capitalize transition-colors',
                       lead.writingStyle === s
                         ? 'bg-[#ff9f43]/10 text-[#ff9f43] border border-[#ff9f43]/30'
                         : 'text-[#444] border border-[#222]'
@@ -381,11 +415,11 @@ export default function TestingPage() {
               </div>
             </div>
             <div>
-              <label className="text-[7px] font-mono text-[#444] uppercase block mb-0.5">First Message</label>
+              <label className="text-[10px] font-mono text-[#444] uppercase block mb-0.5">First Message</label>
               <textarea
                 value={lead.firstMessage}
                 onChange={(e) => setLead((l) => ({ ...l, firstMessage: e.target.value }))}
-                className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-[9px] font-mono text-[#ccc] resize-none h-16 outline-none"
+                className="w-full bg-[#111] border border-[#222] rounded px-2 py-1.5 text-xs font-mono text-[#ccc] resize-none h-16 outline-none"
               />
             </div>
           </div>
@@ -394,7 +428,7 @@ export default function TestingPage() {
           <button
             onClick={startTest}
             disabled={loading || !lead.firstMessage.trim()}
-            className="w-full py-2 rounded bg-[#00ff88] text-black text-[10px] font-mono font-bold uppercase tracking-wider hover:bg-[#00dd77] transition-colors disabled:opacity-50"
+            className="w-full py-2 rounded bg-[#00ff88] text-black text-[13px] font-mono font-bold uppercase tracking-wider hover:bg-[#00dd77] transition-colors disabled:opacity-50"
           >
             {loading ? 'Running...' : 'Start Test'}
           </button>
@@ -404,24 +438,24 @@ export default function TestingPage() {
       {/* ═══════════════════════════════════════ */}
       {/* CENTER — SIMULATED CHAT */}
       {/* ═══════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* Chat header */}
         <div className="px-4 py-2.5 border-b border-[#1a1a1a] flex items-center justify-between bg-[#0a0a0a]">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-[#ccc]">@{lead.username}</span>
-            <span className="text-[7px] font-mono text-[#333] bg-[#111] px-1.5 py-0.5 rounded uppercase">{lead.source}</span>
-            <span className="text-[7px] font-mono text-[#ff9f43] bg-[#ff9f43]/10 px-1.5 py-0.5 rounded uppercase">
+            <span className="text-[13px] font-mono text-[#ccc]">@{lead.username}</span>
+            <span className="text-[10px] font-mono text-[#333] bg-[#111] px-1.5 py-0.5 rounded uppercase">{lead.source}</span>
+            <span className="text-[10px] font-mono text-[#ff9f43] bg-[#ff9f43]/10 px-1.5 py-0.5 rounded uppercase">
               copilot
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[7px] font-mono text-[#333]">{messages.length} messages</span>
+            <span className="text-[10px] font-mono text-[#333]">{messages.length} messages</span>
             <button
-              onClick={() => { setMessages([]); setAnalysis(null); setSuggestions(null); setKbChunks([]); setAppliedRules([]); setMetrics(null) }}
+              onClick={() => { setMessages([]); setAnalysis(null); setSuggestions(null); setKbChunks([]); setAppliedRules([]); setMetrics(null); sessionStorage.removeItem('testing-session') }}
               className="text-[#444] hover:text-[#888] transition-colors"
               title="Reset"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -432,7 +466,7 @@ export default function TestingPage() {
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-2">
                 <FlaskConical className="w-8 h-8 text-[#222] mx-auto" />
-                <p className="text-[10px] font-mono text-[#333]">Configure your test and click START TEST</p>
+                <p className="text-[13px] font-mono text-[#333]">Configure your test and click START TEST</p>
               </div>
             </div>
           )}
@@ -442,10 +476,10 @@ export default function TestingPage() {
               <div className={cn('max-w-[70%] space-y-1')}>
                 {/* Sender tag */}
                 <div className={cn('flex items-center gap-1', msg.role === 'lead' ? '' : 'justify-end')}>
-                  {msg.role === 'lead' && <User className="w-2.5 h-2.5 text-[#555]" />}
-                  {msg.role === 'ai' && <Sparkles className="w-2.5 h-2.5 text-[#00ff88]" />}
-                  {msg.role === 'setter' && <User className="w-2.5 h-2.5 text-[#54a0ff]" />}
-                  <span className={cn('text-[7px] font-mono uppercase',
+                  {msg.role === 'lead' && <User className="w-3.5 h-3.5 text-[#555]" />}
+                  {msg.role === 'ai' && <Sparkles className="w-3.5 h-3.5 text-[#00ff88]" />}
+                  {msg.role === 'setter' && <User className="w-3.5 h-3.5 text-[#54a0ff]" />}
+                  <span className={cn('text-[10px] font-mono uppercase',
                     msg.role === 'lead' ? 'text-[#555]' : msg.role === 'ai' ? 'text-[#00ff88]' : 'text-[#54a0ff]'
                   )}>
                     {msg.role === 'lead' ? `@${lead.username}` : msg.role === 'ai' ? 'AI' : 'Setter'}
@@ -453,7 +487,7 @@ export default function TestingPage() {
                 </div>
                 {/* Bubble */}
                 <div className={cn(
-                  'px-3 py-2 rounded-lg text-[10px] font-mono',
+                  'px-3 py-2 rounded-lg text-[13px] font-mono',
                   msg.role === 'lead'
                     ? 'bg-[#151515] text-[#ccc] border border-[#1a1a1a]'
                     : msg.role === 'ai'
@@ -463,7 +497,7 @@ export default function TestingPage() {
                   {msg.content}
                 </div>
                 {msg.reasoning && (
-                  <div className="px-2 py-1 bg-[#111] border border-[#1a1a1a] rounded text-[8px] font-mono text-[#555]">
+                  <div className="px-3 py-1.5 bg-[#111] border border-[#1a1a1a] rounded text-[11px] font-mono text-[#555]">
                     <Sparkles className="w-2 h-2 inline mr-1 text-[#ff9f43]" />
                     {msg.reasoning}
                   </div>
@@ -476,10 +510,10 @@ export default function TestingPage() {
 
         {/* Copilot suggestions */}
         {suggestions && (
-          <div className="border-t border-[#1a1a1a] bg-[#0a0a0a] px-4 py-3">
+          <div className="border-t border-[#1a1a1a] bg-[#0a0a0a] px-4 py-3 shrink-0 max-h-[40%] overflow-y-auto">
             <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles className="w-3 h-3 text-[#ff9f43]" />
-              <span className="text-[8px] font-mono text-[#555] uppercase tracking-wider">AI Suggestions</span>
+              <Sparkles className="w-4 h-4 text-[#ff9f43]" />
+              <span className="text-[11px] font-mono text-[#555] uppercase tracking-wider">AI Suggestions</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -491,14 +525,14 @@ export default function TestingPage() {
                   opt.rec ? 'border-[#00ff88]/30 bg-[#00ff88]/5' : 'border-[#1a1a1a] bg-[#111]'
                 )} onClick={() => applySuggestion(opt.data.messages)}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[8px] font-mono text-[#888]">{opt.label}</span>
-                    {opt.rec && <span className="text-[6px] font-mono text-[#00ff88] bg-[#00ff88]/10 px-1 rounded">REC</span>}
-                    <span className="text-[7px] font-mono text-[#444]">{opt.data.confidence}%</span>
+                    <span className="text-[11px] font-mono text-[#888]">{opt.label}</span>
+                    {opt.rec && <span className="text-[9px] font-mono text-[#00ff88] bg-[#00ff88]/10 px-1 rounded">REC</span>}
+                    <span className="text-[10px] font-mono text-[#444]">{opt.data.confidence}%</span>
                   </div>
                   {opt.data.messages.map((m, i) => (
-                    <p key={i} className="text-[9px] font-mono text-[#ccc] mb-0.5">{m}</p>
+                    <p key={i} className="text-xs font-mono text-[#ccc] mb-0.5">{m}</p>
                   ))}
-                  <p className="text-[7px] font-mono text-[#444] mt-1">{opt.data.reasoning}</p>
+                  <p className="text-[10px] font-mono text-[#444] mt-1">{opt.data.reasoning}</p>
                 </div>
               ))}
             </div>
@@ -507,31 +541,27 @@ export default function TestingPage() {
 
         {/* Action bar */}
         {messages.length > 0 && (
-          <div className="border-t border-[#1a1a1a] bg-[#0a0a0a] px-4 py-2">
+          <div className="border-t border-[#1a1a1a] bg-[#0a0a0a] px-4 py-2 shrink-0">
             <div className="flex items-center gap-2">
               {/* Inject lead message */}
               <div className="flex-1 flex items-center gap-1">
-                <span className="text-[8px] font-mono text-[#555] shrink-0">Lead says:</span>
+                <span className="text-[11px] font-mono text-[#555] shrink-0">Lead says:</span>
                 <input
                   value={leadInput}
                   onChange={(e) => setLeadInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault()
-                      if (config.mode === 'copilot') {
-                        injectLeadMessage()
-                      } else {
-                        injectLeadMessage()
-                      }
+                      injectLeadMessage()
                     }
                   }}
                   placeholder="Type what lead says..."
-                  className="flex-1 bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc] placeholder:text-[#333] outline-none"
+                  className="flex-1 bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc] placeholder:text-[#333] outline-none"
                 />
                 <button
                   onClick={injectLeadMessage}
                   disabled={!leadInput.trim()}
-                  className="px-2 py-1 rounded bg-[#151515] text-[#888] text-[8px] font-mono hover:bg-[#222] transition-colors disabled:opacity-30"
+                  className="px-3 py-1.5 rounded bg-[#151515] text-[#888] text-[11px] font-mono hover:bg-[#222] transition-colors disabled:opacity-30"
                 >
                   Inject
                 </button>
@@ -544,24 +574,24 @@ export default function TestingPage() {
               <button
                 onClick={() => sendSetterMessage(leadInput)}
                 disabled={!leadInput.trim() || loading}
-                className="flex items-center gap-1 px-2 py-1 rounded bg-[#54a0ff]/10 text-[#54a0ff] text-[8px] font-mono hover:bg-[#54a0ff]/20 transition-colors disabled:opacity-30"
+                className="flex items-center gap-1 px-3 py-1.5 rounded bg-[#54a0ff]/10 text-[#54a0ff] text-[11px] font-mono hover:bg-[#54a0ff]/20 transition-colors disabled:opacity-30"
               >
-                <User className="w-2.5 h-2.5" /> Send as Setter
+                <User className="w-3.5 h-3.5" /> Send as Setter
               </button>
               <button
                 onClick={playSuggestions}
                 disabled={loading}
-                className="flex items-center gap-1 px-2 py-1 rounded bg-[#ff9f43]/10 text-[#ff9f43] text-[8px] font-mono hover:bg-[#ff9f43]/20 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-1.5 rounded bg-[#ff9f43]/10 text-[#ff9f43] text-[11px] font-mono hover:bg-[#ff9f43]/20 transition-colors disabled:opacity-50"
               >
-                <Sparkles className="w-2.5 h-2.5" /> Suggest
+                <Sparkles className="w-3.5 h-3.5" /> Suggest
               </button>
 
               <button
                 onClick={playLeadResponse}
                 disabled={loading}
-                className="flex items-center gap-1 px-2 py-1 rounded bg-[#151515] text-[#888] text-[8px] font-mono hover:bg-[#222] transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-1.5 rounded bg-[#151515] text-[#888] text-[11px] font-mono hover:bg-[#222] transition-colors disabled:opacity-50"
               >
-                <Play className="w-2.5 h-2.5" /> Sim Lead Reply
+                <Play className="w-3.5 h-3.5" /> Sim Lead Reply
               </button>
             </div>
           </div>
@@ -574,12 +604,12 @@ export default function TestingPage() {
       <div className="w-[280px] border-l border-[#1a1a1a] flex flex-col shrink-0 overflow-y-auto">
         <div className="px-4 py-3 border-b border-[#1a1a1a] flex items-center gap-2">
           <Brain className="w-3.5 h-3.5 text-[#5f27cd]" />
-          <span className="text-[10px] font-mono text-[#5f27cd] uppercase tracking-wider font-bold">Analysis</span>
+          <span className="text-[13px] font-mono text-[#5f27cd] uppercase tracking-wider font-bold">Analysis</span>
         </div>
 
         {!analysis ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-[9px] font-mono text-[#333] text-center px-6">
+            <p className="text-xs font-mono text-[#333] text-center px-6">
               Run a test to see AI analysis
             </p>
           </div>
@@ -589,8 +619,8 @@ export default function TestingPage() {
             <div className="bg-[#111] border border-[#222] rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5">
-                  <Flame className="w-3 h-3 text-[#ff4500]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">Heat Score</span>
+                  <Flame className="w-4 h-4 text-[#ff4500]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">Heat Score</span>
                 </div>
                 <span className={cn('text-xl font-mono font-bold',
                   analysis.heatScore >= 80 ? 'text-[#ff4500]' :
@@ -617,12 +647,12 @@ export default function TestingPage() {
             {/* Stage Detection */}
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">
-                <Target className="w-3 h-3 text-[#54a0ff]" />
-                <span className="text-[8px] font-mono text-[#555] uppercase">Detected Stage</span>
+                <Target className="w-4 h-4 text-[#54a0ff]" />
+                <span className="text-[11px] font-mono text-[#555] uppercase">Detected Stage</span>
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className="text-[10px] font-mono font-bold px-2 py-1 rounded"
+                  className="text-[13px] font-mono font-bold px-3 py-1.5 rounded"
                   style={{
                     color: STAGE_COLORS[analysis.detectedStage] || '#666',
                     backgroundColor: `${STAGE_COLORS[analysis.detectedStage] || '#666'}15`,
@@ -630,7 +660,7 @@ export default function TestingPage() {
                 >
                   {STAGE_LABELS[analysis.detectedStage] || analysis.detectedStage}
                 </span>
-                <span className="text-[8px] font-mono text-[#444]">{analysis.confidence}% confident</span>
+                <span className="text-[11px] font-mono text-[#444]">{analysis.confidence}% confident</span>
               </div>
             </div>
 
@@ -638,14 +668,14 @@ export default function TestingPage() {
             {Object.keys(analysis.qualificationUpdates).length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <FileText className="w-3 h-3 text-[#00ff88]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">Fields Detected</span>
+                  <FileText className="w-4 h-4 text-[#00ff88]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">Fields Detected</span>
                 </div>
                 <div className="space-y-1">
                   {Object.entries(analysis.qualificationUpdates).map(([key, val]) => (
-                    <div key={key} className="flex items-center gap-2 px-2 py-1 bg-[#111] rounded">
-                      <span className="text-[8px] font-mono text-[#888]">{key}:</span>
-                      <span className="text-[8px] font-mono text-[#ccc]">{String(val)}</span>
+                    <div key={key} className="flex items-center gap-2 px-3 py-1.5 bg-[#111] rounded">
+                      <span className="text-[11px] font-mono text-[#888]">{key}:</span>
+                      <span className="text-[11px] font-mono text-[#ccc]">{String(val)}</span>
                     </div>
                   ))}
                 </div>
@@ -656,12 +686,12 @@ export default function TestingPage() {
             {analysis.redFlags.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <AlertTriangle className="w-3 h-3 text-[#f05050]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">Red Flags</span>
+                  <AlertTriangle className="w-4 h-4 text-[#f05050]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">Red Flags</span>
                 </div>
                 <div className="space-y-1">
                   {analysis.redFlags.map((flag, i) => (
-                    <div key={i} className="px-2 py-1 bg-[#f05050]/5 border border-[#f05050]/10 rounded text-[8px] font-mono text-[#f05050]">
+                    <div key={i} className="px-3 py-1.5 bg-[#f05050]/5 border border-[#f05050]/10 rounded text-[11px] font-mono text-[#f05050]">
                       {flag}
                     </div>
                   ))}
@@ -673,12 +703,12 @@ export default function TestingPage() {
             {appliedRules.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <Zap className="w-3 h-3 text-[#ff9f43]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">Active Rules</span>
+                  <Zap className="w-4 h-4 text-[#ff9f43]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">Active Rules</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {appliedRules.map((rule) => (
-                    <span key={rule} className="text-[7px] font-mono text-[#ff9f43] bg-[#ff9f43]/10 px-1.5 py-0.5 rounded">
+                    <span key={rule} className="text-[10px] font-mono text-[#ff9f43] bg-[#ff9f43]/10 px-1.5 py-0.5 rounded">
                       {RULE_LABELS[rule] || rule}
                     </span>
                   ))}
@@ -690,17 +720,17 @@ export default function TestingPage() {
             {kbChunks.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <Brain className="w-3 h-3 text-[#5f27cd]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">KB Retrieved</span>
+                  <Brain className="w-4 h-4 text-[#5f27cd]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">KB Retrieved</span>
                 </div>
                 <div className="space-y-1">
                   {kbChunks.map((chunk, i) => (
-                    <div key={i} className="px-2 py-1 bg-[#111] rounded flex items-center justify-between">
+                    <div key={i} className="px-3 py-1.5 bg-[#111] rounded flex items-center justify-between">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-[7px] font-mono text-[#5f27cd] bg-[#5f27cd]/10 px-1 rounded shrink-0">{chunk.type}</span>
-                        <span className="text-[8px] font-mono text-[#888] truncate">{chunk.title}</span>
+                        <span className="text-[10px] font-mono text-[#5f27cd] bg-[#5f27cd]/10 px-1 rounded shrink-0">{chunk.type}</span>
+                        <span className="text-[11px] font-mono text-[#888] truncate">{chunk.title}</span>
                       </div>
-                      <span className="text-[7px] font-mono text-[#444] shrink-0">{chunk.similarity}%</span>
+                      <span className="text-[10px] font-mono text-[#444] shrink-0">{chunk.similarity}%</span>
                     </div>
                   ))}
                 </div>
@@ -711,25 +741,25 @@ export default function TestingPage() {
             {metrics && (
               <div className="border-t border-[#1a1a1a] pt-3">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <ChevronRight className="w-3 h-3 text-[#444]" />
-                  <span className="text-[8px] font-mono text-[#555] uppercase">Metrics</span>
+                  <ChevronRight className="w-4 h-4 text-[#444]" />
+                  <span className="text-[11px] font-mono text-[#555] uppercase">Metrics</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-[#111] rounded px-2 py-1.5">
-                    <span className="text-[7px] font-mono text-[#444] block">Tokens (est)</span>
-                    <span className="text-[10px] font-mono text-[#ccc]">~{metrics.tokenEstimate}</span>
+                    <span className="text-[10px] font-mono text-[#444] block">Tokens (est)</span>
+                    <span className="text-[13px] font-mono text-[#ccc]">~{metrics.tokenEstimate}</span>
                   </div>
                   <div className="bg-[#111] rounded px-2 py-1.5">
-                    <span className="text-[7px] font-mono text-[#444] block">Model</span>
-                    <span className="text-[10px] font-mono text-[#ccc]">{metrics.model}</span>
+                    <span className="text-[10px] font-mono text-[#444] block">Model</span>
+                    <span className="text-[13px] font-mono text-[#ccc]">{metrics.model}</span>
                   </div>
                   <div className="bg-[#111] rounded px-2 py-1.5">
-                    <span className="text-[7px] font-mono text-[#444] block">KB Chunks</span>
-                    <span className="text-[10px] font-mono text-[#ccc]">{metrics.kbChunksUsed}</span>
+                    <span className="text-[10px] font-mono text-[#444] block">KB Chunks</span>
+                    <span className="text-[13px] font-mono text-[#ccc]">{metrics.kbChunksUsed}</span>
                   </div>
                   <div className="bg-[#111] rounded px-2 py-1.5">
-                    <span className="text-[7px] font-mono text-[#444] block">Messages</span>
-                    <span className="text-[10px] font-mono text-[#ccc]">{messages.length}</span>
+                    <span className="text-[10px] font-mono text-[#444] block">Messages</span>
+                    <span className="text-[13px] font-mono text-[#ccc]">{messages.length}</span>
                   </div>
                 </div>
               </div>
@@ -742,9 +772,9 @@ export default function TestingPage() {
                   const session = { config, leadProfile: lead, messages, analysis, kbChunks, appliedRules, metrics, timestamp: new Date().toISOString() }
                   navigator.clipboard.writeText(JSON.stringify(session, null, 2))
                 }}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-[#111] border border-[#222] text-[8px] font-mono text-[#888] hover:bg-[#1a1a1a] transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-[#111] border border-[#222] text-[11px] font-mono text-[#888] hover:bg-[#1a1a1a] transition-colors"
               >
-                <Copy className="w-2.5 h-2.5" /> Copy Session
+                <Copy className="w-3.5 h-3.5" /> Copy Session
               </button>
               <button
                 onClick={async () => {
@@ -755,9 +785,9 @@ export default function TestingPage() {
                     body: JSON.stringify({ action: 'save', session }),
                   }).catch(() => {})
                 }}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-[#111] border border-[#222] text-[8px] font-mono text-[#888] hover:bg-[#1a1a1a] transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-[#111] border border-[#222] text-[11px] font-mono text-[#888] hover:bg-[#1a1a1a] transition-colors"
               >
-                <Save className="w-2.5 h-2.5" /> Save
+                <Save className="w-3.5 h-3.5" /> Save
               </button>
             </div>
           </div>

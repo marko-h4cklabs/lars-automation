@@ -86,7 +86,7 @@ export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
       </div>
 
       {/* Live metrics strip */}
-      <div className="hidden lg:flex items-center gap-4 text-[10px] font-mono text-[#555] uppercase tracking-wider">
+      <div className="hidden lg:flex items-center gap-4 text-[13px] font-mono text-[#555] uppercase tracking-wider">
         <MetricPill
           label="Active Leads"
           value={metrics ? String(metrics.activeLeads) : '--'}
@@ -123,7 +123,7 @@ export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
           >
             <Bell className={cn('w-4 h-4 text-[#666]', bellShake && 'animate-shake')} />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-[#ff4500] rounded-full flex items-center justify-center text-[8px] font-mono text-white font-bold">
+            <span className="absolute top-1 right-1 w-4 h-4 bg-[#ff4500] rounded-full flex items-center justify-center text-[11px] font-mono text-white font-bold">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

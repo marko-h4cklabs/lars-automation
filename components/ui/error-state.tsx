@@ -21,9 +21,9 @@ export function ErrorState({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono text-[#00ff88] bg-[#00ff88]/10 border border-[#00ff88]/30 rounded hover:bg-[#00ff88]/20 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-mono text-[#00ff88] bg-[#00ff88]/10 border border-[#00ff88]/30 rounded hover:bg-[#00ff88]/20 transition-colors"
         >
-          <RefreshCw className="w-3 h-3" />
+          <RefreshCw className="w-4 h-4" />
           RETRY
         </button>
       )}

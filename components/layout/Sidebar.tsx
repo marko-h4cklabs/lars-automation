@@ -46,7 +46,7 @@ export function Sidebar() {
             BLACKOPS
           </span>
         </Link>
-        <p className="text-[#333] font-mono text-[9px] tracking-[0.15em] uppercase mt-1 pl-[30px]">
+        <p className="text-[#333] font-mono text-xs tracking-[0.15em] uppercase mt-1 pl-[30px]">
           Control Tower
         </p>
       </div>
@@ -62,7 +62,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-5 py-2.5 text-[11px] font-mono uppercase tracking-wider transition-colors relative',
+                'flex items-center gap-3 px-5 py-2.5 text-sm font-mono uppercase tracking-wider transition-colors relative',
                 isActive
                   ? 'text-[#f0f0f0] bg-[#111]'
                   : 'text-[#555] hover:text-[#888] hover:bg-[#0f0f0f]'
@@ -85,14 +85,14 @@ export function Sidebar() {
             onClick={() => updateStatus(user.status === 'online' ? 'offline' : 'online')}
             className="flex items-center gap-2.5 w-full px-1 py-1.5 rounded hover:bg-[#111] transition-colors"
           >
-            <div className="w-7 h-7 rounded-full bg-[#222] flex items-center justify-center text-[#888] text-[10px] font-mono font-bold uppercase shrink-0">
+            <div className="w-7 h-7 rounded-full bg-[#222] flex items-center justify-center text-[#888] text-[13px] font-mono font-bold uppercase shrink-0">
               {user.name?.charAt(0) || '?'}
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="text-[#888] text-[10px] font-mono truncate">{user.name}</p>
+              <p className="text-[#888] text-[13px] font-mono truncate">{user.name}</p>
               <div className="flex items-center gap-1.5">
                 <StatusDot status={user.status === 'online' ? 'online' : 'offline'} size="sm" />
-                <span className="text-[#555] text-[9px] font-mono uppercase">
+                <span className="text-[#555] text-xs font-mono uppercase">
                   {user.status === 'online' ? 'Online' : 'Offline'}
                 </span>
               </div>

@@ -180,21 +180,21 @@ export default function KnowledgePage() {
               </button>
               <button
                 onClick={() => setShowUpload(true)}
-                className="flex items-center gap-1 px-2 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[8px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[11px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 transition-colors"
               >
-                <Plus className="w-2.5 h-2.5" /> ADD
+                <Plus className="w-3.5 h-3.5" /> ADD
               </button>
             </div>
           </div>
 
           {/* Search */}
           <div className="relative mb-3">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#444]" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#444]" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search documents..."
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded pl-7 pr-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+              className="w-full bg-[#111] border border-[#1a1a1a] rounded pl-7 pr-2.5 py-1.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
             />
           </div>
 
@@ -205,7 +205,7 @@ export default function KnowledgePage() {
                 key={c.value}
                 onClick={() => setCategory(c.value)}
                 className={cn(
-                  'px-2 py-0.5 rounded text-[7px] font-mono uppercase tracking-wider transition-colors',
+                  'px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider transition-colors',
                   category === c.value
                     ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
                     : 'text-[#555] border border-[#1a1a1a] hover:text-[#888]'
@@ -226,10 +226,10 @@ export default function KnowledgePage() {
           ) : documents.length === 0 ? (
             <div className="p-4 text-center">
               <FileText className="w-6 h-6 text-[#222] mx-auto mb-2" />
-              <p className="text-[10px] font-mono text-[#444]">No documents found</p>
+              <p className="text-[13px] font-mono text-[#444]">No documents found</p>
               <button
                 onClick={() => setShowUpload(true)}
-                className="mt-2 text-[9px] font-mono text-[#00ff88] hover:underline"
+                className="mt-2 text-xs font-mono text-[#00ff88] hover:underline"
               >
                 Add your first document
               </button>
@@ -248,12 +248,12 @@ export default function KnowledgePage() {
                   )}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="text-[10px] font-mono font-bold text-[#f0f0f0] truncate">{doc.title}</span>
-                    <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded border shrink-0', TYPE_COLORS[doc.type])}>
+                    <span className="text-[13px] font-mono font-bold text-[#f0f0f0] truncate">{doc.title}</span>
+                    <span className={cn('text-[10px] font-mono uppercase px-1 py-0.5 rounded border shrink-0', TYPE_COLORS[doc.type])}>
                       {doc.type}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[8px] font-mono text-[#555]">
+                  <div className="flex items-center gap-2 text-[11px] font-mono text-[#555]">
                     <span>{doc.char_count.toLocaleString()} chars</span>
                     {doc.chunk_count > 0 && <span>{doc.chunk_count} chunks</span>}
                     <span className={doc.has_embedding ? 'text-[#00ff88]' : 'text-[#f05050]'}>
@@ -261,11 +261,11 @@ export default function KnowledgePage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[8px] font-mono text-[#333]">
+                    <span className="text-[11px] font-mono text-[#333]">
                       {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                     {!doc.is_active && (
-                      <span className="text-[7px] font-mono text-[#f05050] uppercase">inactive</span>
+                      <span className="text-[10px] font-mono text-[#f05050] uppercase">inactive</span>
                     )}
                   </div>
                 </button>
@@ -275,7 +275,7 @@ export default function KnowledgePage() {
         </div>
 
         {/* Stats footer */}
-        <div className="px-4 py-2 border-t border-[#1a1a1a] text-[8px] font-mono text-[#444]">
+        <div className="px-4 py-2 border-t border-[#1a1a1a] text-[11px] font-mono text-[#444]">
           {documents.length} documents · {documents.filter((d) => d.has_embedding).length} embedded · {documents.reduce((a, d) => a + d.char_count, 0).toLocaleString()} total chars
         </div>
       </div>
@@ -312,11 +312,11 @@ function EmptyState({ onShowGuide }: { onShowGuide: () => void }) {
     <div className="flex items-center justify-center h-full">
       <div className="text-center">
         <BookOpen className="w-8 h-8 text-[#1a1a1a] mx-auto mb-3" />
-        <p className="text-[11px] font-mono text-[#555] mb-1">Select a document to view</p>
-        <p className="text-[9px] font-mono text-[#333] mb-4">or add a new one to the knowledge base</p>
+        <p className="text-sm font-mono text-[#555] mb-1">Select a document to view</p>
+        <p className="text-xs font-mono text-[#333] mb-4">or add a new one to the knowledge base</p>
         <button
           onClick={onShowGuide}
-          className="text-[9px] font-mono text-[#00ff88] hover:underline"
+          className="text-xs font-mono text-[#00ff88] hover:underline"
         >
           View KB Guide →
         </button>
@@ -457,8 +457,8 @@ function DocumentViewer({
     }
   }
 
-  if (loading) return <div className="p-8 text-[10px] font-mono text-[#444]">Loading document...</div>
-  if (!doc) return <div className="p-8 text-[10px] font-mono text-[#f05050]">Document not found</div>
+  if (loading) return <div className="p-8 text-[13px] font-mono text-[#444]">Loading document...</div>
+  if (!doc) return <div className="p-8 text-[13px] font-mono text-[#f05050]">Document not found</div>
 
   return (
     <div className="p-6 max-w-4xl">
@@ -479,9 +479,9 @@ function DocumentViewer({
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] transition-colors"
             >
-              <Pencil className="w-2.5 h-2.5" /> EDIT
+              <Pencil className="w-3.5 h-3.5" /> EDIT
             </button>
           )}
           {editing && (
@@ -489,13 +489,13 @@ function DocumentViewer({
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-1 px-2 py-1 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[8px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[11px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
               >
-                {saving ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Save className="w-2.5 h-2.5" />} SAVE
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} SAVE
               </button>
               <button
                 onClick={() => { setEditing(false); setEditTitle(doc.title); setEditContent(doc.content); setEditType(doc.type) }}
-                className="px-2 py-1 text-[8px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc] transition-colors"
+                className="px-3 py-1.5 text-[11px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc] transition-colors"
               >
                 CANCEL
               </button>
@@ -510,7 +510,7 @@ function DocumentViewer({
           <select
             value={editType}
             onChange={(e) => setEditType(e.target.value as DocType)}
-            className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-[9px] font-mono text-[#ccc] outline-none"
+            className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-0.5 text-xs font-mono text-[#ccc] outline-none"
           >
             <option value="offer">Offer</option>
             <option value="script">Script</option>
@@ -519,20 +519,20 @@ function DocumentViewer({
             <option value="general">General</option>
           </select>
         ) : (
-          <span className={cn('text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border', TYPE_COLORS[doc.type])}>
+          <span className={cn('text-[11px] font-mono uppercase px-1.5 py-0.5 rounded border', TYPE_COLORS[doc.type])}>
             {doc.type}
           </span>
         )}
-        <span className="text-[8px] font-mono text-[#555]">{doc.char_count.toLocaleString()} chars</span>
+        <span className="text-[11px] font-mono text-[#555]">{doc.char_count.toLocaleString()} chars</span>
         {doc.chunks.length > 0 && (
-          <span className="text-[8px] font-mono text-[#555]">{doc.chunks.length} chunks</span>
+          <span className="text-[11px] font-mono text-[#555]">{doc.chunks.length} chunks</span>
         )}
-        <span className={cn('flex items-center gap-1 text-[8px] font-mono',
+        <span className={cn('flex items-center gap-1 text-[11px] font-mono',
           doc.has_embedding ? 'text-[#00ff88]' : 'text-[#f05050]')}>
-          {doc.has_embedding ? <CheckCircle2 className="w-2.5 h-2.5" /> : <AlertCircle className="w-2.5 h-2.5" />}
+          {doc.has_embedding ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
           {doc.has_embedding ? 'Embedded' : 'Not embedded'}
         </span>
-        <span className="text-[8px] font-mono text-[#333]">
+        <span className="text-[11px] font-mono text-[#333]">
           Created {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
       </div>
@@ -542,28 +542,28 @@ function DocumentViewer({
         <div className="flex items-center gap-2 mb-6">
           <button
             onClick={handleToggleActive}
-            className={cn('flex items-center gap-1 px-2 py-1 text-[8px] font-mono border rounded transition-colors',
+            className={cn('flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono border rounded transition-colors',
               doc.is_active
                 ? 'text-[#00ff88] border-[#00ff88]/30 hover:bg-[#00ff88]/10'
                 : 'text-[#666] border-[#333] hover:bg-[#333]/20'
             )}
           >
-            {doc.is_active ? <ToggleRight className="w-3 h-3" /> : <ToggleLeft className="w-3 h-3" />}
+            {doc.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
             {doc.is_active ? 'ACTIVE' : 'INACTIVE'}
           </button>
           <button
             onClick={handleRegenEmbed}
             disabled={embedding}
-            className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] border border-[#222] rounded hover:text-[#ccc] disabled:opacity-50 transition-colors"
           >
-            {embedding ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <RefreshCw className="w-2.5 h-2.5" />}
+            {embedding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             REGENERATE EMBEDDING
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#f05050] border border-[#f05050]/30 rounded hover:bg-[#f05050]/10 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#f05050] border border-[#f05050]/30 rounded hover:bg-[#f05050]/10 transition-colors"
           >
-            <Trash2 className="w-2.5 h-2.5" /> DELETE
+            <Trash2 className="w-3.5 h-3.5" /> DELETE
           </button>
         </div>
       )}
@@ -571,20 +571,20 @@ function DocumentViewer({
       {/* Delete confirmation */}
       {showDeleteConfirm && (
         <div className="mb-4 p-3 bg-[#f05050]/5 border border-[#f05050]/20 rounded-lg">
-          <p className="text-[10px] font-mono text-[#f05050] mb-2">
+          <p className="text-[13px] font-mono text-[#f05050] mb-2">
             Delete &quot;{doc.title}&quot; and all its chunks? This cannot be undone.
           </p>
           <div className="flex gap-2">
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="px-3 py-1 bg-[#f05050]/10 border border-[#f05050]/30 rounded text-[8px] font-mono text-[#f05050] hover:bg-[#f05050]/20 disabled:opacity-50"
+              className="px-3 py-1 bg-[#f05050]/10 border border-[#f05050]/30 rounded text-[11px] font-mono text-[#f05050] hover:bg-[#f05050]/20 disabled:opacity-50"
             >
-              {deleting ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'YES, DELETE'}
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'YES, DELETE'}
             </button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
-              className="px-3 py-1 text-[8px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]"
+              className="px-3 py-1 text-[11px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]"
             >
               CANCEL
             </button>
@@ -599,17 +599,17 @@ function DocumentViewer({
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
             rows={24}
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-4 py-3 text-[11px] font-mono text-[#ccc] leading-relaxed outline-none resize-y focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-4 py-3 text-sm font-mono text-[#ccc] leading-relaxed outline-none resize-y focus:border-[#00ff88]/30"
           />
         ) : (
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg px-4 py-3 max-h-[500px] overflow-y-auto">
-            <pre className="text-[11px] font-mono text-[#ccc] leading-relaxed whitespace-pre-wrap break-words">
+            <pre className="text-sm font-mono text-[#ccc] leading-relaxed whitespace-pre-wrap break-words">
               {doc.content}
             </pre>
           </div>
         )}
         {editing && (
-          <span className="text-[8px] font-mono text-[#444] mt-1 block">{editContent.length.toLocaleString()} characters</span>
+          <span className="text-[11px] font-mono text-[#444] mt-1 block">{editContent.length.toLocaleString()} characters</span>
         )}
       </div>
 
@@ -622,10 +622,10 @@ function DocumentViewer({
       {!editing && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mt-6">
           <div className="flex items-center gap-1.5 mb-3">
-            <Zap className="w-3 h-3 text-[#00ff88]" />
-            <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Test Retrieval</span>
+            <Zap className="w-4 h-4 text-[#00ff88]" />
+            <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">Test Retrieval</span>
           </div>
-          <p className="text-[8px] font-mono text-[#555] mb-3">
+          <p className="text-[11px] font-mono text-[#555] mb-3">
             Enter a sample message to see what the AI would retrieve from the entire knowledge base.
           </p>
           <div className="flex gap-2 mb-3">
@@ -634,36 +634,36 @@ function DocumentViewer({
               onChange={(e) => { setTestQuery(e.target.value); setTestResults(null) }}
               placeholder="e.g., How much does the program cost?"
               onKeyDown={(e) => e.key === 'Enter' && runTestRetrieval()}
-              className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+              className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
             />
             <button
               onClick={runTestRetrieval}
               disabled={testing || !testQuery}
-              className="px-3 py-1.5 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
+              className="px-3 py-1.5 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
             >
-              {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : 'TEST'}
+              {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'TEST'}
             </button>
           </div>
           {testResults !== null && (
             <div className="space-y-2">
               {testResults.length === 0 ? (
-                <p className="text-[10px] font-mono text-[#555]">No matches found. Try a different query or lower the similarity threshold.</p>
+                <p className="text-[13px] font-mono text-[#555]">No matches found. Try a different query or lower the similarity threshold.</p>
               ) : (
                 testResults.map((r, i) => (
                   <div key={r.id} className="p-2.5 bg-[#111] rounded border border-[#1a1a1a]">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[8px] font-mono text-[#555]">#{i + 1}</span>
-                      <span className="text-[10px] font-mono font-bold text-[#f0f0f0]">{r.title}</span>
-                      <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded border', TYPE_COLORS[r.type])}>
+                      <span className="text-[11px] font-mono text-[#555]">#{i + 1}</span>
+                      <span className="text-[13px] font-mono font-bold text-[#f0f0f0]">{r.title}</span>
+                      <span className={cn('text-[10px] font-mono uppercase px-1 py-0.5 rounded border', TYPE_COLORS[r.type])}>
                         {r.type}
                       </span>
-                      <span className={cn('text-[9px] font-mono font-bold ml-auto',
+                      <span className={cn('text-xs font-mono font-bold ml-auto',
                         r.similarity >= 80 ? 'text-[#00ff88]' : r.similarity >= 60 ? 'text-[#ff9f43]' : 'text-[#f05050]'
                       )}>
                         {r.similarity}%
                       </span>
                     </div>
-                    <p className="text-[9px] font-mono text-[#888] leading-relaxed">{r.content}</p>
+                    <p className="text-xs font-mono text-[#888] leading-relaxed">{r.content}</p>
                   </div>
                 ))
               )}
@@ -685,15 +685,15 @@ function ChunksSection({ chunks }: { chunks: DocDetail['chunks'] }) {
     <div className="mb-4">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-[9px] font-mono text-[#666] hover:text-[#ccc] transition-colors"
+        className="flex items-center gap-1 text-xs font-mono text-[#666] hover:text-[#ccc] transition-colors"
       >
-        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {chunks.length} CHUNKS
       </button>
       {open && (
         <div className="mt-2 space-y-1 pl-4">
           {chunks.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 text-[9px] font-mono py-1">
+            <div key={c.id} className="flex items-center gap-3 text-xs font-mono py-1">
               <span className="text-[#888]">{c.title}</span>
               <span className="text-[#555]">{c.char_count.toLocaleString()} chars</span>
               <span className={c.has_embedding ? 'text-[#00ff88]' : 'text-[#f05050]'}>
@@ -802,7 +802,7 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
         <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
           <div className="flex items-center gap-2">
             <Upload className="w-4 h-4 text-[#00ff88]" />
-            <span className="text-[11px] font-mono font-bold text-[#f0f0f0]">Add Document</span>
+            <span className="text-sm font-mono font-bold text-[#f0f0f0]">Add Document</span>
           </div>
           <button onClick={onClose} className="text-[#444] hover:text-[#888]">
             <X className="w-4 h-4" />
@@ -813,20 +813,20 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           {/* Title + Type */}
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Title</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Title</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Document title"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
               />
             </div>
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Type</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as DocType)}
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none"
               >
                 <option value="offer">Offer</option>
                 <option value="script">Script</option>
@@ -841,19 +841,19 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           <div className="flex gap-2">
             <button
               onClick={() => setMode('file')}
-              className={cn('px-3 py-1 rounded text-[9px] font-mono border transition-colors',
+              className={cn('px-3 py-1 rounded text-xs font-mono border transition-colors',
                 mode === 'file' ? 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/5' : 'text-[#666] border-[#222]'
               )}
             >
-              <Upload className="w-3 h-3 inline mr-1" /> Upload File
+              <Upload className="w-4 h-4 inline mr-1" /> Upload File
             </button>
             <button
               onClick={() => setMode('paste')}
-              className={cn('px-3 py-1 rounded text-[9px] font-mono border transition-colors',
+              className={cn('px-3 py-1 rounded text-xs font-mono border transition-colors',
                 mode === 'paste' ? 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/5' : 'text-[#666] border-[#222]'
               )}
             >
-              <FileText className="w-3 h-3 inline mr-1" /> Paste Text
+              <FileText className="w-4 h-4 inline mr-1" /> Paste Text
             </button>
           </div>
 
@@ -866,9 +866,9 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               className="border-2 border-dashed border-[#222] rounded-lg p-8 text-center cursor-pointer hover:border-[#00ff88]/30 transition-colors"
             >
               <Upload className="w-6 h-6 text-[#333] mx-auto mb-2" />
-              <p className="text-[10px] font-mono text-[#666] mb-1">Drop a file here or click to browse</p>
-              <p className="text-[8px] font-mono text-[#444]">.txt, .md, .json, .csv supported directly</p>
-              <p className="text-[8px] font-mono text-[#444]">.pdf, .docx — paste content manually</p>
+              <p className="text-[13px] font-mono text-[#666] mb-1">Drop a file here or click to browse</p>
+              <p className="text-[11px] font-mono text-[#444]">.txt, .md, .json, .csv supported directly</p>
+              <p className="text-[11px] font-mono text-[#444]">.pdf, .docx — paste content manually</p>
               <input
                 ref={fileRef}
                 type="file"
@@ -882,13 +882,13 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           {/* Paste zone */}
           {mode === 'paste' && (
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Content</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Content</label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={14}
                 placeholder="Paste your document content here..."
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-y focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-y focus:border-[#00ff88]/30"
               />
             </div>
           )}
@@ -897,37 +897,37 @@ function UploadModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           {mode === 'file' && content && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-[8px] font-mono text-[#555] uppercase">Preview ({content.length.toLocaleString()} chars)</label>
+                <label className="text-[11px] font-mono text-[#555] uppercase">Preview ({content.length.toLocaleString()} chars)</label>
                 <button
                   onClick={() => setMode('paste')}
-                  className="text-[8px] font-mono text-[#666] hover:text-[#ccc]"
+                  className="text-[11px] font-mono text-[#666] hover:text-[#ccc]"
                 >
-                  <Eye className="w-2.5 h-2.5 inline mr-0.5" /> Edit content
+                  <Eye className="w-3.5 h-3.5 inline mr-0.5" /> Edit content
                 </button>
               </div>
-              <pre className="bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#888] max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words">
+              <pre className="bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#888] max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words">
                 {content.slice(0, 3000)}{content.length > 3000 ? '\n\n... (truncated preview)' : ''}
               </pre>
             </div>
           )}
 
-          {error && <p className="text-[9px] font-mono text-[#f05050]">{error}</p>}
+          {error && <p className="text-xs font-mono text-[#f05050]">{error}</p>}
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-[#1a1a1a]">
-            <span className="text-[8px] font-mono text-[#444]">
+            <span className="text-[11px] font-mono text-[#444]">
               {content ? `${content.length.toLocaleString()} chars · ~${Math.ceil(content.length / 4000)} chunk(s)` : 'No content yet'}
             </span>
             <div className="flex gap-2">
-              <button onClick={onClose} className="px-3 py-1.5 text-[9px] font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
+              <button onClick={onClose} className="px-3 py-1.5 text-xs font-mono text-[#666] border border-[#222] rounded hover:text-[#ccc]">
                 CANCEL
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !title || !content}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[9px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-xs font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
               >
-                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 SAVE & EMBED
               </button>
             </div>
@@ -959,7 +959,7 @@ function GuidePanel({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Knowledge Base Guide</h2>
-          <p className="text-[10px] font-mono text-[#555]">How to build a high-performing AI knowledge base for Lars.</p>
+          <p className="text-[13px] font-mono text-[#555]">How to build a high-performing AI knowledge base for Lars.</p>
         </div>
         <button onClick={onClose} className="text-[#444] hover:text-[#888]">
           <X className="w-4 h-4" />
@@ -975,19 +975,19 @@ function GuidePanel({ onClose }: { onClose: () => void }) {
               className="w-full flex items-center justify-between p-3 hover:bg-[#0d0d0d] transition-colors"
             >
               <div className="flex items-center gap-2">
-                <span className={cn('text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border',
+                <span className={cn('text-[11px] font-mono uppercase px-1.5 py-0.5 rounded border',
                   TYPE_COLORS[section.type.toLowerCase()])}>
                   {section.type}
                 </span>
-                <span className="text-[10px] font-mono text-[#ccc]">{section.title}</span>
+                <span className="text-[13px] font-mono text-[#ccc]">{section.title}</span>
               </div>
-              {openSections.has(i) ? <ChevronDown className="w-3 h-3 text-[#555]" /> : <ChevronRight className="w-3 h-3 text-[#555]" />}
+              {openSections.has(i) ? <ChevronDown className="w-4 h-4 text-[#555]" /> : <ChevronRight className="w-4 h-4 text-[#555]" />}
             </button>
             {openSections.has(i) && (
               <div className="px-3 pb-3 pt-0">
                 <ul className="space-y-1.5">
                   {section.tips.map((tip, j) => (
-                    <li key={j} className="flex gap-2 text-[9px] font-mono text-[#888] leading-relaxed">
+                    <li key={j} className="flex gap-2 text-xs font-mono text-[#888] leading-relaxed">
                       <span className="text-[#00ff88] shrink-0 mt-0.5">→</span>
                       {tip}
                     </li>
@@ -1001,7 +1001,7 @@ function GuidePanel({ onClose }: { onClose: () => void }) {
 
       {/* Best practices */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4">
-        <h3 className="text-[10px] font-mono font-bold text-[#f0f0f0] mb-3">Best Practices</h3>
+        <h3 className="text-[13px] font-mono font-bold text-[#f0f0f0] mb-3">Best Practices</h3>
         <ul className="space-y-2">
           {[
             'Write in first person as Lars — "I always tell my clients..." not "Lars tells his clients..."',
@@ -1012,7 +1012,7 @@ function GuidePanel({ onClose }: { onClose: () => void }) {
             'Label training examples clearly — [GOOD: led to booking] or [BAD: lead went cold]',
             'Test retrieval after adding content — use the Test Retrieval tool to verify the AI finds the right info',
           ].map((tip, i) => (
-            <li key={i} className="flex gap-2 text-[9px] font-mono text-[#888] leading-relaxed">
+            <li key={i} className="flex gap-2 text-xs font-mono text-[#888] leading-relaxed">
               <span className="text-[#00ff88] shrink-0 mt-0.5">✓</span>
               {tip}
             </li>

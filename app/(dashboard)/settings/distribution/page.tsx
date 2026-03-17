@@ -149,18 +149,18 @@ export default function DistributionPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Distribution Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Configure how incoming leads are distributed between setters.</p>
+      <p className="text-[13px] font-mono text-[#555] mb-6">Configure how incoming leads are distributed between setters.</p>
 
       {/* Distribution mode */}
       <div className="mb-6">
-        <label className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2 block">Distribution Mode</label>
+        <label className="text-xs font-mono text-[#666] uppercase tracking-wider mb-2 block">Distribution Mode</label>
         <div className="flex gap-2">
           {['percentage', 'round_robin', 'load_based'].map((mode) => (
             <button
               key={mode}
               onClick={() => setSettings((p) => ({ ...p, distribution_mode: mode }))}
               className={cn(
-                'px-3 py-1.5 rounded text-[10px] font-mono border transition-colors',
+                'px-3 py-1.5 rounded text-[13px] font-mono border transition-colors',
                 settings.distribution_mode === mode
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30'
                   : 'text-[#666] border-[#222] hover:border-[#444]'
@@ -175,12 +175,12 @@ export default function DistributionPage() {
       {/* Active Setters section */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-[9px] font-mono text-[#666] uppercase tracking-wider">Active Setters</label>
+          <label className="text-xs font-mono text-[#666] uppercase tracking-wider">Active Setters</label>
           <button
             onClick={autoBalance}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[9px] font-mono text-[#888] border border-[#222] hover:border-[#444] transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono text-[#888] border border-[#222] hover:border-[#444] transition-colors"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-4 h-4" />
             AUTO-BALANCE
           </button>
         </div>
@@ -204,7 +204,7 @@ export default function DistributionPage() {
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${color}15` }}
                 >
-                  <span className="text-[10px] font-mono font-bold" style={{ color }}>
+                  <span className="text-[13px] font-mono font-bold" style={{ color }}>
                     {row.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -212,8 +212,8 @@ export default function DistributionPage() {
                 {/* Name + role */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono text-[#ccc] truncate">{row.name}</span>
-                    <span className="text-[8px] font-mono uppercase text-[#444]">{row.role}</span>
+                    <span className="text-sm font-mono text-[#ccc] truncate">{row.name}</span>
+                    <span className="text-[11px] font-mono uppercase text-[#444]">{row.role}</span>
                     {row.status && (
                       <div className={cn(
                         'w-1.5 h-1.5 rounded-full',
@@ -232,7 +232,7 @@ export default function DistributionPage() {
                   )}
                 >
                   <div className={cn(
-                    'absolute top-0.5 w-3 h-3 rounded-full transition-all',
+                    'absolute top-0.5 w-4 h-4 rounded-full transition-all',
                     row.receives_leads ? 'left-4 bg-[#00ff88]' : 'left-0.5 bg-[#555]'
                   )} />
                 </button>
@@ -245,9 +245,9 @@ export default function DistributionPage() {
                     value={row.pct}
                     disabled={!row.receives_leads}
                     onChange={(e) => updatePct(idx, parseInt(e.target.value) || 0)}
-                    className="w-12 bg-[#111] border border-[#222] rounded px-1.5 py-0.5 text-[11px] font-mono text-center text-[#ccc] disabled:opacity-30 outline-none focus:border-[#00ff88]/40"
+                    className="w-12 bg-[#111] border border-[#222] rounded px-1.5 py-0.5 text-sm font-mono text-center text-[#ccc] disabled:opacity-30 outline-none focus:border-[#00ff88]/40"
                   />
-                  <span className="text-[10px] font-mono text-[#444]">%</span>
+                  <span className="text-[13px] font-mono text-[#444]">%</span>
                 </div>
               </div>
             )
@@ -261,7 +261,7 @@ export default function DistributionPage() {
         isValid ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-[#f05050]/5 border-[#f05050]/20'
       )}>
         {!isValid && <AlertCircle className="w-3.5 h-3.5 text-[#f05050]" />}
-        <span className={cn('text-[10px] font-mono', isValid ? 'text-[#00ff88]' : 'text-[#f05050]')}>
+        <span className={cn('text-[13px] font-mono', isValid ? 'text-[#00ff88]' : 'text-[#f05050]')}>
           Total: {totalPct}% {isValid ? '— Valid' : `— Must equal 100% (off by ${totalPct - 100 > 0 ? '+' : ''}${totalPct - 100})`}
         </span>
       </div>
@@ -283,11 +283,11 @@ export default function DistributionPage() {
 
       {/* Preview */}
       <div className="bg-[#0d0d0d] rounded-lg border border-[#1a1a1a] p-3 mb-6 space-y-1.5">
-        <span className="text-[8px] font-mono text-[#555] uppercase tracking-wider">Preview</span>
-        <p className="text-[10px] font-mono text-[#888]">
+        <span className="text-[11px] font-mono text-[#555] uppercase tracking-wider">Preview</span>
+        <p className="text-[13px] font-mono text-[#888]">
           All active setters online: {activeRows.map((r) => `${r.name}=${r.pct}%`).join(', ')}
         </p>
-        <p className="text-[10px] font-mono text-[#666]">
+        <p className="text-[13px] font-mono text-[#666]">
           All setters offline: leads queued as unassigned
         </p>
       </div>
@@ -295,9 +295,9 @@ export default function DistributionPage() {
       <button
         onClick={save}
         disabled={!isValid || saving}
-        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
       >
-        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         SAVE CHANGES
       </button>
     </div>

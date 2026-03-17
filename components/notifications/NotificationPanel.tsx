@@ -83,11 +83,11 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
         <div className="px-4 py-2 border-b border-[#1a1a1a] flex items-center justify-between">
           <button
             onClick={markAllAsRead}
-            className="text-[#00ff88] text-[10px] font-mono uppercase tracking-wider hover:text-[#00cc6a] transition-colors"
+            className="text-[#00ff88] text-[13px] font-mono uppercase tracking-wider hover:text-[#00cc6a] transition-colors"
           >
             Mark all read
           </button>
-          <Filter className="w-3 h-3 text-[#444]" />
+          <Filter className="w-4 h-4 text-[#444]" />
         </div>
 
         {/* Type filters */}
@@ -97,7 +97,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
               key={f.value}
               onClick={() => setActiveFilter(f.value)}
               className={cn(
-                'px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider transition-colors',
+                'px-2 py-0.5 rounded text-xs font-mono uppercase tracking-wider transition-colors',
                 activeFilter === f.value
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
                   : 'text-[#555] hover:text-[#888] border border-[#1a1a1a]'
@@ -121,7 +121,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             ) : (
               groups.map((group) => (
                 <div key={group.label} className="mb-3">
-                  <p className="text-[#333] text-[9px] font-mono uppercase tracking-widest px-2 py-1.5">
+                  <p className="text-[#333] text-xs font-mono uppercase tracking-widest px-2 py-1.5">
                     {group.label}
                   </p>
                   {group.items.map((n) => (
@@ -173,7 +173,7 @@ function NotificationItem({
         <p className="text-[#f0f0f0] text-xs font-mono leading-relaxed">
           {notification.message}
         </p>
-        <p className="text-[#444] text-[10px] font-mono mt-1">{timeAgo}</p>
+        <p className="text-[#444] text-[13px] font-mono mt-1">{timeAgo}</p>
       </div>
       {!notification.read && (
         <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] mt-1.5 shrink-0" />

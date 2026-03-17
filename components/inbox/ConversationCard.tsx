@@ -49,17 +49,17 @@ export function ConversationCard({ conversation, isActive, onClick }: Conversati
               @{lead.username}
             </span>
           </div>
-          <span className="text-[#444] text-[9px] font-mono shrink-0">{timeAgo}</span>
+          <span className="text-[#444] text-xs font-mono shrink-0">{timeAgo}</span>
         </div>
 
         {/* Full name */}
         {lead.full_name && (
-          <p className="text-[#555] text-[10px] font-mono truncate">{lead.full_name}</p>
+          <p className="text-[#555] text-[13px] font-mono truncate">{lead.full_name}</p>
         )}
 
         {/* Message preview */}
         <p className={cn(
-          'text-[10px] font-mono truncate mt-0.5',
+          'text-[13px] font-mono truncate mt-0.5',
           unread_count > 0 ? 'text-[#999]' : 'text-[#444]'
         )}>
           {preview}
@@ -68,14 +68,14 @@ export function ConversationCard({ conversation, isActive, onClick }: Conversati
         {/* Bottom row: badges */}
         <div className="flex items-center gap-1.5 mt-1.5">
           <HeatScore score={lead.heat_score} size="sm" />
-          <Badge variant="stage" className="text-[8px] py-0 px-1">
+          <Badge variant="stage" className="text-[11px] py-0 px-1">
             {lead.stage.replace('_', ' ')}
           </Badge>
-          <Badge variant="source" className="text-[8px] py-0 px-1">
+          <Badge variant="source" className="text-[11px] py-0 px-1">
             {lead.source}
           </Badge>
           {unread_count > 0 && (
-            <span className="ml-auto w-4 h-4 bg-[#00ff88] rounded-full flex items-center justify-center text-[8px] font-mono text-black font-bold">
+            <span className="ml-auto w-4 h-4 bg-[#00ff88] rounded-full flex items-center justify-center text-[11px] font-mono text-black font-bold">
               {unread_count > 9 ? '9+' : unread_count}
             </span>
           )}

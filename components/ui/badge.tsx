@@ -23,7 +23,7 @@ export function Badge({ children, variant = 'default', className, pulse }: Badge
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border',
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[13px] font-mono uppercase tracking-wider border',
         variantStyles[variant],
         pulse && 'animate-pulse',
         className

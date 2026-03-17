@@ -57,7 +57,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       <div className="w-[220px] border-r border-[#1a1a1a] bg-[#0a0a0a] flex flex-col shrink-0 overflow-y-auto">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1a1a1a]">
           <Settings className="w-3.5 h-3.5 text-[#00ff88]" />
-          <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-wider font-bold">Settings</span>
+          <span className="text-[13px] font-mono text-[#00ff88] uppercase tracking-wider font-bold">Settings</span>
         </div>
         <nav className="py-1">
           {navItems.map((item) => {
@@ -67,13 +67,13 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2.5 px-4 py-2 text-[10px] font-mono transition-colors',
+                  'flex items-center gap-2.5 px-4 py-2 text-[13px] font-mono transition-colors',
                   isActive
                     ? 'text-[#00ff88] bg-[#00ff88]/[0.05] border-r-2 border-r-[#00ff88]'
                     : 'text-[#666] hover:text-[#999] hover:bg-[#0d0d0d]'
                 )}
               >
-                <item.icon className="w-3 h-3 shrink-0" />
+                <item.icon className="w-4 h-4 shrink-0" />
                 {item.label}
               </Link>
             )

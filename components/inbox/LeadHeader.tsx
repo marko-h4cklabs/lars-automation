@@ -46,22 +46,22 @@ export function LeadHeader({ lead, onStageChange }: LeadHeaderProps) {
             @{lead.username}
           </span>
           {isUnassigned ? (
-            <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5 bg-[#f0a030]/20 text-[#f0a030] border-[#f0a030]/30">
+            <Badge variant="default" className="text-[11px] py-0 px-1.5 gap-0.5 bg-[#f0a030]/20 text-[#f0a030] border-[#f0a030]/30">
               UNASSIGNED
             </Badge>
           ) : (
-            <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5">
-              <UserRound className="w-2.5 h-2.5" />
+            <Badge variant="default" className="text-[11px] py-0 px-1.5 gap-0.5">
+              <UserRound className="w-3.5 h-3.5" />
               ASSIGNED
             </Badge>
           )}
         </div>
         {lead.full_name && (
-          <p className="text-[#555] text-[10px] font-mono truncate">{lead.full_name}</p>
+          <p className="text-[#555] text-[13px] font-mono truncate">{lead.full_name}</p>
         )}
         <div className="flex items-center gap-2 mt-1">
           <HeatScore score={lead.heat_score} size="sm" />
-          <span className="text-[#444] text-[9px] font-mono">
+          <span className="text-[#444] text-xs font-mono">
             {lead.follower_count ? `${(lead.follower_count / 1000).toFixed(1)}k followers` : ''}
           </span>
         </div>
@@ -73,10 +73,10 @@ export function LeadHeader({ lead, onStageChange }: LeadHeaderProps) {
         <div className="relative">
           <button
             onClick={() => setStageOpen(!stageOpen)}
-            className="flex items-center gap-1 px-2 py-1 bg-[#111] border border-[#222] rounded text-[9px] font-mono text-[#888] hover:text-[#ccc] transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[#111] border border-[#222] rounded text-xs font-mono text-[#888] hover:text-[#ccc] transition-colors"
           >
             {lead.stage.replace('_', ' ').toUpperCase()}
-            <ChevronDown className="w-2.5 h-2.5" />
+            <ChevronDown className="w-3.5 h-3.5" />
           </button>
           {stageOpen && (
             <div className="absolute right-0 top-full mt-1 bg-[#111] border border-[#222] rounded shadow-xl z-50 min-w-[140px]">
@@ -88,7 +88,7 @@ export function LeadHeader({ lead, onStageChange }: LeadHeaderProps) {
                     setStageOpen(false)
                   }}
                   className={cn(
-                    'w-full text-left px-3 py-1.5 text-[9px] font-mono hover:bg-[#1a1a1a] transition-colors',
+                    'w-full text-left px-3 py-1.5 text-xs font-mono hover:bg-[#1a1a1a] transition-colors',
                     lead.stage === s.value ? 'text-[#00ff88]' : 'text-[#888]'
                   )}
                 >
@@ -101,8 +101,8 @@ export function LeadHeader({ lead, onStageChange }: LeadHeaderProps) {
 
         {/* Calendly link */}
         {lead.calendly_booked_at ? (
-          <Badge variant="booked" className="text-[8px] py-1 px-1.5 gap-0.5">
-            <Phone className="w-2.5 h-2.5" />
+          <Badge variant="booked" className="text-[11px] py-1 px-1.5 gap-0.5">
+            <Phone className="w-3.5 h-3.5" />
             BOOKED
           </Badge>
         ) : null}

@@ -17,9 +17,9 @@ export function QualificationFields({ fields, collected }: QualificationFieldsPr
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider">Qualification</span>
+        <span className="text-xs font-mono text-[#666] uppercase tracking-wider">Qualification</span>
         <span className={cn(
-          'text-[10px] font-mono font-bold',
+          'text-[13px] font-mono font-bold',
           pct === 100 ? 'text-[#00ff88]' : pct >= 50 ? 'text-[#f0a030]' : 'text-[#666]'
         )}>
           {filledCount}/{total} ({pct}%)
@@ -51,14 +51,14 @@ export function QualificationFields({ fields, collected }: QualificationFieldsPr
                 <Circle className="w-3.5 h-3.5 text-[#333] shrink-0" />
               )}
               <span className={cn(
-                'text-[10px] font-mono flex-1',
+                'text-[13px] font-mono flex-1',
                 isFilled ? 'text-[#999]' : 'text-[#555]'
               )}>
                 {field.field_label}
                 {field.is_required && <span className="text-[#f05050] ml-0.5">*</span>}
               </span>
               {isFilled && (
-                <span className="text-[10px] font-mono text-[#00ff88] truncate max-w-[140px]">
+                <span className="text-[13px] font-mono text-[#00ff88] truncate max-w-[140px]">
                   {String(value)}
                 </span>
               )}

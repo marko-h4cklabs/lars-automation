@@ -151,9 +151,9 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   if (!active || !payload) return null
   return (
     <div className="bg-[#111] border border-[#333] rounded px-3 py-2 shadow-xl">
-      <p className="text-[9px] font-mono text-[#666] mb-1">{label}</p>
+      <p className="text-xs font-mono text-[#666] mb-1">{label}</p>
       {payload.map((p) => (
-        <p key={p.name} className="text-[10px] font-mono" style={{ color: p.color }}>
+        <p key={p.name} className="text-[13px] font-mono" style={{ color: p.color }}>
           {p.name}: {p.value}
         </p>
       ))}
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                 key={p}
                 onClick={() => setPreset(p)}
                 className={cn(
-                  'px-3 py-1 rounded text-[9px] font-mono uppercase tracking-wider transition-colors',
+                  'px-3 py-1 rounded text-xs font-mono uppercase tracking-wider transition-colors',
                   preset === p
                     ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
                     : 'text-[#555] hover:text-[#888] border border-[#222]'
@@ -228,13 +228,13 @@ export default function DashboardPage() {
             <button
               onClick={() => setPreset('custom')}
               className={cn(
-                'px-2 py-1 rounded text-[9px] font-mono transition-colors',
+                'px-3 py-1.5 rounded text-xs font-mono transition-colors',
                 preset === 'custom'
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
                   : 'text-[#555] hover:text-[#888] border border-[#222]'
               )}
             >
-              <Calendar className="w-3 h-3" />
+              <Calendar className="w-4 h-4" />
             </button>
             {preset === 'custom' && (
               <div className="flex items-center gap-1">
@@ -242,14 +242,14 @@ export default function DashboardPage() {
                   type="date"
                   value={customFrom}
                   onChange={(e) => setCustomFrom(e.target.value)}
-                  className="bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc]"
+                  className="bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc]"
                 />
-                <span className="text-[#444] text-[9px]">→</span>
+                <span className="text-[#444] text-xs">→</span>
                 <input
                   type="date"
                   value={customTo}
                   onChange={(e) => setCustomTo(e.target.value)}
-                  className="bg-[#111] border border-[#222] rounded px-2 py-1 text-[9px] font-mono text-[#ccc]"
+                  className="bg-[#111] border border-[#222] rounded px-3 py-1.5 text-xs font-mono text-[#ccc]"
                 />
               </div>
             )}
@@ -288,13 +288,13 @@ export default function DashboardPage() {
               {/* Daily Volume */}
               <div className="col-span-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <MessageSquare className="w-3 h-3 text-[#00ff88]" />
-                  <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Daily Volume</span>
+                  <MessageSquare className="w-4 h-4 text-[#00ff88]" />
+                  <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Daily Volume</span>
                   <div className="flex items-center gap-3 ml-auto">
-                    <span className="flex items-center gap-1 text-[8px] font-mono text-[#00ff88]">
+                    <span className="flex items-center gap-1 text-[11px] font-mono text-[#00ff88]">
                       <span className="w-2 h-[2px] bg-[#00ff88] rounded" /> DMs
                     </span>
-                    <span className="flex items-center gap-1 text-[8px] font-mono text-[#ff9f43]">
+                    <span className="flex items-center gap-1 text-[11px] font-mono text-[#ff9f43]">
                       <span className="w-2 h-[2px] bg-[#ff9f43] rounded" /> Bookings
                     </span>
                   </div>
@@ -314,8 +314,8 @@ export default function DashboardPage() {
               {/* Stage Distribution Donut */}
               <div className="col-span-2 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-3 h-3 text-[#54a0ff]" />
-                  <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Lead Stages</span>
+                  <Users className="w-4 h-4 text-[#54a0ff]" />
+                  <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Lead Stages</span>
                 </div>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
@@ -343,8 +343,8 @@ export default function DashboardPage() {
                   {Object.entries(data?.stageDistribution || {}).map(([stage, count]) => (
                     <div key={stage} className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: STAGE_COLORS[stage] || '#333' }} />
-                      <span className="text-[7px] font-mono text-[#555]">{STAGE_LABELS[stage] || stage}</span>
-                      <span className="text-[7px] font-mono text-[#333]">{count}</span>
+                      <span className="text-[10px] font-mono text-[#555]">{STAGE_LABELS[stage] || stage}</span>
+                      <span className="text-[10px] font-mono text-[#333]">{count}</span>
                     </div>
                   ))}
                 </div>
@@ -354,23 +354,23 @@ export default function DashboardPage() {
             {/* ── ROW 3: Setter vs AI Performance ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-3 h-3 text-[#5f27cd]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Setter Performance</span>
+                <Shield className="w-4 h-4 text-[#5f27cd]" />
+                <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Setter Performance</span>
               </div>
               <ResponsiveTable>
-                <table className="w-full text-[10px] font-mono">
+                <table className="w-full text-[13px] font-mono">
                   <thead>
                     <tr className="border-b border-[#1a1a1a]">
-                      <th className="text-left text-[#444] py-2 px-3 uppercase tracking-wider text-[8px]">Metric</th>
+                      <th className="text-left text-[#444] py-2 px-3 uppercase tracking-wider text-[11px]">Metric</th>
                       {(data?.setterPerformance || []).map((p) => (
                         <th
                           key={p.id}
-                          className="text-center py-2 px-3 uppercase tracking-wider text-[8px] text-[#888]"
+                          className="text-center py-2 px-3 uppercase tracking-wider text-[11px] text-[#888]"
                         >
                           {p.name}
                         </th>
                       ))}
-                      <th className="text-center text-[#888] py-2 px-3 uppercase tracking-wider text-[8px]">Total</th>
+                      <th className="text-center text-[#888] py-2 px-3 uppercase tracking-wider text-[11px]">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -427,8 +427,8 @@ export default function DashboardPage() {
               {/* By Source */}
               <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <Zap className="w-3 h-3 text-[#ff9f43]" />
-                  <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Bookings by Source</span>
+                  <Zap className="w-4 h-4 text-[#ff9f43]" />
+                  <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Bookings by Source</span>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={Object.entries(data?.bookingsBySource || {}).map(([source, count]) => ({
@@ -452,8 +452,8 @@ export default function DashboardPage() {
               {/* By Hour */}
               <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <Activity className="w-3 h-3 text-[#54a0ff]" />
-                  <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Bookings by Hour</span>
+                  <Activity className="w-4 h-4 text-[#54a0ff]" />
+                  <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Bookings by Hour</span>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={(data?.bookingsByHour || new Array(24).fill(0)).map((count, hour) => ({
@@ -482,8 +482,8 @@ export default function DashboardPage() {
             {/* ── ROW 5: Conversion Funnel ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <UserCheck className="w-3 h-3 text-[#00ff88]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Conversion Funnel</span>
+                <UserCheck className="w-4 h-4 text-[#00ff88]" />
+                <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Conversion Funnel</span>
               </div>
               <FunnelChart funnel={data?.funnel || { totalDms: 0, replied: 0, qualifying: 0, callOffered: 0, booked: 0 }} />
             </div>
@@ -491,8 +491,8 @@ export default function DashboardPage() {
             {/* ── ROW 6: Copilot Performance ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-3 h-3 text-[#00ff88]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Copilot Performance</span>
+                <Sparkles className="w-4 h-4 text-[#00ff88]" />
+                <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Copilot Performance</span>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <MetricCard label="Suggestions Generated" value={data?.copilotMetrics?.generated ?? 0} />
@@ -510,20 +510,20 @@ export default function DashboardPage() {
             {/* ── ROW 9: Activity Feed ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Activity className="w-3 h-3 text-[#ff9f43]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Recent Activity</span>
+                <Activity className="w-4 h-4 text-[#ff9f43]" />
+                <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Recent Activity</span>
               </div>
               <div className="space-y-0 max-h-[300px] overflow-y-auto">
                 {(data?.activityFeed || []).length === 0 && (
-                  <p className="text-[10px] font-mono text-[#333] text-center py-6">No recent activity</p>
+                  <p className="text-[13px] font-mono text-[#333] text-center py-6">No recent activity</p>
                 )}
                 {(data?.activityFeed || []).map((event) => {
                   const Icon = ACTIVITY_ICONS[event.type] || Bell
                   return (
                     <div key={event.id} className="flex items-center gap-3 py-2 px-2 border-b border-[#111] last:border-0">
-                      <Icon className="w-3 h-3 text-[#444] shrink-0" />
-                      <span className="text-[10px] font-mono text-[#888] flex-1 truncate">{event.message}</span>
-                      <span className="text-[8px] font-mono text-[#333] shrink-0">{timeAgo(event.createdAt)}</span>
+                      <Icon className="w-4 h-4 text-[#444] shrink-0" />
+                      <span className="text-[13px] font-mono text-[#888] flex-1 truncate">{event.message}</span>
+                      <span className="text-[11px] font-mono text-[#333] shrink-0">{timeAgo(event.createdAt)}</span>
                     </div>
                   )
                 })}
@@ -570,17 +570,17 @@ function OutboundTriggerSection({ preset, customFrom, customTo }: { preset: Date
   return (
     <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Zap className="w-3 h-3 text-[#ff9f43]" />
-        <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Outbound Trigger Performance</span>
+        <Zap className="w-4 h-4 text-[#ff9f43]" />
+        <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Outbound Trigger Performance</span>
       </div>
       <div className="grid grid-cols-4 gap-3">
         {triggers.map((t) => {
           const color = t.replyRate >= 30 ? '#00ff88' : t.replyRate >= 15 ? '#ff9f43' : '#f05050'
           return (
             <div key={t.triggerType} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3">
-              <div className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-2">{t.label}</div>
+              <div className="text-xs font-mono text-[#666] uppercase tracking-wider mb-2">{t.label}</div>
               <div className="text-[18px] font-mono font-bold text-[#f0f0f0] mb-1">{t.replyRate}%</div>
-              <div className="text-[9px] font-mono text-[#444] mb-2">{t.sent} sent / {t.replied} replied</div>
+              <div className="text-xs font-mono text-[#444] mb-2">{t.sent} sent / {t.replied} replied</div>
               <div className="h-1.5 bg-[#111] rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
@@ -625,8 +625,8 @@ function LeadFlowSection({ preset, customFrom, customTo }: { preset: DatePreset;
   return (
     <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-3 h-3 text-[#54a0ff]" />
-        <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Lead Flow Performance</span>
+        <MessageSquare className="w-4 h-4 text-[#54a0ff]" />
+        <span className="text-xs font-mono text-[#555] uppercase tracking-wider">Lead Flow Performance</span>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {flows.map((flow) => {
@@ -634,13 +634,13 @@ function LeadFlowSection({ preset, customFrom, customTo }: { preset: DatePreset;
           const maxSparkline = Math.max(...flow.sparkline, 1)
           return (
             <div key={flow.id} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-3">
-              <div className="text-[9px] font-mono text-[#666] uppercase tracking-wider mb-1">{flow.label}</div>
-              <div className="text-[8px] font-mono text-[#333] mb-3">{flow.description}</div>
+              <div className="text-xs font-mono text-[#666] uppercase tracking-wider mb-1">{flow.label}</div>
+              <div className="text-[11px] font-mono text-[#333] mb-3">{flow.description}</div>
               <div className="flex items-end gap-1 mb-2">
                 <span className="text-[22px] font-mono font-bold" style={{ color }}>{flow.replyRate}%</span>
-                <span className="text-[9px] font-mono text-[#444] mb-1">reply rate</span>
+                <span className="text-xs font-mono text-[#444] mb-1">reply rate</span>
               </div>
-              <div className="text-[9px] font-mono text-[#555] mb-3">
+              <div className="text-xs font-mono text-[#555] mb-3">
                 {flow.sent} triggered / {flow.replied} replied
               </div>
               {/* Mini sparkline */}
@@ -656,7 +656,7 @@ function LeadFlowSection({ preset, customFrom, customTo }: { preset: DatePreset;
                   />
                 ))}
               </div>
-              <div className="text-[7px] font-mono text-[#333] mt-1">7-day trend</div>
+              <div className="text-[10px] font-mono text-[#333] mt-1">7-day trend</div>
             </div>
           )
         })}
@@ -690,7 +690,7 @@ function FunnelChart({ funnel }: { funnel: { totalDms: number; replied: number; 
         return (
           <div key={stage.label} className="flex items-center gap-3">
             <div className="w-24 text-right">
-              <span className="text-[9px] font-mono text-[#666]">{stage.label}</span>
+              <span className="text-xs font-mono text-[#666]">{stage.label}</span>
             </div>
             <div className="flex-1 relative">
               <div
@@ -701,14 +701,14 @@ function FunnelChart({ funnel }: { funnel: { totalDms: number; replied: number; 
                   borderLeft: `3px solid ${stage.color}`,
                 }}
               >
-                <span className="text-[11px] font-mono font-bold" style={{ color: stage.color }}>
+                <span className="text-sm font-mono font-bold" style={{ color: stage.color }}>
                   {stage.value}
                 </span>
               </div>
             </div>
             <div className="w-16 text-right">
               {i > 0 && (
-                <span className="text-[8px] font-mono text-[#f05050]">
+                <span className="text-[11px] font-mono text-[#f05050]">
                   −{dropPct}%
                 </span>
               )}

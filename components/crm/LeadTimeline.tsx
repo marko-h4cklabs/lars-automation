@@ -59,14 +59,14 @@ export function LeadTimeline({ leadId }: LeadTimelineProps) {
   if (loading) {
     return (
       <div className="flex items-center gap-2 py-4 justify-center">
-        <Loader2 className="w-3 h-3 animate-spin text-[#444]" />
-        <span className="text-[9px] font-mono text-[#444]">Loading timeline...</span>
+        <Loader2 className="w-4 h-4 animate-spin text-[#444]" />
+        <span className="text-xs font-mono text-[#444]">Loading timeline...</span>
       </div>
     )
   }
 
   if (events.length === 0) {
-    return <p className="text-[10px] font-mono text-[#444] italic py-4 text-center">No events yet</p>
+    return <p className="text-[13px] font-mono text-[#444] italic py-4 text-center">No events yet</p>
   }
 
   return (
@@ -85,17 +85,17 @@ export function LeadTimeline({ leadId }: LeadTimelineProps) {
                 'w-4 h-4 rounded-full bg-[#0a0a0a] border border-[#1a1a1a] flex items-center justify-center shrink-0 z-10',
                 color
               )}>
-                <Icon className="w-2.5 h-2.5" />
+                <Icon className="w-3.5 h-3.5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-mono text-[#ccc]">{event.title}</span>
-                  <span className="text-[8px] font-mono text-[#333] shrink-0">
+                  <span className="text-[13px] font-mono text-[#ccc]">{event.title}</span>
+                  <span className="text-[11px] font-mono text-[#333] shrink-0">
                     {formatEventTime(event.timestamp)}
                   </span>
                 </div>
                 {event.detail && (
-                  <p className="text-[9px] font-mono text-[#555] mt-0.5 truncate">{event.detail}</p>
+                  <p className="text-xs font-mono text-[#555] mt-0.5 truncate">{event.detail}</p>
                 )}
               </div>
             </div>

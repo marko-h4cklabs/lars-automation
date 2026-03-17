@@ -123,19 +123,19 @@ export default function NotificationsPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Notification Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">
+      <p className="text-[13px] font-mono text-[#555] mb-6">
         Configure Slack integration, notification preferences, and alert behavior.
       </p>
 
       {/* ═══ Slack Webhooks ═══ */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6 space-y-4">
-        <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">
+        <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">
           Slack Webhooks
         </span>
 
         {/* Alerts Webhook */}
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">
             Alerts Webhook URL (Hot Leads + Bookings)
           </label>
           <input
@@ -144,26 +144,26 @@ export default function NotificationsPage() {
             onChange={(e) =>
               setSettings((p) => ({ ...p, slack_webhook_alerts: e.target.value }))
             }
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="https://hooks.slack.com/services/..."
           />
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => testSlack('alerts')}
               disabled={testing === 'alerts'}
-              className="flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
             >
               {testing === 'alerts' ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Send className="w-3 h-3" />
+                <Send className="w-4 h-4" />
               )}{' '}
               TEST ALERTS
             </button>
             {testResult && testing === null && (
               <span
                 className={cn(
-                  'text-[9px] font-mono',
+                  'text-xs font-mono',
                   testResult.includes('sent') ? 'text-[#00ff88]' : 'text-[#f05050]'
                 )}
               >
@@ -175,7 +175,7 @@ export default function NotificationsPage() {
 
         {/* System Webhook */}
         <div>
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">
             System Webhook URL (Offline + AI Takeover) — optional, falls back to Alerts
           </label>
           <input
@@ -184,19 +184,19 @@ export default function NotificationsPage() {
             onChange={(e) =>
               setSettings((p) => ({ ...p, slack_webhook_system: e.target.value }))
             }
-            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+            className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
             placeholder="https://hooks.slack.com/services/... (optional)"
           />
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => testSlack('system')}
               disabled={testing === 'system'}
-              className="flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50"
             >
               {testing === 'system' ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Send className="w-3 h-3" />
+                <Send className="w-4 h-4" />
               )}{' '}
               TEST SYSTEM
             </button>
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
         />
 
         <div className="pl-4 border-l-2 border-[#1a1a1a]">
-          <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">
+          <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">
             Hot Lead Threshold
           </label>
           <div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function NotificationsPage() {
               }
               className="flex-1 h-1 accent-[#00ff88]"
             />
-            <span className="text-[10px] font-mono text-[#00ff88] font-bold w-8">
+            <span className="text-[13px] font-mono text-[#00ff88] font-bold w-8">
               {settings.hot_lead_threshold}
             </span>
           </div>
@@ -255,26 +255,26 @@ export default function NotificationsPage() {
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider block">
+            <span className="text-xs font-mono text-[#666] uppercase tracking-wider block">
               Sound Alert
             </span>
-            <span className="text-[8px] font-mono text-[#444]">
+            <span className="text-[11px] font-mono text-[#444]">
               Play sound for Hot Lead and Call Booked notifications
             </span>
           </div>
           <button
             onClick={toggleSound}
             className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[9px] font-mono border transition-colors',
+              'flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors',
               soundEnabled
                 ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30'
                 : 'text-[#555] border-[#1a1a1a]'
             )}
           >
             {soundEnabled ? (
-              <Volume2 className="w-3 h-3" />
+              <Volume2 className="w-4 h-4" />
             ) : (
-              <VolumeX className="w-3 h-3" />
+              <VolumeX className="w-4 h-4" />
             )}
             {soundEnabled ? 'ON' : 'OFF'}
           </button>
@@ -283,30 +283,30 @@ export default function NotificationsPage() {
 
       {/* ═══ Do Not Disturb ═══ */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4 mb-6">
-        <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider">
+        <span className="text-xs font-mono text-[#666] uppercase tracking-wider">
           Do Not Disturb (suppresses Slack only)
         </span>
         <div className="flex gap-3 mt-2">
           <div>
-            <label className="text-[8px] font-mono text-[#555] block mb-1">Start</label>
+            <label className="text-[11px] font-mono text-[#555] block mb-1">Start</label>
             <input
               type="time"
               value={settings.dnd_start}
               onChange={(e) =>
                 setSettings((p) => ({ ...p, dnd_start: e.target.value }))
               }
-              className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-1 text-[10px] font-mono text-[#ccc] outline-none"
+              className="bg-[#111] border border-[#1a1a1a] rounded px-3 py-1.5 text-[13px] font-mono text-[#ccc] outline-none"
             />
           </div>
           <div>
-            <label className="text-[8px] font-mono text-[#555] block mb-1">End</label>
+            <label className="text-[11px] font-mono text-[#555] block mb-1">End</label>
             <input
               type="time"
               value={settings.dnd_end}
               onChange={(e) =>
                 setSettings((p) => ({ ...p, dnd_end: e.target.value }))
               }
-              className="bg-[#111] border border-[#1a1a1a] rounded px-2 py-1 text-[10px] font-mono text-[#ccc] outline-none"
+              className="bg-[#111] border border-[#1a1a1a] rounded px-3 py-1.5 text-[13px] font-mono text-[#ccc] outline-none"
             />
           </div>
         </div>
@@ -316,12 +316,12 @@ export default function NotificationsPage() {
       <button
         onClick={save}
         disabled={saving}
-        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
       >
         {saving ? (
-          <Loader2 className="w-3 h-3 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <Save className="w-3 h-3" />
+          <Save className="w-4 h-4" />
         )}{' '}
         SAVE SETTINGS
       </button>
@@ -343,8 +343,8 @@ function NotifType({
   return (
     <div className="flex items-center justify-between">
       <div>
-        <span className="text-[10px] font-mono text-[#ccc] block">{label}</span>
-        <span className="text-[8px] font-mono text-[#555]">{desc}</span>
+        <span className="text-[13px] font-mono text-[#ccc] block">{label}</span>
+        <span className="text-[11px] font-mono text-[#555]">{desc}</span>
       </div>
       <div className="flex gap-1">
         {MODE_OPTIONS.map((opt) => (
@@ -352,7 +352,7 @@ function NotifType({
             key={opt.value}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'px-2 py-1 rounded text-[8px] font-mono border transition-colors',
+              'px-3 py-1.5 rounded text-[11px] font-mono border transition-colors',
               value === opt.value
                 ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30'
                 : 'text-[#555] border-[#1a1a1a] hover:border-[#333]'

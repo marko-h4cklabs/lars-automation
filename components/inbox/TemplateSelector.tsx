@@ -88,9 +88,9 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[#1a1a1a] shrink-0">
         <div className="flex items-center gap-1.5">
-          <FileText className="w-3 h-3 text-[#00ff88]" />
-          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Templates</span>
-          <span className="text-[8px] font-mono text-[#444]">({filtered.length})</span>
+          <FileText className="w-4 h-4 text-[#00ff88]" />
+          <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">Templates</span>
+          <span className="text-[11px] font-mono text-[#444]">({filtered.length})</span>
         </div>
         <button onClick={onClose} className="text-[#444] hover:text-[#888]">
           <X className="w-3.5 h-3.5" />
@@ -99,13 +99,13 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
 
       {/* Search + categories */}
       <div className="px-3 py-2 border-b border-[#111] space-y-2 shrink-0">
-        <div className="flex items-center gap-2 bg-[#111] rounded px-2 py-1">
-          <Search className="w-3 h-3 text-[#444]" />
+        <div className="flex items-center gap-2 bg-[#111] rounded px-3 py-1.5">
+          <Search className="w-4 h-4 text-[#444]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search templates..."
-            className="bg-transparent text-[#ccc] text-[10px] font-mono placeholder:text-[#333] outline-none flex-1"
+            className="bg-transparent text-[#ccc] text-[13px] font-mono placeholder:text-[#333] outline-none flex-1"
             autoFocus
           />
         </div>
@@ -115,7 +115,7 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
               key={cat.value}
               onClick={() => setCategory(cat.value)}
               className={cn(
-                'px-1.5 py-0.5 rounded text-[7px] font-mono uppercase transition-colors',
+                'px-1.5 py-0.5 rounded text-[10px] font-mono uppercase transition-colors',
                 category === cat.value
                   ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20'
                   : 'text-[#555] hover:text-[#888] border border-transparent'
@@ -130,15 +130,15 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
       {/* Template list */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <p className="text-center text-[10px] font-mono text-[#444] py-6">Loading...</p>
+          <p className="text-center text-[13px] font-mono text-[#444] py-6">Loading...</p>
         ) : (
           <>
             {/* Favorites */}
             {favorites.length > 0 && (
               <div>
                 <div className="px-3 py-1 flex items-center gap-1">
-                  <Star className="w-2.5 h-2.5 text-[#ff9f43]" />
-                  <span className="text-[7px] font-mono text-[#555] uppercase tracking-wider">Favorites</span>
+                  <Star className="w-3.5 h-3.5 text-[#ff9f43]" />
+                  <span className="text-[10px] font-mono text-[#555] uppercase tracking-wider">Favorites</span>
                 </div>
                 {favorites.map((t) => (
                   <TemplateRow key={t.id} template={t} onSelect={onSelect} onClose={onClose} onSendDirect={onSendDirect} />
@@ -150,8 +150,8 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
             {recent.length > 0 && (
               <div>
                 <div className="px-3 py-1 flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5 text-[#555]" />
-                  <span className="text-[7px] font-mono text-[#555] uppercase tracking-wider">Recent</span>
+                  <Clock className="w-3.5 h-3.5 text-[#555]" />
+                  <span className="text-[10px] font-mono text-[#555] uppercase tracking-wider">Recent</span>
                 </div>
                 {recent.map((t) => (
                   <TemplateRow key={t.id} template={t} onSelect={onSelect} onClose={onClose} onSendDirect={onSendDirect} />
@@ -165,7 +165,7 @@ export function TemplateSelector({ open, onClose, onSelect, onSendDirect }: Temp
             ))}
 
             {filtered.length === 0 && (
-              <p className="text-center text-[10px] font-mono text-[#444] py-6">No templates found</p>
+              <p className="text-center text-[13px] font-mono text-[#444] py-6">No templates found</p>
             )}
           </>
         )}
@@ -187,16 +187,16 @@ function TemplateRow({
         className="flex-1 text-left min-w-0"
       >
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-[10px] font-mono text-[#ccc] font-bold truncate">{template.name}</span>
-          <span className={cn('text-[7px] font-mono uppercase px-1 py-0.5 rounded shrink-0',
+          <span className="text-[13px] font-mono text-[#ccc] font-bold truncate">{template.name}</span>
+          <span className={cn('text-[10px] font-mono uppercase px-1 py-0.5 rounded shrink-0',
             CAT_COLORS[template.category] || 'text-[#666] bg-[#666]/10')}>
             {template.category.replace('_', ' ')}
           </span>
           {template.tags.slice(0, 2).map((tag) => (
-            <span key={tag} className="text-[7px] font-mono text-[#444] bg-[#111] px-1 rounded shrink-0">{tag}</span>
+            <span key={tag} className="text-[10px] font-mono text-[#444] bg-[#111] px-1 rounded shrink-0">{tag}</span>
           ))}
         </div>
-        <p className="text-[9px] font-mono text-[#555] truncate">{template.content.slice(0, 60)}</p>
+        <p className="text-xs font-mono text-[#555] truncate">{template.content.slice(0, 60)}</p>
       </button>
       {onSendDirect && (
         <button
@@ -204,7 +204,7 @@ function TemplateRow({
           className="p-1 text-[#333] hover:text-[#00ff88] opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
           title="Send directly"
         >
-          <Send className="w-3 h-3" />
+          <Send className="w-4 h-4" />
         </button>
       )}
     </div>

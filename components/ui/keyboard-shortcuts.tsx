@@ -52,10 +52,10 @@ export function KeyboardShortcutsModal({ open, onClose }: KeyboardShortcutsModal
           {SHORTCUTS.map((s) => (
             <div key={s.keys} className="flex items-center justify-between py-2 border-b border-[#111]">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-[#ccc]">{s.label}</span>
-                <span className="text-[8px] font-mono text-[#444]">{s.scope}</span>
+                <span className="text-[13px] font-mono text-[#ccc]">{s.label}</span>
+                <span className="text-[11px] font-mono text-[#444]">{s.scope}</span>
               </div>
-              <kbd className="px-2 py-0.5 bg-[#111] border border-[#222] rounded text-[10px] font-mono text-[#888]">
+              <kbd className="px-2 py-0.5 bg-[#111] border border-[#222] rounded text-[13px] font-mono text-[#888]">
                 {s.keys}
               </kbd>
             </div>

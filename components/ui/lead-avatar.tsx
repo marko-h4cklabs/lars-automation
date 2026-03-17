@@ -12,7 +12,7 @@ interface LeadAvatarProps {
 }
 
 const sizeStyles = {
-  sm: 'w-7 h-7 text-[10px]',
+  sm: 'w-7 h-7 text-[13px]',
   md: 'w-9 h-9 text-xs',
   lg: 'w-12 h-12 text-sm',
 }

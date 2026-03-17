@@ -49,13 +49,13 @@ function SortHeader({ label, column, currentSort, currentDir, onSort, className 
   return (
     <button
       onClick={() => onSort(column)}
-      className={cn('flex items-center gap-1 text-[8px] font-mono uppercase tracking-wider', className)}
+      className={cn('flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider', className)}
     >
       <span className={isActive ? 'text-[#00ff88]' : 'text-[#555]'}>{label}</span>
       {isActive ? (
-        currentDir === 'asc' ? <ChevronUp className="w-2.5 h-2.5 text-[#00ff88]" /> : <ChevronDown className="w-2.5 h-2.5 text-[#00ff88]" />
+        currentDir === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-[#00ff88]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#00ff88]" />
       ) : (
-        <ArrowUpDown className="w-2.5 h-2.5 text-[#333]" />
+        <ArrowUpDown className="w-3.5 h-3.5 text-[#333]" />
       )}
     </button>
   )
@@ -109,13 +109,13 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
       {/* Bulk actions bar */}
       {selected.size > 0 && (
         <div className="flex items-center gap-3 px-4 py-2 bg-[#0d0d0d] border-b border-[#1a1a1a]">
-          <span className="text-[9px] font-mono text-[#00ff88]">{selected.size} selected</span>
+          <span className="text-xs font-mono text-[#00ff88]">{selected.size} selected</span>
           <div className="relative">
             <button
               onClick={() => setBulkStageOpen(!bulkStageOpen)}
-              className="flex items-center gap-1 px-2 py-1 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
+              className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
             >
-              <ArrowRight className="w-2.5 h-2.5" /> CHANGE STAGE
+              <ArrowRight className="w-3.5 h-3.5" /> CHANGE STAGE
             </button>
             {bulkStageOpen && (
               <div className="absolute left-0 top-full mt-1 bg-[#111] border border-[#222] rounded shadow-xl z-50 min-w-[130px]">
@@ -123,7 +123,7 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                   <button
                     key={s.value}
                     onClick={() => handleBulkStageChange(s.value)}
-                    className="w-full text-left px-3 py-1.5 text-[9px] font-mono text-[#888] hover:bg-[#1a1a1a]"
+                    className="w-full text-left px-3 py-1.5 text-xs font-mono text-[#888] hover:bg-[#1a1a1a]"
                   >
                     {s.label}
                   </button>
@@ -133,15 +133,15 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
           </div>
           <button
             onClick={() => setSelected(new Set())}
-            className="px-2 py-1 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
+            className="px-3 py-1.5 text-[11px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
           >
-            <Users className="w-2.5 h-2.5 inline mr-1" /> REASSIGN
+            <Users className="w-3.5 h-3.5 inline mr-1" /> REASSIGN
           </button>
           <button
             onClick={exportCSV}
-            className="px-2 py-1 text-[8px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
+            className="px-3 py-1.5 text-[11px] font-mono text-[#888] bg-[#111] border border-[#222] rounded hover:text-[#ccc]"
           >
-            <Download className="w-2.5 h-2.5 inline mr-1" /> EXPORT CSV
+            <Download className="w-3.5 h-3.5 inline mr-1" /> EXPORT CSV
           </button>
         </div>
       )}
@@ -169,13 +169,13 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                 <SortHeader label="Stage" column="stage" currentSort={sort} currentDir={sortDir} onSort={onSort} />
               </th>
               <th className="px-3 py-2 text-left">
-                <span className="text-[8px] font-mono text-[#555] uppercase tracking-wider">Source</span>
+                <span className="text-[11px] font-mono text-[#555] uppercase tracking-wider">Source</span>
               </th>
               <th className="px-3 py-2 text-left">
-                <span className="text-[8px] font-mono text-[#555] uppercase tracking-wider">Assigned</span>
+                <span className="text-[11px] font-mono text-[#555] uppercase tracking-wider">Assigned</span>
               </th>
               <th className="px-3 py-2 text-left">
-                <span className="text-[8px] font-mono text-[#555] uppercase tracking-wider">Qual %</span>
+                <span className="text-[11px] font-mono text-[#555] uppercase tracking-wider">Qual %</span>
               </th>
               <th className="px-3 py-2 text-left">
                 <SortHeader label="Last Msg" column="last_message_at" currentSort={sort} currentDir={sortDir} onSort={onSort} />
@@ -204,9 +204,9 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                   <div className="flex items-center gap-2">
                     <LeadAvatar src={lead.profile_pic_url} name={lead.full_name || lead.username} size="sm" />
                     <div className="min-w-0">
-                      <span className="text-[10px] font-mono font-bold text-[#f0f0f0] truncate block">@{lead.username}</span>
+                      <span className="text-[13px] font-mono font-bold text-[#f0f0f0] truncate block">@{lead.username}</span>
                       {lead.full_name && (
-                        <span className="text-[8px] font-mono text-[#555] truncate block">{lead.full_name}</span>
+                        <span className="text-[11px] font-mono text-[#555] truncate block">{lead.full_name}</span>
                       )}
                     </div>
                   </div>
@@ -218,7 +218,7 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                   <div className="relative">
                     <button
                       onClick={() => setOpenStageId(openStageId === lead.id ? null : lead.id)}
-                      className="text-[9px] font-mono text-[#888] hover:text-[#ccc] flex items-center gap-0.5"
+                      className="text-xs font-mono text-[#888] hover:text-[#ccc] flex items-center gap-0.5"
                     >
                       {lead.stage.replace('_', ' ')}
                       <ChevronDown className="w-2 h-2" />
@@ -233,7 +233,7 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                               setOpenStageId(null)
                             }}
                             className={cn(
-                              'w-full text-left px-3 py-1 text-[9px] font-mono hover:bg-[#1a1a1a]',
+                              'w-full text-left px-3 py-1 text-xs font-mono hover:bg-[#1a1a1a]',
                               lead.stage === s.value ? 'text-[#00ff88]' : 'text-[#888]'
                             )}
                           >
@@ -245,25 +245,25 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                   </div>
                 </td>
                 <td className="px-3 py-2">
-                  <Badge variant="source" className="text-[7px] py-0 px-1">{lead.source}</Badge>
+                  <Badge variant="source" className="text-[10px] py-0 px-1">{lead.source}</Badge>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[9px] font-mono text-[#666]">
+                  <span className="text-xs font-mono text-[#666]">
                     {lead.assigned_to ? 'Setter' : '-'}
                   </span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[9px] font-mono text-[#666]">
+                  <span className="text-xs font-mono text-[#666]">
                     {lead.conversation?.qualification_score || 0}%
                   </span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[9px] font-mono text-[#555]">
+                  <span className="text-xs font-mono text-[#555]">
                     {lead.last_message ? formatTimeAgo(lead.last_message.sent_at) : '-'}
                   </span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className="text-[9px] font-mono text-[#555]">
+                  <span className="text-xs font-mono text-[#555]">
                     {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </td>

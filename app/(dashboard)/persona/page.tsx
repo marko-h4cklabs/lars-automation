@@ -165,7 +165,7 @@ export default function PersonaPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Persona Configuration</h1>
-            <p className="text-[10px] font-mono text-[#555]">
+            <p className="text-[13px] font-mono text-[#555]">
               Configure the AI&apos;s personality, writing style, and human-like behavior. Affects all AI modes globally.
             </p>
           </div>
@@ -173,14 +173,14 @@ export default function PersonaPage() {
             onClick={save}
             disabled={saving || !dirty}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded text-[10px] font-mono transition-colors',
+              'flex items-center gap-2 px-4 py-2 rounded text-[13px] font-mono transition-colors',
               dirty
                 ? 'bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] hover:bg-[#00ff88]/20'
                 : 'bg-[#111] border border-[#1a1a1a] text-[#555]',
               'disabled:opacity-50'
             )}
           >
-            {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {dirty ? 'SAVE CHANGES' : 'SAVED'}
           </button>
         </div>
@@ -195,34 +195,34 @@ export default function PersonaPage() {
         >
           {/* AI Name */}
           <div className="mb-4">
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">AI Name / Identity</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">AI Name / Identity</label>
             <input
               value={persona.name}
               onChange={(e) => update((p) => ({ ...p, name: e.target.value }))}
               placeholder="Leave empty — AI acts as anonymous team member, never reveals it's AI"
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+              className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
             />
-            <span className="text-[8px] font-mono text-[#444] mt-0.5 block">
+            <span className="text-[11px] font-mono text-[#444] mt-0.5 block">
               If empty, the AI never identifies itself by name and acts as a member of the team.
             </span>
           </div>
 
           {/* Base Role Prompt */}
           <div className="mb-4">
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Base Role Description</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Base Role Description</label>
             <textarea
               value={persona.base_prompt}
               onChange={(e) => update((p) => ({ ...p, base_prompt: e.target.value }))}
               rows={5}
               placeholder="You are a world-class appointment setter..."
-              className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
+              className="w-full bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none resize-none focus:border-[#00ff88]/30"
             />
-            <span className="text-[8px] font-mono text-[#444]">{persona.base_prompt.length} characters</span>
+            <span className="text-[11px] font-mono text-[#444]">{persona.base_prompt.length} characters</span>
           </div>
 
           {/* Tone Selector */}
           <div className="mb-4">
-            <label className="text-[8px] font-mono text-[#555] uppercase block mb-2">Tone</label>
+            <label className="text-[11px] font-mono text-[#555] uppercase block mb-2">Tone</label>
             <div className="grid grid-cols-3 gap-2">
               {TONE_OPTIONS.map((opt) => (
                 <button
@@ -235,11 +235,11 @@ export default function PersonaPage() {
                       : 'bg-[#0d0d0d] border-[#1a1a1a] hover:border-[#333]'
                   )}
                 >
-                  <span className={cn('text-[10px] font-mono font-bold block mb-0.5',
+                  <span className={cn('text-[13px] font-mono font-bold block mb-0.5',
                     persona.language_rules.tone === opt.value ? 'text-[#00ff88]' : 'text-[#888]')}>
                     {opt.label}
                   </span>
-                  <span className="text-[8px] font-mono text-[#555] leading-relaxed">{opt.desc}</span>
+                  <span className="text-[11px] font-mono text-[#555] leading-relaxed">{opt.desc}</span>
                 </button>
               ))}
             </div>
@@ -248,21 +248,21 @@ export default function PersonaPage() {
           {/* Language */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Primary Language</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Primary Language</label>
               <input
                 value={persona.language_rules.primary_language}
                 onChange={(e) => updateLang('primary_language', e.target.value)}
                 placeholder="English"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] outline-none focus:border-[#00ff88]/30"
               />
             </div>
             <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase block mb-1">Accent / Dialect Notes</label>
+              <label className="text-[11px] font-mono text-[#555] uppercase block mb-1">Accent / Dialect Notes</label>
               <input
                 value={persona.language_rules.accent_notes}
                 onChange={(e) => updateLang('accent_notes', e.target.value)}
                 placeholder="e.g. UK/Norwegian English — use 'yeah' not 'y'all'"
-                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+                className="w-full bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
               />
             </div>
           </div>
@@ -290,15 +290,15 @@ export default function PersonaPage() {
             {/* Max sentences per bubble */}
             <div className="flex items-center justify-between p-3 bg-[#0d0d0d] rounded-lg border border-[#1a1a1a]">
               <div>
-                <span className="text-[10px] font-mono text-[#ccc] block">Max sentences per message bubble</span>
-                <span className="text-[8px] font-mono text-[#555]">Keep each message short and punchy</span>
+                <span className="text-[13px] font-mono text-[#ccc] block">Max sentences per message bubble</span>
+                <span className="text-[11px] font-mono text-[#555]">Keep each message short and punchy</span>
               </div>
               <div className="flex items-center gap-2">
                 {[1, 2, 3].map((n) => (
                   <button
                     key={n}
                     onClick={() => updateStyle('max_sentences_per_bubble', n)}
-                    className={cn('w-8 h-7 rounded border text-[10px] font-mono font-bold transition-colors',
+                    className={cn('w-8 h-7 rounded border text-[13px] font-mono font-bold transition-colors',
                       persona.style_rules.max_sentences_per_bubble === n
                         ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30'
                         : 'text-[#666] border-[#222] hover:border-[#444]'
@@ -313,8 +313,8 @@ export default function PersonaPage() {
             {/* Custom rules */}
             {persona.style_rules.custom_rules.map((rule, i) => (
               <div key={i} className="flex items-center gap-2 p-3 bg-[#0d0d0d] rounded-lg border border-[#1a1a1a]">
-                <span className="text-[10px] font-mono text-[#ccc] flex-1">{rule}</span>
-                <span className="text-[7px] font-mono text-[#555] uppercase px-1.5 py-0.5 bg-[#111] rounded border border-[#1a1a1a]">Custom</span>
+                <span className="text-[13px] font-mono text-[#ccc] flex-1">{rule}</span>
+                <span className="text-[10px] font-mono text-[#555] uppercase px-1.5 py-0.5 bg-[#111] rounded border border-[#1a1a1a]">Custom</span>
                 <button
                   onClick={() => {
                     const next = persona.style_rules.custom_rules.filter((_, j) => j !== i)
@@ -322,7 +322,7 @@ export default function PersonaPage() {
                   }}
                   className="text-[#444] hover:text-[#f05050]"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -342,14 +342,14 @@ export default function PersonaPage() {
           open={openSections.has('prohibited')}
           onToggle={toggleSection}
         >
-          <p className="text-[9px] font-mono text-[#555] mb-3">
+          <p className="text-xs font-mono text-[#555] mb-3">
             Phrases the AI must NEVER use in any message. These are hard blocks — the AI will actively avoid them.
           </p>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {persona.style_rules.prohibited_phrases.map((phrase, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-[#f05050]/5 border border-[#f05050]/20 rounded text-[9px] font-mono text-[#f05050]/80"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#f05050]/5 border border-[#f05050]/20 rounded text-xs font-mono text-[#f05050]/80"
               >
                 <span className="line-through">{phrase}</span>
                 <button
@@ -359,12 +359,12 @@ export default function PersonaPage() {
                   }}
                   className="text-[#f05050]/40 hover:text-[#f05050]"
                 >
-                  <X className="w-2.5 h-2.5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
             {persona.style_rules.prohibited_phrases.length === 0 && (
-              <span className="text-[9px] font-mono text-[#444]">No prohibited phrases set</span>
+              <span className="text-xs font-mono text-[#444]">No prohibited phrases set</span>
             )}
           </div>
           <AddItemInput
@@ -381,14 +381,14 @@ export default function PersonaPage() {
           open={openSections.has('signatures')}
           onToggle={toggleSection}
         >
-          <p className="text-[9px] font-mono text-[#555] mb-3">
+          <p className="text-xs font-mono text-[#555] mb-3">
             Words and phrases Lars or the team actually uses in DMs. The AI will naturally incorporate these into conversations to sound authentic.
           </p>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {persona.style_rules.signature_phrases.map((phrase, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-[#00ff88]/5 border border-[#00ff88]/20 rounded text-[9px] font-mono text-[#00ff88]/80"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#00ff88]/5 border border-[#00ff88]/20 rounded text-xs font-mono text-[#00ff88]/80"
               >
                 &ldquo;{phrase}&rdquo;
                 <button
@@ -398,12 +398,12 @@ export default function PersonaPage() {
                   }}
                   className="text-[#00ff88]/40 hover:text-[#00ff88]"
                 >
-                  <X className="w-2.5 h-2.5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
             {persona.style_rules.signature_phrases.length === 0 && (
-              <span className="text-[9px] font-mono text-[#444]">No signature phrases set</span>
+              <span className="text-xs font-mono text-[#444]">No signature phrases set</span>
             )}
           </div>
           <AddItemInput
@@ -420,7 +420,7 @@ export default function PersonaPage() {
           open={openSections.has('vibe')}
           onToggle={toggleSection}
         >
-          <p className="text-[9px] font-mono text-[#555] mb-3">
+          <p className="text-xs font-mono text-[#555] mb-3">
             Controls how the AI detects and adapts to each lead&apos;s unique communication style in real-time.
           </p>
           <div className="space-y-2">
@@ -453,9 +453,9 @@ export default function PersonaPage() {
             <button
               onClick={save}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-lg text-[10px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-lg text-[13px] font-mono text-[#00ff88] hover:bg-[#00ff88]/20 disabled:opacity-50 transition-colors"
             >
-              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} SAVE ALL CHANGES
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} SAVE ALL CHANGES
             </button>
           </div>
         )}
@@ -492,8 +492,8 @@ function CollapsibleSection({
         <div className="flex items-center gap-3">
           {open ? <ChevronDown className="w-3.5 h-3.5 text-[#00ff88]" /> : <ChevronRight className="w-3.5 h-3.5 text-[#555]" />}
           <div className="text-left">
-            <span className="text-[11px] font-mono font-bold text-[#f0f0f0] block">{title}</span>
-            <span className="text-[8px] font-mono text-[#555]">{subtitle}</span>
+            <span className="text-sm font-mono font-bold text-[#f0f0f0] block">{title}</span>
+            <span className="text-[11px] font-mono text-[#555]">{subtitle}</span>
           </div>
         </div>
       </button>
@@ -527,10 +527,10 @@ function RuleCard({
       enabled ? 'bg-[#0d0d0d] border-[#1a1a1a]' : 'bg-[#080808] border-[#111]'
     )}>
       <div className="flex-1 mr-3">
-        <span className={cn('text-[10px] font-mono block', enabled ? 'text-[#ccc]' : 'text-[#555]')}>
+        <span className={cn('text-[13px] font-mono block', enabled ? 'text-[#ccc]' : 'text-[#555]')}>
           {title}
         </span>
-        <span className="text-[8px] font-mono text-[#444]">{desc}</span>
+        <span className="text-[11px] font-mono text-[#444]">{desc}</span>
       </div>
       <button
         onClick={() => onToggle(!enabled)}
@@ -567,14 +567,14 @@ function AddItemInput({ placeholder, onAdd }: { placeholder: string; onAdd: (val
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         placeholder={placeholder}
-        className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+        className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
       />
       <button
         onClick={handleAdd}
         disabled={!value.trim()}
-        className="flex items-center gap-1 px-2.5 py-1.5 text-[8px] font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-30 transition-colors"
+        className="flex items-center gap-1 px-3 py-2 text-[11px] font-mono text-[#888] border border-dashed border-[#333] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-30 transition-colors"
       >
-        <Plus className="w-2.5 h-2.5" /> ADD
+        <Plus className="w-3.5 h-3.5" /> ADD
       </button>
     </div>
   )
@@ -630,8 +630,8 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
     <div className="space-y-4">
       {/* Persona summary */}
       <div className="bg-[#111] rounded-lg p-3 border border-[#1a1a1a]">
-        <span className="text-[8px] font-mono text-[#555] uppercase block mb-2">Active Persona Summary</span>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono">
+        <span className="text-[11px] font-mono text-[#555] uppercase block mb-2">Active Persona Summary</span>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono">
           <span className="text-[#666]">Tone:</span>
           <span className="text-[#00ff88]">{persona.language_rules.tone}</span>
           <span className="text-[#666]">Language:</span>
@@ -656,10 +656,10 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
       {/* Test persona */}
       <div>
         <div className="flex items-center gap-1.5 mb-2">
-          <Zap className="w-3 h-3 text-[#00ff88]" />
-          <span className="text-[9px] font-mono text-[#00ff88] uppercase tracking-wider">Test Persona</span>
+          <Zap className="w-4 h-4 text-[#00ff88]" />
+          <span className="text-xs font-mono text-[#00ff88] uppercase tracking-wider">Test Persona</span>
         </div>
-        <p className="text-[8px] font-mono text-[#555] mb-2">
+        <p className="text-[11px] font-mono text-[#555] mb-2">
           Enter a sample lead message to see how the AI would respond with current persona settings.
         </p>
         <div className="flex gap-2 mb-3">
@@ -668,24 +668,24 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
             onChange={(e) => { setTestInput(e.target.value); setTestOutput(null) }}
             onKeyDown={(e) => e.key === 'Enter' && runTest()}
             placeholder='e.g., "how much is your coaching program?"'
-            className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-2.5 py-1.5 text-[10px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
+            className="flex-1 bg-[#111] border border-[#1a1a1a] rounded px-3 py-2 text-[13px] font-mono text-[#ccc] placeholder:text-[#333] outline-none focus:border-[#00ff88]/30"
           />
           <button
             onClick={runTest}
             disabled={testing || !testInput}
-            className="px-3 py-1.5 text-[9px] font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
+            className="px-3 py-1.5 text-xs font-mono text-[#888] border border-[#222] rounded hover:text-[#00ff88] hover:border-[#00ff88]/30 disabled:opacity-50 transition-colors"
           >
-            {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : 'TEST'}
+            {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'TEST'}
           </button>
         </div>
 
         {testOutput && (
           <div className="space-y-1.5">
-            <span className="text-[8px] font-mono text-[#555] uppercase">AI would respond:</span>
+            <span className="text-[11px] font-mono text-[#555] uppercase">AI would respond:</span>
             {testOutput.map((msg, i) => (
               <div key={i} className="flex justify-end">
                 <div className="bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg px-3 py-2 max-w-[80%]">
-                  <span className="text-[10px] font-mono text-[#ccc]">{msg}</span>
+                  <span className="text-[13px] font-mono text-[#ccc]">{msg}</span>
                 </div>
               </div>
             ))}
@@ -697,15 +697,15 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <MessageSquare className="w-3 h-3 text-[#555]" />
-            <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider">Recent AI Messages</span>
+            <MessageSquare className="w-4 h-4 text-[#555]" />
+            <span className="text-xs font-mono text-[#666] uppercase tracking-wider">Recent AI Messages</span>
           </div>
           <button
             onClick={loadRecentAIMessages}
             disabled={loadingRecent}
-            className="text-[8px] font-mono text-[#555] hover:text-[#00ff88] transition-colors"
+            className="text-[11px] font-mono text-[#555] hover:text-[#00ff88] transition-colors"
           >
-            {loadingRecent ? <Loader2 className="w-3 h-3 animate-spin inline" /> : 'Load latest →'}
+            {loadingRecent ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Load latest →'}
           </button>
         </div>
         {recentMessages.length > 0 ? (
@@ -713,8 +713,8 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
             {recentMessages.map((msg, i) => (
               <div key={i} className="flex justify-end">
                 <div className="bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-2 max-w-[80%]">
-                  <span className="text-[10px] font-mono text-[#888]">{msg.content}</span>
-                  <span className="text-[7px] font-mono text-[#333] block mt-0.5 text-right">
+                  <span className="text-[13px] font-mono text-[#888]">{msg.content}</span>
+                  <span className="text-[10px] font-mono text-[#333] block mt-0.5 text-right">
                     {new Date(msg.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                   </span>
                 </div>
@@ -722,7 +722,7 @@ function PersonaPreview({ persona }: { persona: PersonaState }) {
             ))}
           </div>
         ) : (
-          <p className="text-[9px] font-mono text-[#444]">
+          <p className="text-xs font-mono text-[#444]">
             Click &quot;Load latest&quot; to see recent AI-generated messages with current persona.
           </p>
         )}

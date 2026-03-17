@@ -17,7 +17,7 @@ export function MetricCard({ label, value, trend, trendValue, className }: Metri
         className
       )}
     >
-      <p className="text-[#666] font-mono text-[10px] uppercase tracking-wider mb-2">
+      <p className="text-[#666] font-mono text-[13px] uppercase tracking-wider mb-2">
         {label}
       </p>
       <div className="flex items-end justify-between">
@@ -30,9 +30,9 @@ export function MetricCard({ label, value, trend, trendValue, className }: Metri
               'text-[#666]': trend === 'neutral',
             })}
           >
-            {trend === 'up' && <TrendingUp className="w-3 h-3" />}
-            {trend === 'down' && <TrendingDown className="w-3 h-3" />}
-            {trend === 'neutral' && <Minus className="w-3 h-3" />}
+            {trend === 'up' && <TrendingUp className="w-4 h-4" />}
+            {trend === 'down' && <TrendingDown className="w-4 h-4" />}
+            {trend === 'neutral' && <Minus className="w-4 h-4" />}
             {trendValue && <span>{trendValue}</span>}
           </div>
         )}

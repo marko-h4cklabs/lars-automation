@@ -156,7 +156,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
     <div className="w-[380px] h-full bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col shrink-0">
       {/* Search */}
       <div className="px-3 py-2 border-b border-[#1a1a1a]">
-        <div className="flex items-center gap-2 bg-[#111] rounded px-2.5 py-1.5">
+        <div className="flex items-center gap-2 bg-[#111] rounded px-3 py-2">
           <Search className="w-3.5 h-3.5 text-[#444] shrink-0" />
           <input
             type="text"
@@ -165,7 +165,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
             placeholder="Search leads..."
             className="bg-transparent text-[#f0f0f0] text-xs font-mono placeholder:text-[#333] outline-none flex-1"
           />
-          <SlidersHorizontal className="w-3 h-3 text-[#333] shrink-0" />
+          <SlidersHorizontal className="w-4 h-4 text-[#333] shrink-0" />
         </div>
       </div>
 
@@ -175,7 +175,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
         <button
           onClick={() => selectFilter('all', 'ALL')}
           className={cn(
-            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            'flex-1 py-2 text-xs font-mono uppercase tracking-wider transition-colors',
             assignedTo === 'all'
               ? 'text-[#00ff88] border-b border-[#00ff88]'
               : 'text-[#444] hover:text-[#666]'
@@ -188,7 +188,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
         <button
           onClick={() => selectFilter('me', 'MY LEADS')}
           className={cn(
-            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            'flex-1 py-2 text-xs font-mono uppercase tracking-wider transition-colors',
             assignedTo === 'me'
               ? 'text-[#00ff88] border-b border-[#00ff88]'
               : 'text-[#444] hover:text-[#666]'
@@ -203,28 +203,28 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
             <button
               onClick={() => setShowSetterDropdown(!showSetterDropdown)}
               className={cn(
-                'w-full py-2 text-[9px] font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-1',
+                'w-full py-2 text-xs font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-1',
                 assignedTo !== 'all' && assignedTo !== 'me'
                   ? 'text-[#00ff88] border-b border-[#00ff88]'
                   : 'text-[#444] hover:text-[#666]'
               )}
             >
-              <Users className="w-3 h-3" />
+              <Users className="w-4 h-4" />
               <span>SETTER</span>
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className="w-4 h-4" />
             </button>
 
             {showSetterDropdown && (
               <div className="absolute top-full left-0 right-0 z-50 bg-[#111] border border-[#1a1a1a] rounded-b shadow-lg max-h-[200px] overflow-y-auto">
                 {setters.length === 0 ? (
-                  <div className="px-3 py-2 text-[10px] font-mono text-[#444]">No setters found</div>
+                  <div className="px-3 py-2 text-[13px] font-mono text-[#444]">No setters found</div>
                 ) : (
                   setters.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => selectFilter(s.id, `${s.name}'s Leads`)}
                       className={cn(
-                        'w-full text-left px-3 py-2 text-[10px] font-mono transition-colors hover:bg-[#1a1a1a] flex items-center gap-2',
+                        'w-full text-left px-3 py-2 text-[13px] font-mono transition-colors hover:bg-[#1a1a1a] flex items-center gap-2',
                         assignedTo === s.id ? 'text-[#00ff88]' : 'text-[#999]'
                       )}
                     >
@@ -233,7 +233,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
                         s.status === 'online' ? 'bg-[#00ff88]' : 'bg-[#333]'
                       )} />
                       {s.name}
-                      <span className="text-[#444] text-[8px] ml-auto">{s.role}</span>
+                      <span className="text-[#444] text-[11px] ml-auto">{s.role}</span>
                     </button>
                   ))
                 )}
@@ -250,7 +250,7 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
             // For HOT we use legacy filter param
           }}
           className={cn(
-            'flex-1 py-2 text-[9px] font-mono uppercase tracking-wider transition-colors',
+            'flex-1 py-2 text-xs font-mono uppercase tracking-wider transition-colors',
             assignedLabel === 'HOT'
               ? 'text-[#00ff88] border-b border-[#00ff88]'
               : 'text-[#444] hover:text-[#666]'
@@ -263,12 +263,12 @@ export function ConversationList({ activeId, onSelect }: ConversationListProps) 
       {/* Active filter badge */}
       {assignedTo !== 'all' && assignedLabel !== 'ALL' && assignedLabel !== 'HOT' && (
         <div className="px-3 py-1.5 border-b border-[#1a1a1a] flex items-center gap-2">
-          <span className="text-[8px] font-mono uppercase tracking-wider text-[#00ff88] bg-[#00ff8810] px-2 py-0.5 rounded">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-[#00ff88] bg-[#00ff8810] px-2 py-0.5 rounded">
             {assignedLabel}
           </span>
           <button
             onClick={() => selectFilter('all', 'ALL')}
-            className="text-[8px] font-mono text-[#444] hover:text-[#666]"
+            className="text-[11px] font-mono text-[#444] hover:text-[#666]"
           >
             CLEAR
           </button>
