@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   BarChart3, Calendar, MessageSquare, Users, Phone, Zap,
-  Flame, Bot, UserCheck, Activity, Bell, Shield, UserMinus,
+  Flame, Sparkles, UserCheck, Activity, Bell, Shield, UserMinus,
   AlertTriangle,
 } from 'lucide-react'
 import { MetricCard } from '@/components/ui/metric-card'
@@ -27,8 +27,6 @@ interface AnalyticsData {
     callsOffered: number
     callsBooked: number
     bookingRate: number
-    aiBookings: number
-    setterBookings: number
     avgHeatScore: number
   }
   dailyMetrics: { day: string; inboundDms: number; bookings: number }[]
@@ -41,9 +39,9 @@ interface AnalyticsData {
   funnel: { totalDms: number; replied: number; qualifying: number; callOffered: number; booked: number }
   bookingsBySource: Record<string, number>
   bookingsByHour: number[]
-  aiMetrics: {
+  copilotMetrics: {
     generated: number; used: number; usedRate: number
-    copilotAccuracy: number; autopilotBookingRate: number
+    copilotAccuracy: number
   }
   activityFeed: {
     id: string; type: string; message: string
@@ -97,7 +95,6 @@ const ACTIVITY_ICONS: Record<string, typeof Bell> = {
   call_booked: Phone,
   hot_lead: Flame,
   setter_offline: UserMinus,
-  ai_takeover: Bot,
   disqualified: AlertTriangle,
 }
 
@@ -278,15 +275,11 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* ── ROW 1: KPI Cards ── */}
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-5 gap-3">
               <MetricCard label="Total DMs" value={k?.totalDms ?? 0} />
               <MetricCard label="Calls Offered" value={k?.callsOffered ?? 0} />
               <MetricCard label="Calls Booked" value={k?.callsBooked ?? 0} />
               <MetricCard label="Booking Rate" value={`${k?.bookingRate ?? 0}%`} />
-              <MetricCard
-                label="AI vs Setter"
-                value={`${k?.aiBookings ?? 0} / ${k?.setterBookings ?? 0}`}
-              />
               <MetricCard label="Avg Heat Score" value={k?.avgHeatScore ?? 0} />
             </div>
 
@@ -362,7 +355,7 @@ export default function DashboardPage() {
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Shield className="w-3 h-3 text-[#5f27cd]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Setter vs AI Performance</span>
+                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Setter Performance</span>
               </div>
               <ResponsiveTable>
                 <table className="w-full text-[10px] font-mono">
@@ -372,10 +365,7 @@ export default function DashboardPage() {
                       {(data?.setterPerformance || []).map((p) => (
                         <th
                           key={p.id}
-                          className={cn(
-                            'text-center py-2 px-3 uppercase tracking-wider text-[8px]',
-                            p.type === 'ai' ? 'text-[#00ff88]' : 'text-[#888]'
-                          )}
+                          className="text-center py-2 px-3 uppercase tracking-wider text-[8px] text-[#888]"
                         >
                           {p.name}
                         </th>
@@ -393,7 +383,7 @@ export default function DashboardPage() {
                       <tr key={row.key} className="border-b border-[#111]">
                         <td className="text-[#666] py-2 px-3">{row.label}</td>
                         {(data?.setterPerformance || []).map((p) => (
-                          <td key={p.id} className={cn('text-center py-2 px-3', p.type === 'ai' ? 'text-[#00ff88]' : 'text-[#ccc]')}>
+                          <td key={p.id} className="text-center py-2 px-3 text-[#ccc]">
                             {p[row.key]}
                           </td>
                         ))}
@@ -498,18 +488,16 @@ export default function DashboardPage() {
               <FunnelChart funnel={data?.funnel || { totalDms: 0, replied: 0, qualifying: 0, callOffered: 0, booked: 0 }} />
             </div>
 
-            {/* ── ROW 6: AI Performance ── */}
+            {/* ── ROW 6: Copilot Performance ── */}
             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Bot className="w-3 h-3 text-[#00ff88]" />
-                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">AI Performance</span>
+                <Sparkles className="w-3 h-3 text-[#00ff88]" />
+                <span className="text-[9px] font-mono text-[#555] uppercase tracking-wider">Copilot Performance</span>
               </div>
-              <div className="grid grid-cols-5 gap-3">
-                <MetricCard label="Suggestions Generated" value={data?.aiMetrics?.generated ?? 0} />
-                <MetricCard label="Suggestions Used" value={`${data?.aiMetrics?.used ?? 0} (${data?.aiMetrics?.usedRate ?? 0}%)`} />
-                <MetricCard label="Used → Booking" value={data?.aiMetrics?.autopilotBookingRate ?? 0} />
-                <MetricCard label="Co-pilot Accuracy" value={`${data?.aiMetrics?.copilotAccuracy ?? 0}%`} />
-                <MetricCard label="Autopilot Bookings" value={data?.kpis?.aiBookings ?? 0} />
+              <div className="grid grid-cols-3 gap-3">
+                <MetricCard label="Suggestions Generated" value={data?.copilotMetrics?.generated ?? 0} />
+                <MetricCard label="Suggestions Used" value={`${data?.copilotMetrics?.used ?? 0} (${data?.copilotMetrics?.usedRate ?? 0}%)`} />
+                <MetricCard label="Copilot Accuracy" value={`${data?.copilotMetrics?.copilotAccuracy ?? 0}%`} />
               </div>
             </div>
 

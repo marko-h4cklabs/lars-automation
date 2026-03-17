@@ -4,14 +4,13 @@ import { useState } from 'react'
 import { LeadAvatar } from '@/components/ui/lead-avatar'
 import { HeatScore } from '@/components/ui/heat-score'
 import { Badge } from '@/components/ui/badge'
-import { Bot, UserRound, ChevronDown, Phone } from 'lucide-react'
+import { UserRound, ChevronDown, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lead, LeadStage, Conversation } from '@/types'
 
 interface LeadHeaderProps {
   lead: Lead
   conversation: Conversation
-  onTransfer: () => void
   onStageChange: (stage: LeadStage) => void
 }
 
@@ -28,9 +27,8 @@ const STAGES: { value: LeadStage; label: string }[] = [
   { value: 'disqualified' as LeadStage, label: 'Disqualified' },
 ]
 
-export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps) {
+export function LeadHeader({ lead, onStageChange }: LeadHeaderProps) {
   const [stageOpen, setStageOpen] = useState(false)
-  const isAI = lead.assignment_type === 'ai'
   const isUnassigned = !lead.assignment_type || lead.assignment_type === 'unassigned'
 
   return (
@@ -47,19 +45,14 @@ export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps)
           <span className="text-[#f0f0f0] text-sm font-mono font-bold truncate">
             @{lead.username}
           </span>
-          {isAI ? (
-            <Badge variant="ai" className="text-[8px] py-0 px-1.5 gap-0.5">
-              <Bot className="w-2.5 h-2.5" />
-              AUTOPILOT
-            </Badge>
-          ) : isUnassigned ? (
+          {isUnassigned ? (
             <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5 bg-[#f0a030]/20 text-[#f0a030] border-[#f0a030]/30">
               UNASSIGNED
             </Badge>
           ) : (
             <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5">
               <UserRound className="w-2.5 h-2.5" />
-              HUMAN
+              ASSIGNED
             </Badge>
           )}
         </div>
@@ -105,24 +98,6 @@ export function LeadHeader({ lead, onTransfer, onStageChange }: LeadHeaderProps)
             </div>
           )}
         </div>
-
-        {/* Transfer button */}
-        <button
-          onClick={onTransfer}
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-mono font-bold transition-all',
-            isAI
-              ? 'bg-[#111] border border-[#222] text-[#888] hover:text-[#f0a030] hover:border-[#f0a030]/30'
-              : 'bg-[#00ff88]/15 border border-[#00ff88]/40 text-[#00ff88] hover:bg-[#00ff88]/25'
-          )}
-          title={isAI ? 'Transfer to human' : 'Assign AI autopilot'}
-        >
-          {isAI ? (
-            <><UserRound className="w-3 h-3" /> TAKE OVER</>
-          ) : (
-            <><Bot className="w-3 h-3" /> ASSIGN AI</>
-          )}
-        </button>
 
         {/* Calendly link */}
         {lead.calendly_booked_at ? (

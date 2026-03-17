@@ -249,7 +249,7 @@ export function TableView({ leads, onLeadClick, onStageChange, sort, sortDir, on
                 </td>
                 <td className="px-3 py-2">
                   <span className="text-[9px] font-mono text-[#666]">
-                    {lead.assignment_type === 'ai' ? 'AI' : lead.assigned_to ? 'Setter' : '-'}
+                    {lead.assigned_to ? 'Setter' : '-'}
                   </span>
                 </td>
                 <td className="px-3 py-2">

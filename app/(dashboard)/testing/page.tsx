@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import {
-  FlaskConical, Play, Bot, User, Zap, Brain, Flame, Target,
+  FlaskConical, Play, User, Zap, Brain, Flame, Target,
   FileText, AlertTriangle, Sparkles, RotateCcw, Save, Copy,
   ChevronRight,
 } from 'lucide-react'
@@ -38,7 +38,7 @@ interface KBChunk {
 }
 
 interface SimConfig {
-  mode: 'autopilot' | 'copilot'
+  mode: 'copilot'
   personaId: string
   useKB: boolean
   responseStyle: string
@@ -92,7 +92,7 @@ const RULE_LABELS: Record<string, string> = {
 export default function TestingPage() {
   // ── State ──
   const [config, setConfig] = useState<SimConfig>({
-    mode: 'autopilot',
+    mode: 'copilot',
     personaId: '',
     useKB: true,
     responseStyle: 'balanced',
@@ -173,49 +173,13 @@ export default function TestingPage() {
     setMetrics(null)
     setSuggestions(null)
 
-    if (config.mode === 'autopilot') {
-      const data = await simulate('ai_response', [firstMsg])
-      if (data?.aiResponse) {
-        const aiMsgs: SimMessage[] = data.aiResponse.messages.map((content: string, i: number) => ({
-          id: crypto.randomUUID(),
-          role: 'ai' as const,
-          content,
-          timestamp: new Date(Date.now() + i * 2500).toISOString(),
-          reasoning: i === 0 ? data.aiResponse.reasoning : undefined,
-        }))
-        setMessages((prev) => [...prev, ...aiMsgs])
-        if (data.analysis) setAnalysis(data.analysis)
-        if (data.retrievedKBChunks) setKbChunks(data.retrievedKBChunks)
-        if (data.appliedRules) setAppliedRules(data.appliedRules)
-        if (data.metrics) setMetrics(data.metrics)
-      }
-    } else {
-      // Copilot: auto-suggest
-      const data = await simulate('suggest', [firstMsg])
-      if (data?.suggestions) setSuggestions(data.suggestions)
-      if (data?.analysis) setAnalysis(data.analysis)
-      if (data?.retrievedKBChunks) setKbChunks(data.retrievedKBChunks)
-      if (data?.appliedRules) setAppliedRules(data.appliedRules)
-      if (data?.metrics) setMetrics(data.metrics)
-    }
-  }
-
-  const playAIResponse = async () => {
-    const data = await simulate('ai_response')
-    if (data?.aiResponse) {
-      const aiMsgs: SimMessage[] = data.aiResponse.messages.map((content: string, i: number) => ({
-        id: crypto.randomUUID(),
-        role: 'ai' as const,
-        content,
-        timestamp: new Date(Date.now() + i * 2500).toISOString(),
-        reasoning: i === 0 ? data.aiResponse.reasoning : undefined,
-      }))
-      setMessages((prev) => [...prev, ...aiMsgs])
-      if (data.analysis) setAnalysis(data.analysis)
-      if (data.retrievedKBChunks) setKbChunks(data.retrievedKBChunks)
-      if (data.appliedRules) setAppliedRules(data.appliedRules)
-      if (data.metrics) setMetrics(data.metrics)
-    }
+    // Copilot: auto-suggest
+    const data = await simulate('suggest', [firstMsg])
+    if (data?.suggestions) setSuggestions(data.suggestions)
+    if (data?.analysis) setAnalysis(data.analysis)
+    if (data?.retrievedKBChunks) setKbChunks(data.retrievedKBChunks)
+    if (data?.appliedRules) setAppliedRules(data.appliedRules)
+    if (data?.metrics) setMetrics(data.metrics)
   }
 
   const playSuggestions = async () => {
@@ -287,27 +251,6 @@ export default function TestingPage() {
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Mode */}
-          <div>
-            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Mode</label>
-            <div className="flex gap-1">
-              {(['autopilot', 'copilot'] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setConfig((c) => ({ ...c, mode: m }))}
-                  className={cn(
-                    'flex-1 py-1.5 rounded text-[9px] font-mono uppercase transition-colors',
-                    config.mode === m
-                      ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30'
-                      : 'text-[#555] border border-[#222] hover:border-[#333]'
-                  )}
-                >
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Persona */}
           <div>
             <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Persona</label>
@@ -340,28 +283,26 @@ export default function TestingPage() {
             </button>
           </div>
 
-          {/* Response style (copilot) */}
-          {config.mode === 'copilot' && (
-            <div>
-              <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Response Style</label>
-              <div className="flex gap-1">
-                {['casual', 'balanced', 'aggressive'].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setConfig((c) => ({ ...c, responseStyle: s }))}
-                    className={cn(
-                      'flex-1 py-1 rounded text-[8px] font-mono capitalize transition-colors',
-                      config.responseStyle === s
-                        ? 'bg-[#54a0ff]/10 text-[#54a0ff] border border-[#54a0ff]/30'
-                        : 'text-[#444] border border-[#222]'
-                    )}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+          {/* Response style */}
+          <div>
+            <label className="text-[8px] font-mono text-[#555] uppercase tracking-wider block mb-1.5">Response Style</label>
+            <div className="flex gap-1">
+              {['casual', 'balanced', 'aggressive'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setConfig((c) => ({ ...c, responseStyle: s }))}
+                  className={cn(
+                    'flex-1 py-1 rounded text-[8px] font-mono capitalize transition-colors',
+                    config.responseStyle === s
+                      ? 'bg-[#54a0ff]/10 text-[#54a0ff] border border-[#54a0ff]/30'
+                      : 'text-[#444] border border-[#222]'
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Custom prompt */}
           <div>
@@ -470,7 +411,7 @@ export default function TestingPage() {
             <span className="text-[10px] font-mono text-[#ccc]">@{lead.username}</span>
             <span className="text-[7px] font-mono text-[#333] bg-[#111] px-1.5 py-0.5 rounded uppercase">{lead.source}</span>
             <span className="text-[7px] font-mono text-[#ff9f43] bg-[#ff9f43]/10 px-1.5 py-0.5 rounded uppercase">
-              {config.mode}
+              copilot
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -502,12 +443,12 @@ export default function TestingPage() {
                 {/* Sender tag */}
                 <div className={cn('flex items-center gap-1', msg.role === 'lead' ? '' : 'justify-end')}>
                   {msg.role === 'lead' && <User className="w-2.5 h-2.5 text-[#555]" />}
-                  {msg.role === 'ai' && <Bot className="w-2.5 h-2.5 text-[#00ff88]" />}
+                  {msg.role === 'ai' && <Sparkles className="w-2.5 h-2.5 text-[#00ff88]" />}
                   {msg.role === 'setter' && <User className="w-2.5 h-2.5 text-[#54a0ff]" />}
                   <span className={cn('text-[7px] font-mono uppercase',
                     msg.role === 'lead' ? 'text-[#555]' : msg.role === 'ai' ? 'text-[#00ff88]' : 'text-[#54a0ff]'
                   )}>
-                    {msg.role === 'lead' ? `@${lead.username}` : msg.role === 'ai' ? 'AI (autopilot)' : 'Setter'}
+                    {msg.role === 'lead' ? `@${lead.username}` : msg.role === 'ai' ? 'AI' : 'Setter'}
                   </span>
                 </div>
                 {/* Bubble */}
@@ -600,34 +541,20 @@ export default function TestingPage() {
               <div className="w-px h-5 bg-[#222]" />
 
               {/* Action buttons */}
-              {config.mode === 'copilot' && (
-                <>
-                  <button
-                    onClick={() => sendSetterMessage(leadInput)}
-                    disabled={!leadInput.trim() || loading}
-                    className="flex items-center gap-1 px-2 py-1 rounded bg-[#54a0ff]/10 text-[#54a0ff] text-[8px] font-mono hover:bg-[#54a0ff]/20 transition-colors disabled:opacity-30"
-                  >
-                    <User className="w-2.5 h-2.5" /> Send as Setter
-                  </button>
-                  <button
-                    onClick={playSuggestions}
-                    disabled={loading}
-                    className="flex items-center gap-1 px-2 py-1 rounded bg-[#ff9f43]/10 text-[#ff9f43] text-[8px] font-mono hover:bg-[#ff9f43]/20 transition-colors disabled:opacity-50"
-                  >
-                    <Sparkles className="w-2.5 h-2.5" /> Suggest
-                  </button>
-                </>
-              )}
-
-              {config.mode === 'autopilot' && (
-                <button
-                  onClick={playAIResponse}
-                  disabled={loading}
-                  className="flex items-center gap-1 px-2 py-1 rounded bg-[#00ff88]/10 text-[#00ff88] text-[8px] font-mono hover:bg-[#00ff88]/20 transition-colors disabled:opacity-50"
-                >
-                  <Bot className="w-2.5 h-2.5" /> {loading ? 'Generating...' : 'Play AI Response'}
-                </button>
-              )}
+              <button
+                onClick={() => sendSetterMessage(leadInput)}
+                disabled={!leadInput.trim() || loading}
+                className="flex items-center gap-1 px-2 py-1 rounded bg-[#54a0ff]/10 text-[#54a0ff] text-[8px] font-mono hover:bg-[#54a0ff]/20 transition-colors disabled:opacity-30"
+              >
+                <User className="w-2.5 h-2.5" /> Send as Setter
+              </button>
+              <button
+                onClick={playSuggestions}
+                disabled={loading}
+                className="flex items-center gap-1 px-2 py-1 rounded bg-[#ff9f43]/10 text-[#ff9f43] text-[8px] font-mono hover:bg-[#ff9f43]/20 transition-colors disabled:opacity-50"
+              >
+                <Sparkles className="w-2.5 h-2.5" /> Suggest
+              </button>
 
               <button
                 onClick={playLeadResponse}

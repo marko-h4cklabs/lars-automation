@@ -8,7 +8,7 @@ function ext(rules: StyleRules): Record<string, unknown> {
 
 /**
  * Build a strong, directive style block from persona style_rules.
- * Used by both autopilot and simulation prompts.
+ * Used by both copilot and simulation prompts.
  *
  * IMPORTANT: This block is injected into the AI prompt verbatim.
  * NEVER use dashes (-, --, –, —) in the rule text because the AI

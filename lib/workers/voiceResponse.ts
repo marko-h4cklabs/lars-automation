@@ -3,7 +3,9 @@ import { generateVoice, transcribeVoice, getVoiceSettings } from '@/lib/voice'
 import { generate } from '@/lib/ai'
 import { sendVoiceMessage } from '@/lib/manychat'
 import { assembleContext } from '@/lib/workers/contextAssembly'
-import type { Message, Conversation, VoiceReplyMode } from '@/types'
+import type { Message, Conversation } from '@/types'
+
+type VoiceReplyMode = 'always' | 'contextual' | 'never' | 'match'
 
 /**
  * Handle an incoming voice message from a lead.
@@ -24,14 +26,8 @@ export async function handleIncomingVoice(
     return
   }
 
-  // Check auto-voice settings
-  const { data: autopilotData } = await supabase
-    .from('autopilot_settings')
-    .select('voice_reply_on_voice')
-    .limit(1)
-    .single()
-
-  const voiceReplyMode: VoiceReplyMode = autopilotData?.voice_reply_on_voice || 'contextual'
+  // Default voice reply mode (autopilot settings removed)
+  const voiceReplyMode: VoiceReplyMode = 'contextual'
 
   // Load voice-specific auto settings
   const { data: voiceAutoData } = await supabase

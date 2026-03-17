@@ -19,8 +19,6 @@ export async function GET(req: NextRequest) {
     callsOfferedResult,
     callsBookedResult,
     qualifiedResult,
-    aiBookingsResult,
-    setterBookingsResult,
     heatScoreResult,
     dailyMetricsResult,
     stageResult,
@@ -65,25 +63,7 @@ export async function GET(req: NextRequest) {
       .gte('created_at', dateFrom)
       .lte('created_at', dateTo),
 
-    // 5. AI bookings
-    supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('assignment_type', 'ai')
-      .in('stage', ['call_booked', 'showed', 'no_show', 'won'])
-      .gte('calendly_booked_at', dateFrom)
-      .lte('calendly_booked_at', dateTo),
-
-    // 6. Setter bookings
-    supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .neq('assignment_type', 'ai')
-      .in('stage', ['call_booked', 'showed', 'no_show', 'won'])
-      .gte('calendly_booked_at', dateFrom)
-      .lte('calendly_booked_at', dateTo),
-
-    // 7. Active leads heat scores (for avg)
+    // 5. Active leads heat scores (for avg)
     supabase
       .from('leads')
       .select('heat_score')
@@ -155,8 +135,6 @@ export async function GET(req: NextRequest) {
   const callsOffered = callsOfferedResult.count || 0
   const callsBooked = callsBookedResult.count || 0
   const qualified = qualifiedResult.count || 0
-  const aiBookings = aiBookingsResult.count || 0
-  const setterBookings = setterBookingsResult.count || 0
   const bookingRate = qualified > 0 ? Math.round((callsBooked / qualified) * 1000) / 10 : 0
 
   const heatScores = (heatScoreResult.data || []) as { heat_score: number }[]
@@ -231,12 +209,11 @@ export async function GET(req: NextRequest) {
   const aiGenerated = aiSuggestionsGenResult.count || 0
   const aiUsed = aiSuggestionsUsedResult.count || 0
 
-  const aiMetrics = {
+  const copilotMetrics = {
     generated: aiGenerated,
     used: aiUsed,
     usedRate: aiGenerated > 0 ? Math.round((aiUsed / aiGenerated) * 1000) / 10 : 0,
     copilotAccuracy: aiGenerated > 0 ? Math.round((aiUsed / aiGenerated) * 1000) / 10 : 0,
-    autopilotBookingRate: aiBookings,
   }
 
   // ── Activity feed (merge notifications + audit, sort by date, take 20) ──
@@ -268,8 +245,6 @@ export async function GET(req: NextRequest) {
       callsOffered,
       callsBooked,
       bookingRate,
-      aiBookings,
-      setterBookings,
       avgHeatScore,
     },
     dailyMetrics,
@@ -278,7 +253,7 @@ export async function GET(req: NextRequest) {
     funnel,
     bookingsBySource,
     bookingsByHour,
-    aiMetrics,
+    copilotMetrics,
     activityFeed,
   })
 }

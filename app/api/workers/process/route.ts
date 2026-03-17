@@ -29,7 +29,6 @@ import type {
   Lead,
   Conversation,
   Message,
-  AutopilotSettings,
   KeywordTrigger,
 } from '@/types'
 import {
@@ -170,7 +169,7 @@ export async function POST(request: NextRequest) {
           source: payload.source as LeadSource,
           stage: LeadStage.New,
           heat_score: 0,
-          assignment_type: 'ai',
+          assignment_type: 'unassigned',
           qualification_fields: {},
           last_message_at: new Date().toISOString(),
         })
@@ -448,12 +447,10 @@ export async function POST(request: NextRequest) {
     // setter from the inbox. Only already-assigned conversations keep
     // their current assignment.
     let assignedTo = conversation.assigned_to
-    let assignmentType = lead.assignment_type
 
     if (isNewConversation || !assignedTo) {
       // Leave unassigned — admin picks from inbox
       assignedTo = null
-      assignmentType = AssignmentType.Unassigned
 
       await supabase
         .from('conversations')
@@ -474,35 +471,7 @@ export async function POST(request: NextRequest) {
     // ═══════════════════════════════════════
     if (keywordTriggerFired) {
       // Keyword trigger already sent the outbound template.
-      console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — skipping AI autopilot, waiting for lead reply`)
-    } else if (assignmentType === 'ai') {
-      // AI was MANUALLY assigned previously — continue autopilot for ongoing messages
-      const { data: autopilotSettings } = await supabase
-        .from('autopilot_settings')
-        .select('*')
-        .limit(1)
-        .single()
-
-      const settings = autopilotSettings as AutopilotSettings | null
-
-      if (settings?.enabled === false) {
-        console.log(`[Process] AI autopilot DISABLED globally — skipping for @${username}`)
-      } else {
-        const minDelay = settings?.min_delay_seconds || 8
-        const maxDelay = settings?.max_delay_seconds || 45
-        const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
-
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-        await getQStash().publishJSON({
-          url: `${appUrl}/api/workers/autopilot`,
-          body: {
-            conversationId: conversation.id,
-            leadId: lead.id,
-          },
-          delay,
-          retries: 3,
-        })
-      }
+      console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — waiting for lead reply`)
     } else if (assignedTo) {
       // Setter assigned — push notification
       createNotification({
@@ -555,7 +524,7 @@ export async function POST(request: NextRequest) {
       leadId: lead.id,
       conversationId: conversation.id,
       heatScore: triageResult.heat_score,
-      assignedTo: assignedTo || 'ai',
+      assignedTo: assignedTo || 'unassigned',
       messagesStored: totalInbound,
     })
   } catch (err) {

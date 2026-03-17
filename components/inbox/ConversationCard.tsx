@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 import { LeadAvatar } from '@/components/ui/lead-avatar'
 import { HeatScore } from '@/components/ui/heat-score'
 import { Badge } from '@/components/ui/badge'
-import { Bot } from 'lucide-react'
 import type { Conversation, Lead, Message } from '@/types'
 
 interface ConversationCardProps {
@@ -49,9 +48,6 @@ export function ConversationCard({ conversation, isActive, onClick }: Conversati
             <span className="text-[#f0f0f0] text-xs font-mono font-bold truncate">
               @{lead.username}
             </span>
-            {lead.assignment_type === 'ai' && (
-              <Bot className="w-3 h-3 text-[#00ff88] shrink-0" />
-            )}
           </div>
           <span className="text-[#444] text-[9px] font-mono shrink-0">{timeAgo}</span>
         </div>

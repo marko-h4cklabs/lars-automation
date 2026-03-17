@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, ExternalLink, Bot, UserRound, ChevronDown, Save, Loader2, MessageSquare } from 'lucide-react'
+import { X, ExternalLink, UserRound, ChevronDown, Save, Loader2, MessageSquare } from 'lucide-react'
 import { LeadAvatar } from '@/components/ui/lead-avatar'
 import { HeatScore } from '@/components/ui/heat-score'
 import { Badge } from '@/components/ui/badge'
@@ -133,13 +133,13 @@ export function LeadDetailPanel({ leadId, onClose, onUpdate }: LeadDetailPanelPr
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-mono font-bold text-[#f0f0f0]">@{lead.username}</span>
-                  {lead.assignment_type === 'ai' ? (
-                    <Badge variant="ai" className="text-[8px] py-0 px-1.5 gap-0.5">
-                      <Bot className="w-2.5 h-2.5" /> AI
+                  {lead.assigned_user ? (
+                    <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5">
+                      <UserRound className="w-2.5 h-2.5" /> ASSIGNED
                     </Badge>
                   ) : (
-                    <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5">
-                      <UserRound className="w-2.5 h-2.5" /> HUMAN
+                    <Badge variant="default" className="text-[8px] py-0 px-1.5 gap-0.5 opacity-60">
+                      UNASSIGNED
                     </Badge>
                   )}
                 </div>
@@ -264,10 +264,7 @@ export function LeadDetailPanel({ leadId, onClose, onUpdate }: LeadDetailPanelPr
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center gap-1.5">
-                        <Bot className="w-3.5 h-3.5 text-[#00ff88]" />
-                        <span className="text-[10px] font-mono text-[#00ff88]">AI Autopilot</span>
-                      </div>
+                      <span className="text-[10px] font-mono text-[#666]">Unassigned</span>
                     )}
                   </div>
                 </div>

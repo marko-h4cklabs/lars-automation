@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   LayoutGrid, Table2, Filter, X, Search,
-  Users, Phone, TrendingUp, Flame, Bot, UserRound,
+  Users, Phone, TrendingUp, Flame,
   ChevronDown, Trophy,
 } from 'lucide-react'
 import { PipelineView } from '@/components/crm/PipelineView'
@@ -26,8 +26,6 @@ interface Metrics {
   total: number
   booked: number
   conversionRate: number
-  aiBookings: number
-  setterBookings: number
   avgHeat: number
 }
 
@@ -67,7 +65,7 @@ export default function CRMPage() {
   const [sortDir, setSortDir] = useState('desc')
 
   // Metrics
-  const [metrics, setMetrics] = useState<Metrics>({ total: 0, booked: 0, conversionRate: 0, aiBookings: 0, setterBookings: 0, avgHeat: 0 })
+  const [metrics, setMetrics] = useState<Metrics>({ total: 0, booked: 0, conversionRate: 0, avgHeat: 0 })
 
   const fetchLeads = useCallback(async (pageNum: number, append = false) => {
     setLoading(true)
@@ -113,18 +111,15 @@ export default function CRMPage() {
   // Compute metrics from loaded leads
   useEffect(() => {
     if (leads.length === 0) {
-      setMetrics({ total: 0, booked: 0, conversionRate: 0, aiBookings: 0, setterBookings: 0, avgHeat: 0 })
+      setMetrics({ total: 0, booked: 0, conversionRate: 0, avgHeat: 0 })
       return
     }
     const booked = leads.filter((l) => l.stage === 'call_booked' || l.stage === 'showed' || l.stage === 'won')
-    const aiBooked = booked.filter((l) => l.assignment_type === 'ai')
     const avgHeat = Math.round(leads.reduce((sum, l) => sum + l.heat_score, 0) / leads.length)
     setMetrics({
       total,
       booked: booked.length,
       conversionRate: total > 0 ? Math.round((booked.length / total) * 100) : 0,
-      aiBookings: aiBooked.length,
-      setterBookings: booked.length - aiBooked.length,
       avgHeat,
     })
   }, [leads, total])
@@ -220,7 +215,7 @@ export default function CRMPage() {
               <div className="flex gap-1 mt-1.5">
                 {[
                   { value: '', label: 'All' },
-                  { value: 'ai', label: 'AI' },
+                  { value: 'unassigned', label: 'Unassigned' },
                 ].map((opt) => (
                   <button
                     key={opt.value}
@@ -314,8 +309,6 @@ export default function CRMPage() {
           <MetricChip icon={Users} label="Total" value={metrics.total} />
           <MetricChip icon={Phone} label="Booked" value={metrics.booked} color="#00ff88" />
           <MetricChip icon={TrendingUp} label="Conv %" value={`${metrics.conversionRate}%`} color={metrics.conversionRate >= 10 ? '#00ff88' : '#f0a030'} />
-          <MetricChip icon={Bot} label="AI" value={metrics.aiBookings} color="#00ff88" />
-          <MetricChip icon={UserRound} label="Setter" value={metrics.setterBookings} />
           <MetricChip icon={Flame} label="Avg Heat" value={metrics.avgHeat} color={metrics.avgHeat >= 60 ? '#f05050' : '#f0a030'} />
 
           <div className="flex-1" />

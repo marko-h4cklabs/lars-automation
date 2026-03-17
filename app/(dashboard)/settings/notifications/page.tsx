@@ -14,7 +14,6 @@ interface NotifSettings {
   hot_lead_threshold: number
   call_booked_mode: string
   setter_offline_mode: string
-  ai_takeover_mode: string
   dnd_start: string
   dnd_end: string
 }
@@ -35,7 +34,6 @@ export default function NotificationsPage() {
     hot_lead_threshold: 80,
     call_booked_mode: 'slack_and_app',
     setter_offline_mode: 'app_only',
-    ai_takeover_mode: 'app_only',
     dnd_start: '',
     dnd_end: '',
   })
@@ -250,12 +248,6 @@ export default function NotificationsPage() {
           desc="Admin alert when setter goes offline"
           value={settings.setter_offline_mode}
           onChange={(v) => setSettings((p) => ({ ...p, setter_offline_mode: v }))}
-        />
-        <NotifType
-          label="AI Takeover"
-          desc="When conversation transfers to AI"
-          value={settings.ai_takeover_mode}
-          onChange={(v) => setSettings((p) => ({ ...p, ai_takeover_mode: v }))}
         />
       </div>
 

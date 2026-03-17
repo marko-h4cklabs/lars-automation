@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Save, Loader2, AlertCircle, Bot, RotateCcw } from 'lucide-react'
+import { Save, Loader2, AlertCircle, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LoadingFormSection } from '@/components/ui/loading-pulse'
 import { ErrorState } from '@/components/ui/error-state'
 import type { User } from '@/types'
 
 interface SetterRow {
-  user_id: string | null // null = AI
+  user_id: string
   name: string
   role: string
   receives_leads: boolean
@@ -47,17 +47,6 @@ export default function DistributionPage() {
         // Build setter rows from users + existing allocations
         const rows: SetterRow[] = []
 
-        // AI Agent row (always present)
-        const aiExisting = existing?.find((a) => a.user_id === null)
-        rows.push({
-          user_id: null,
-          name: 'AI Agent',
-          role: 'ai',
-          receives_leads: aiExisting ? aiExisting.receives_leads : true,
-          pct: aiExisting?.pct ?? distData?.ai_pct ?? 30,
-          status: 'online',
-        })
-
         // User rows
         for (const u of users) {
           if (u.role === 'viewer') continue
@@ -92,8 +81,6 @@ export default function DistributionPage() {
     setSettings((prev) => {
       const allocs = [...prev.setter_allocations]
       const row = { ...allocs[idx] }
-      // AI cannot be removed
-      if (row.user_id === null) return prev
       row.receives_leads = !row.receives_leads
       if (!row.receives_leads) row.pct = 0
       allocs[idx] = row
@@ -136,13 +123,10 @@ export default function DistributionPage() {
     if (!isValid) return
     setSaving(true)
     try {
-      // Also update receives_leads on each user
-      const userUpdates = settings.setter_allocations
-        .filter((r) => r.user_id !== null)
-        .map((r) => ({
-          id: r.user_id,
-          receives_leads: r.receives_leads,
-        }))
+      const userUpdates = settings.setter_allocations.map((r) => ({
+        id: r.user_id,
+        receives_leads: r.receives_leads,
+      }))
 
       await fetch('/api/settings', {
         method: 'PUT',
@@ -151,8 +135,6 @@ export default function DistributionPage() {
           section: 'distribution',
           distribution_mode: settings.distribution_mode,
           setter_allocations: settings.setter_allocations,
-          // Legacy fields for backward compat
-          ai_pct: settings.setter_allocations.find((r) => r.user_id === null)?.pct ?? 30,
           user_updates: userUpdates,
         }),
       })
@@ -167,7 +149,7 @@ export default function DistributionPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-sm font-mono font-bold text-[#f0f0f0] mb-1">Distribution Settings</h1>
-      <p className="text-[10px] font-mono text-[#555] mb-6">Configure how incoming leads are distributed between setters and AI.</p>
+      <p className="text-[10px] font-mono text-[#555] mb-6">Configure how incoming leads are distributed between setters.</p>
 
       {/* Distribution mode */}
       <div className="mb-6">
@@ -205,12 +187,11 @@ export default function DistributionPage() {
 
         <div className="space-y-2">
           {settings.setter_allocations.map((row, idx) => {
-            const isAI = row.user_id === null
-            const color = isAI ? '#00ff88' : COLORS[idx % COLORS.length]
+            const color = COLORS[idx % COLORS.length]
 
             return (
               <div
-                key={row.user_id ?? 'ai'}
+                key={row.user_id}
                 className={cn(
                   'flex items-center gap-3 p-3 rounded-lg border transition-colors',
                   row.receives_leads
@@ -218,18 +199,14 @@ export default function DistributionPage() {
                     : 'bg-[#080808] border-[#141414] opacity-50'
                 )}
               >
-                {/* Avatar / icon */}
+                {/* Avatar */}
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${color}15` }}
                 >
-                  {isAI ? (
-                    <Bot className="w-3.5 h-3.5" style={{ color }} />
-                  ) : (
-                    <span className="text-[10px] font-mono font-bold" style={{ color }}>
-                      {row.name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <span className="text-[10px] font-mono font-bold" style={{ color }}>
+                    {row.name.charAt(0).toUpperCase()}
+                  </span>
                 </div>
 
                 {/* Name + role */}
@@ -249,10 +226,8 @@ export default function DistributionPage() {
                 {/* Toggle */}
                 <button
                   onClick={() => toggleReceivesLeads(idx)}
-                  disabled={isAI}
                   className={cn(
-                    'w-8 h-4 rounded-full transition-colors relative shrink-0',
-                    isAI ? 'cursor-not-allowed' : 'cursor-pointer',
+                    'w-8 h-4 rounded-full transition-colors relative shrink-0 cursor-pointer',
                     row.receives_leads ? 'bg-[#00ff88]/30' : 'bg-[#222]'
                   )}
                 >
@@ -297,10 +272,10 @@ export default function DistributionPage() {
           .filter((r) => r.receives_leads && r.pct > 0)
           .map((row, i) => (
             <div
-              key={row.user_id ?? 'ai'}
+              key={row.user_id}
               style={{
                 width: `${row.pct}%`,
-                backgroundColor: row.user_id === null ? '#00ff88' : COLORS[i % COLORS.length],
+                backgroundColor: COLORS[i % COLORS.length],
               }}
             />
           ))}
@@ -313,7 +288,7 @@ export default function DistributionPage() {
           All active setters online: {activeRows.map((r) => `${r.name}=${r.pct}%`).join(', ')}
         </p>
         <p className="text-[10px] font-mono text-[#666]">
-          All setters offline: AI=100%
+          All setters offline: leads queued as unassigned
         </p>
       </div>
 

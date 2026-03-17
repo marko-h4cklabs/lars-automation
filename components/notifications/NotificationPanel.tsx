@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Flame, Calendar, Bot, Moon, AlertTriangle, Filter } from 'lucide-react'
+import { X, Flame, Calendar, Moon, AlertTriangle, Filter } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -18,7 +18,6 @@ const typeFilters: { label: string; value: NotificationType | 'all' }[] = [
   { label: 'Hot', value: NotificationType.HotLead },
   { label: 'Booked', value: NotificationType.CallBooked },
   { label: 'DQ', value: NotificationType.Disqualified },
-  { label: 'AI', value: NotificationType.AITakeover },
   { label: 'Offline', value: NotificationType.SetterOffline },
 ]
 
@@ -152,7 +151,6 @@ function NotificationItem({
   const icons: Record<string, React.ReactNode> = {
     hot_lead: <Flame className="w-3.5 h-3.5 text-[#ff4500]" />,
     call_booked: <Calendar className="w-3.5 h-3.5 text-[#00ff88]" />,
-    ai_takeover: <Bot className="w-3.5 h-3.5 text-amber-400" />,
     setter_offline: <Moon className="w-3.5 h-3.5 text-[#666]" />,
     disqualified: <AlertTriangle className="w-3.5 h-3.5 text-[#666]" />,
   }

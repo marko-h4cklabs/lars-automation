@@ -12,7 +12,6 @@ import {
   ClipboardList,
   Settings,
   FlaskConical,
-  GraduationCap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
@@ -28,7 +27,6 @@ const navItems = [
   { href: '/templates', label: 'TEMPLATES', icon: ClipboardList, roles: ['admin', 'setter'] },
   { href: '/settings', label: 'SETTINGS', icon: Settings, roles: ['admin'] },
   { href: '/testing', label: 'TESTING', icon: FlaskConical, roles: ['admin'] },
-  { href: '/learning', label: 'LEARNING', icon: GraduationCap, roles: ['admin'] },
 ]
 
 export function Sidebar() {

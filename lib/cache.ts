@@ -3,7 +3,6 @@
  *
  * Cached with TTLs:
  * - Distribution settings (60s)
- * - Autopilot settings (60s)
  * - Persona settings (300s)
  * - Lead assignment (30s)
  * - KB search results (600s)
@@ -17,7 +16,6 @@ import { redis } from '@/lib/queue'
 import { createAdminClient } from '@/lib/supabase'
 import type {
   DistributionSettings,
-  AutopilotSettings,
   PersonaSettings,
   User,
 } from '@/types'
@@ -28,7 +26,6 @@ import type {
 
 const KEYS = {
   DISTRIBUTION: 'cache:distribution',
-  AUTOPILOT: 'cache:autopilot',
   PERSONA: 'cache:persona:global',
   LEAD_ASSIGNMENT: 'cache:lead:',
   KB_SEARCH: 'cache:kb:',
@@ -41,7 +38,6 @@ const KEYS = {
 
 const TTL = {
   DISTRIBUTION: 60,
-  AUTOPILOT: 60,
   PERSONA: 300,
   LEAD_ASSIGNMENT: 30,
   KB_SEARCH: 600,
@@ -89,27 +85,6 @@ export async function getDistributionSettings(): Promise<DistributionSettings | 
     await setInCache(KEYS.DISTRIBUTION, data, TTL.DISTRIBUTION)
   }
   return data as DistributionSettings | null
-}
-
-// ═══════════════════════════════════════
-// AUTOPILOT SETTINGS
-// ═══════════════════════════════════════
-
-export async function getAutopilotSettings(): Promise<AutopilotSettings | null> {
-  const cached = await getFromCache<AutopilotSettings>(KEYS.AUTOPILOT)
-  if (cached) return cached
-
-  const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('autopilot_settings')
-    .select('*')
-    .limit(1)
-    .single()
-
-  if (data) {
-    await setInCache(KEYS.AUTOPILOT, data, TTL.AUTOPILOT)
-  }
-  return data as AutopilotSettings | null
 }
 
 // ═══════════════════════════════════════
@@ -252,5 +227,5 @@ export async function invalidateLeadCache(leadId: string): Promise<void> {
 }
 
 export async function invalidateAllCache(): Promise<void> {
-  await invalidateCache('DISTRIBUTION', 'AUTOPILOT', 'PERSONA', 'ONLINE_SETTERS')
+  await invalidateCache('DISTRIBUTION', 'PERSONA', 'ONLINE_SETTERS')
 }

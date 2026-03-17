@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Bot, Mic, Image as ImageIcon, FileText, Zap } from 'lucide-react'
+import { Mic, Image as ImageIcon, FileText, Zap } from 'lucide-react'
 import type { Message } from '@/types'
 
 interface MessageBubbleProps {
@@ -37,14 +37,6 @@ export function MessageBubble({ message, showTimestamp = true }: MessageBubblePr
   return (
     <div className={cn('flex w-full mb-2 animate-slide-in-up', isOutbound ? 'justify-end' : 'justify-start')}>
       <div className={cn('max-w-[70%] flex flex-col', isOutbound ? 'items-end' : 'items-start')}>
-        {/* Sender tag */}
-        {isOutbound && message.ai_generated && (
-          <div className="flex items-center gap-1 mb-0.5">
-            <Bot className="w-2.5 h-2.5 text-[#00ff88]" />
-            <span className="text-[8px] font-mono text-[#00ff88]">AI GENERATED</span>
-          </div>
-        )}
-
         {/* Bubble */}
         <div
           className={cn(

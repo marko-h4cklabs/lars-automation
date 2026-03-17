@@ -120,7 +120,6 @@ async function getWebhookForType(type: NotificationType): Promise<string | undef
     case NotificationType.Disqualified:
       return webhooks.alerts
     case NotificationType.SetterOffline:
-    case NotificationType.AITakeover:
       return webhooks.system || webhooks.alerts
     default:
       return webhooks.alerts
@@ -250,33 +249,6 @@ function buildSetterOfflineBlocks(payload: SlackNotificationPayload): SlackBlock
   ]
 }
 
-function buildAITakeoverBlocks(payload: SlackNotificationPayload): SlackBlock[] {
-  const blocks: SlackBlock[] = [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `🤖 *AI TAKEOVER*\n${payload.message}`,
-      },
-    },
-  ]
-
-  if (payload.conversationUrl) {
-    blocks.push({
-      type: 'actions',
-      elements: [
-        {
-          type: 'button',
-          text: { type: 'plain_text', text: 'View Conversation', emoji: true },
-          url: payload.conversationUrl,
-        },
-      ],
-    })
-  }
-
-  return blocks
-}
-
 function buildDisqualifiedBlocks(payload: SlackNotificationPayload): SlackBlock[] {
   return [
     {
@@ -297,8 +269,6 @@ function buildBlocksForType(payload: SlackNotificationPayload): SlackBlock[] {
       return buildCallBookedBlocks(payload)
     case NotificationType.SetterOffline:
       return buildSetterOfflineBlocks(payload)
-    case NotificationType.AITakeover:
-      return buildAITakeoverBlocks(payload)
     case NotificationType.Disqualified:
       return buildDisqualifiedBlocks(payload)
     default:

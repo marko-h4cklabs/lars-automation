@@ -29,8 +29,7 @@ export const MESSAGE_TYPES: { value: MessageType; label: string }[] = [
 export const NOTIFICATION_TYPES: { value: NotificationType; label: string }[] = [
   { value: NotificationType.HotLead, label: 'Hot Lead Alert' },
   { value: NotificationType.CallBooked, label: 'Call Booked' },
-  { value: NotificationType.AITakeover, label: 'AI Takeover' },
-  { value: NotificationType.SetterOffline, label: 'Setter Went Offline' },
+{ value: NotificationType.SetterOffline, label: 'Setter Went Offline' },
   { value: NotificationType.Disqualified, label: 'Disqualified' },
 ]
 

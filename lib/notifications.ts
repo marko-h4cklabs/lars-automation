@@ -21,7 +21,6 @@ interface NotificationSettings {
   hot_lead_threshold: number
   call_booked_mode: string
   setter_offline_mode: string
-  ai_takeover_mode: string
   dnd_start: string | null
   dnd_end: string | null
 }
@@ -46,7 +45,6 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   hot_lead_threshold: 80,
   call_booked_mode: 'slack_and_app',
   setter_offline_mode: 'app_only',
-  ai_takeover_mode: 'app_only',
   dnd_start: null,
   dnd_end: null,
 }
@@ -119,8 +117,6 @@ function getModeForType(type: NotificationType, settings: NotificationSettings):
       return settings.call_booked_mode
     case NotificationType.SetterOffline:
       return settings.setter_offline_mode
-    case NotificationType.AITakeover:
-      return settings.ai_takeover_mode
     case NotificationType.Disqualified:
       return 'app_only' // Always in-app only for disqualified
     default:

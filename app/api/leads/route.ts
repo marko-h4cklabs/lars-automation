@@ -36,10 +36,8 @@ export async function GET(request: NextRequest) {
   if (sources.length > 0) {
     query = query.in('source', sources)
   }
-  if (assignedTo === 'ai') {
+  if (assignedTo === 'unassigned') {
     query = query.is('assigned_to', null)
-  } else if (assignedTo === 'unassigned') {
-    query = query.is('assigned_to', null).neq('assignment_type', 'ai')
   } else if (assignedTo) {
     query = query.eq('assigned_to', assignedTo)
   }

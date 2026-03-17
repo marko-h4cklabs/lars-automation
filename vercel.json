@@ -7,10 +7,7 @@
     "app/api/workers/process/route.ts": {
       "maxDuration": 60
     },
-    "app/api/workers/autopilot/route.ts": {
-      "maxDuration": 60
-    },
-    "app/api/workers/followup/route.ts": {
+"app/api/workers/followup/route.ts": {
       "maxDuration": 60
     },
     "app/api/workers/summarize/route.ts": {

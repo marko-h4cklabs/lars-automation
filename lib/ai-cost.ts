@@ -57,7 +57,7 @@ export function estimateCost(
 
 interface AIUsageLog {
   model: AIModel
-  action: string // 'triage', 'autopilot', 'suggestion', 'summary', etc.
+  action: string // 'triage', 'suggestion', 'summary', etc.
   inputTokens: number
   outputTokens: number
   conversationId?: string

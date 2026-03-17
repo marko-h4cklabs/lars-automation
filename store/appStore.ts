@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import type {
   User,
-  AutopilotSettings,
   DistributionSettings,
   LeadSource,
   LeadStage,
@@ -41,8 +40,6 @@ interface AppState {
   // Settings
   distributionSettings: DistributionSettings | null
   setDistributionSettings: (settings: DistributionSettings | null) => void
-  autopilotSettings: AutopilotSettings | null
-  setAutopilotSettings: (settings: AutopilotSettings | null) => void
 
   // Realtime connection
   isRealtimeConnected: boolean
@@ -78,8 +75,6 @@ export const useAppStore = create<AppState>((set) => ({
 
   distributionSettings: null,
   setDistributionSettings: (settings) => set({ distributionSettings: settings }),
-  autopilotSettings: null,
-  setAutopilotSettings: (settings) => set({ autopilotSettings: settings }),
 
   isRealtimeConnected: false,
   setRealtimeConnected: (connected) => set({ isRealtimeConnected: connected }),

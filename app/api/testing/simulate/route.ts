@@ -11,7 +11,7 @@ interface SimMessage {
 }
 
 interface SimConfig {
-  mode: 'autopilot' | 'copilot'
+  mode: 'copilot'
   personaId?: string
   useKB: boolean
   responseStyle?: string
@@ -108,7 +108,7 @@ Writing style: ${leadProfile.writingStyle}
 ${leadProfile.ageHint ? `Age hint: ${leadProfile.ageHint}` : ''}`
 
   // ═══════════════════════════════════════
-  // ACTION: AI RESPONSE (Autopilot mode)
+  // ACTION: AI RESPONSE (simulation only)
   // ═══════════════════════════════════════
   if (action === 'ai_response') {
     const systemPrompt = `${basePrompt}

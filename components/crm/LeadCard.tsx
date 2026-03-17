@@ -3,7 +3,7 @@
 import { LeadAvatar } from '@/components/ui/lead-avatar'
 import { HeatScore } from '@/components/ui/heat-score'
 import { Badge } from '@/components/ui/badge'
-import { Bot, UserRound } from 'lucide-react'
+import { UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lead } from '@/types'
 
@@ -17,7 +17,6 @@ interface LeadCardProps {
 }
 
 export function LeadCard({ lead, onClick, isDragging }: LeadCardProps) {
-  const isAI = lead.assignment_type === 'ai'
   const preview = lead.last_message
     ? `${lead.last_message.direction === 'outbound' ? 'You: ' : ''}${lead.last_message.content}`.slice(0, 60)
     : 'No messages'
@@ -44,9 +43,7 @@ export function LeadCard({ lead, onClick, isDragging }: LeadCardProps) {
               <span className="text-[11px] font-mono font-bold text-[#f0f0f0] truncate">
                 @{lead.username}
               </span>
-              {isAI ? (
-                <Bot className="w-2.5 h-2.5 text-[#00ff88] shrink-0" />
-              ) : (
+              {lead.assigned_to && (
                 <UserRound className="w-2.5 h-2.5 text-[#555] shrink-0" />
               )}
             </div>

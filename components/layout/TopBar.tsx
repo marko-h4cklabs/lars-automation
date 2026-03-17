@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, Power } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Tooltip } from '@/components/ui/tooltip'
 import { UserMenu } from '@/components/auth/UserMenu'
@@ -19,7 +19,6 @@ const pageTitles: Record<string, string> = {
   '/templates': 'Templates',
   '/settings': 'Settings',
   '/testing': 'Testing Ground',
-  '/learning': 'Learning Center',
 }
 
 interface TopBarProps {
@@ -34,8 +33,6 @@ export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [bellShake, setBellShake] = useState(false)
   const prevUnread = useRef(unreadCount)
-  const [toggling, setToggling] = useState(false)
-
   // Shake bell when unread count increases
   useEffect(() => {
     if (unreadCount > prevUnread.current) {
@@ -70,25 +67,6 @@ export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [fetchMetrics])
-
-  const handleToggleAI = async () => {
-    if (toggling) return
-    setToggling(true)
-    try {
-      const res = await fetch('/api/autopilot/toggle', { method: 'POST' })
-      if (res.ok) {
-        const { enabled } = await res.json()
-        // Optimistically update metrics
-        setMetrics((prev) => prev ? { ...prev, aiActive: enabled } : prev)
-      }
-    } catch {
-      // Silently fail
-    } finally {
-      setToggling(false)
-    }
-  }
-
-  const aiActive = metrics?.aiActive ?? false
 
   return (
     <header className="h-12 bg-[#0d0d0d] border-b border-[#1a1a1a] flex items-center justify-between px-5 shrink-0">
@@ -137,24 +115,6 @@ export function TopBar({ onToggleNotifications, unreadCount }: TopBarProps) {
 
       {/* Right side */}
       <div className="flex items-center gap-3">
-        {/* AI Kill Switch */}
-        <Tooltip content={aiActive ? 'Click to PAUSE AI' : 'Click to ENABLE AI'} side="bottom">
-          <button
-            onClick={handleToggleAI}
-            disabled={toggling}
-            className={cn(
-              'flex items-center gap-1.5 px-3 py-1 rounded-full border font-mono text-[10px] uppercase tracking-wider transition-all',
-              toggling && 'opacity-50 cursor-wait',
-              aiActive
-                ? 'bg-[#00ff88]/10 border-[#00ff88]/40 text-[#00ff88] hover:bg-[#00ff88]/20'
-                : 'bg-[#ff4500]/10 border-[#ff4500]/40 text-[#ff4500] hover:bg-[#ff4500]/20'
-            )}
-          >
-            <Power className={cn('w-3 h-3', aiActive && 'drop-shadow-[0_0_4px_#00ff88]')} />
-            <span className="font-bold">AI {aiActive ? 'ON' : 'OFF'}</span>
-          </button>
-        </Tooltip>
-
         {/* Notification bell */}
         <Tooltip content="Notifications" side="bottom">
           <button

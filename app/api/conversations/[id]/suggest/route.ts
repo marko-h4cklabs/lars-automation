@@ -39,7 +39,7 @@ export async function POST(
   }
 
   try {
-    // 2. Assemble context (same contextAssembly function as autopilot)
+    // 2. Assemble context
     const ctx = await assembleContext(id)
 
     // 3. Fetch setter-specific AI settings

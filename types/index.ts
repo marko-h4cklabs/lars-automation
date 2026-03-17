@@ -39,7 +39,6 @@ export enum AssignmentType {
   Setter1 = 'setter1',
   Setter2 = 'setter2',
   Setter = 'setter',
-  AI = 'ai',
   Unassigned = 'unassigned',
 }
 
@@ -84,12 +83,6 @@ export enum QualificationFieldType {
   Select = 'select',
 }
 
-export enum VoiceReplyMode {
-  Always = 'always',
-  Never = 'never',
-  Contextual = 'contextual',
-}
-
 export enum DistributionMode {
   Percentage = 'percentage',
   RoundRobin = 'round_robin',
@@ -101,7 +94,6 @@ export enum NotificationType {
   CallBooked = 'call_booked',
   Disqualified = 'disqualified',
   SetterOffline = 'setter_offline',
-  AITakeover = 'ai_takeover',
 }
 
 export enum FollowUpJobStatus {
@@ -109,12 +101,6 @@ export enum FollowUpJobStatus {
   Paused = 'paused',
   Completed = 'completed',
   Cancelled = 'cancelled',
-}
-
-export enum TrainingOutcome {
-  Success = 'success',
-  Failure = 'failure',
-  Partial = 'partial',
 }
 
 // ═══════════════════════════════════════
@@ -315,20 +301,6 @@ export interface SetterAISettings {
   updated_at: string
 }
 
-export interface AutopilotSettings {
-  id: string
-  enabled: boolean
-  min_delay_seconds: number
-  max_delay_seconds: number
-  max_messages_per_burst: number
-  burst_delay_ms: number
-  auto_qualify: boolean
-  auto_disqualify: boolean
-  auto_send_calendly: boolean
-  voice_reply_on_voice: VoiceReplyMode
-  updated_at: string
-}
-
 export interface DistributionSettings {
   id: string
   setter1_id: string | null
@@ -358,17 +330,6 @@ export interface Notification {
   message: string
   read: boolean
   slack_sent: boolean
-  created_at: string
-}
-
-export interface TrainingConversation {
-  id: string
-  title: string
-  conversation_data: Record<string, unknown>
-  outcome: TrainingOutcome
-  feedback_notes: string | null
-  approved: boolean
-  approved_by: string | null
   created_at: string
 }
 
@@ -425,15 +386,6 @@ export interface AITriageResult {
   suggested_stage: LeadStage
 }
 
-export interface AIAutopilotResponse {
-  messages: string[]
-  reasoning: string
-  should_send_calendly: boolean
-  qualification_updates: Record<string, unknown>
-  updated_heat_score: number
-  next_action: 'continue_qualifying' | 'book_call' | 'soft_close'
-}
-
 export interface AISuggestionResponse {
   option_a: {
     messages: string[]
@@ -456,7 +408,6 @@ export interface LiveMetrics {
   queuedMessages: number
   onlineSetters: number
   totalSetters: number
-  aiActive: boolean
   todayBooked: number
   todayNewLeads: number
 }

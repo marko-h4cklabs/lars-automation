@@ -3,7 +3,6 @@ import { getDisplayName } from '@/lib/nameValidator'
 import { searchKnowledgeBase } from './ragSearch'
 import type { KBChunk } from './ragSearch'
 import {
-  getAutopilotSettings,
   getPersonaSettings,
   getCachedKBSearch,
   setCachedKBSearch,
@@ -14,7 +13,6 @@ import type {
   Conversation,
   Message,
   PersonaSettings,
-  AutopilotSettings,
   QualificationField,
 } from '@/types'
 
@@ -24,7 +22,6 @@ export interface ContextPackage {
   messages: Message[]
   transcript: string
   persona: PersonaSettings | null
-  autopilotSettings: AutopilotSettings | null
   qualificationFields: QualificationField[]
   missingFields: QualificationField[]
   collectedFields: Record<string, unknown>
@@ -33,7 +30,7 @@ export interface ContextPackage {
 }
 
 /**
- * Assembles full context for AI autopilot response generation.
+ * Assembles full context for AI copilot suggestions.
  * Uses Redis caching for settings and KB results.
  * Limits conversation history to last 20 messages for token efficiency.
  */
@@ -60,7 +57,6 @@ export async function assembleContext(
     leadResult,
     messagesResult,
     persona,
-    autopilotSettings,
     qualFieldsResult,
   ] = await Promise.all([
     // Lead profile
@@ -80,9 +76,6 @@ export async function assembleContext(
 
     // Persona settings (cached — 300s TTL)
     getPersonaSettings(),
-
-    // Autopilot settings (cached — 60s TTL)
-    getAutopilotSettings(),
 
     // All qualification fields
     supabase
@@ -170,7 +163,6 @@ export async function assembleContext(
     messages: allMessages, // Return all for downstream use
     transcript,
     persona,
-    autopilotSettings,
     qualificationFields,
     missingFields,
     collectedFields,

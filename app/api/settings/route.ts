@@ -27,13 +27,6 @@ export async function GET(request: NextRequest) {
       const { data } = await supabase.from('follow_up_sequences').select('*').order('created_at', { ascending: true })
       return NextResponse.json({ sequences: data || [] })
     }
-    case 'autopilot': {
-      const [autopilot, persona] = await Promise.all([
-        supabase.from('autopilot_settings').select('*').limit(1).single(),
-        supabase.from('persona_settings').select('*').eq('is_global', true).limit(1).single(),
-      ])
-      return NextResponse.json({ autopilot: autopilot.data, persona: persona.data })
-    }
     case 'copilot': {
       const userId = request.nextUrl.searchParams.get('userId') || session.user.id
       const { data } = await supabase.from('setter_ai_settings').select('*').eq('user_id', userId).single()
@@ -120,16 +113,6 @@ export async function PUT(request: NextRequest) {
         const { error } = await supabase.from('follow_up_sequences').insert(data)
         if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       }
-      return NextResponse.json({ status: 'saved' })
-    }
-    case 'autopilot': {
-      if (!data.id) {
-        const { data: existing } = await supabase.from('autopilot_settings').select('id').limit(1).single()
-        if (existing) data.id = existing.id
-      }
-      const { error } = await supabase.from('autopilot_settings').upsert({ ...data, updated_at: new Date().toISOString() })
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-      invalidateCache('AUTOPILOT').catch(() => {})
       return NextResponse.json({ status: 'saved' })
     }
     case 'persona': {

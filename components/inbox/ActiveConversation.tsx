@@ -145,15 +145,6 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
     setInput(messages.join('\n'))
   }
 
-  const handleTransfer = async () => {
-    const res = await fetch(`/api/conversations/${conversationId}/transfer`, { method: 'POST' })
-    if (res.ok) {
-      // Refetch conversation
-      const data = await fetch(`/api/conversations/${conversationId}`).then(r => r.json())
-      setConversation(data)
-    }
-  }
-
   const handleStageChange = async (stage: LeadStage) => {
     if (!conversation) return
     await fetch(`/api/conversations/${conversationId}`, {
@@ -205,7 +196,6 @@ export function ActiveConversation({ conversationId }: ActiveConversationProps) 
       <LeadHeader
         lead={conversation.lead}
         conversation={conversation}
-        onTransfer={handleTransfer}
         onStageChange={handleStageChange}
       />
 

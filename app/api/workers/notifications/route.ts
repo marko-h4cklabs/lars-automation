@@ -13,12 +13,11 @@ export const maxDuration = 30
  * - hot_lead_detected  (from triage worker)
  * - call_booked        (from Calendly webhook)
  * - setter_offline     (from user status update)
- * - ai_takeover        (from conversation transfer)
  * - refresh_views      (materialized view refresh — called by QStash cron)
  *
  * POST body:
  * {
- *   event: 'hot_lead_detected' | 'call_booked' | 'setter_offline' | 'ai_takeover' | 'refresh_views',
+ *   event: 'hot_lead_detected' | 'call_booked' | 'setter_offline' | 'refresh_views',
  *   leadId?: string,
  *   conversationId?: string,
  *   userId?: string,     // target user for directed notifications (null = broadcast)
@@ -91,12 +90,6 @@ export async function POST(request: NextRequest) {
       case 'setter_offline': {
         type = NotificationType.SetterOffline
         message = customMessage || `🌙 A setter has gone offline`
-        break
-      }
-
-      case 'ai_takeover': {
-        type = NotificationType.AITakeover
-        message = customMessage || `🤖 @${username || 'Lead'} transferred to AI autopilot`
         break
       }
 

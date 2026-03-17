@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
-  Percent, ClipboardCheck, Key, Timer, Bot, UserRound, Bell, Plug, Users, Settings
+  Percent, ClipboardCheck, Key, Timer, UserRound, Bell, Plug, Users, Settings
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -20,7 +20,6 @@ const STATIC_BEFORE: NavItem[] = [
   { href: '/settings/qualification', label: 'Qualification', icon: ClipboardCheck },
   { href: '/settings/keywords', label: 'Keyword Triggers', icon: Key },
   { href: '/settings/followups', label: 'Follow-up Sequences', icon: Timer },
-  { href: '/settings/autopilot', label: 'Autopilot AI', icon: Bot },
 ]
 
 const STATIC_AFTER: NavItem[] = [

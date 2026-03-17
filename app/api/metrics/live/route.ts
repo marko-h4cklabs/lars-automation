@@ -20,7 +20,6 @@ export async function GET() {
     queuedResult,
     onlineSettersResult,
     totalSettersResult,
-    autopilotResult,
     bookedResult,
     newLeadsResult,
   ] = await Promise.all([
@@ -50,13 +49,6 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .eq('role', 'setter'),
 
-    // Autopilot active check (reads enabled field)
-    supabase
-      .from('autopilot_settings')
-      .select('id, enabled')
-      .limit(1)
-      .single(),
-
     // Today's booked calls
     supabase
       .from('leads')
@@ -76,7 +68,6 @@ export async function GET() {
     queuedMessages: queuedResult.count || 0,
     onlineSetters: onlineSettersResult.count || 0,
     totalSetters: totalSettersResult.count || 0,
-    aiActive: !!(autopilotResult.data && (autopilotResult.data as { enabled?: boolean }).enabled !== false),
     todayBooked: bookedResult.count || 0,
     todayNewLeads: newLeadsResult.count || 0,
   }
