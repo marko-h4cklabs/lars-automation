@@ -66,6 +66,7 @@ CREATE TABLE leads (
   heat_score INTEGER NOT NULL DEFAULT 0 CHECK (heat_score >= 0 AND heat_score <= 100),
   qualification_fields JSONB NOT NULL DEFAULT '{}',
   calendly_booked_at TIMESTAMPTZ,
+  calendly_event_uri TEXT,
   last_message_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

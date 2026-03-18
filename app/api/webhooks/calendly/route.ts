@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     const email = payload?.email as string | undefined
     const name = payload?.name as string | undefined
     const scheduledAt = payload?.scheduled_event?.start_time as string | undefined
+    const eventUri = payload?.scheduled_event?.uri as string | undefined
 
     // Try to match lead by email or name in tracking fields
     // Calendly doesn't send Instagram username, so we match via
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
         .update({
           stage: LeadStage.CallBooked,
           calendly_booked_at: scheduledAt || new Date().toISOString(),
+          calendly_event_uri: eventUri || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', leadId)
