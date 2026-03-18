@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
               .eq('id', conversation.id)
           }
 
-          createNotification({
+          await createNotification({
             type: NotificationType.CallBooked,
             leadId,
             conversationId: conversation?.id || null,
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
                 ? `${appUrl}/inbox/${conversation.id}`
                 : undefined,
             },
-          }).catch(() => {})
+          }).catch((err) => console.error('Notification error (matched):', err))
 
           processed++
         } else {
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (newLead) {
-            createNotification({
+            await createNotification({
               type: NotificationType.CallBooked,
               leadId: newLead.id,
               conversationId: null,
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
                 scheduledAt,
                 leadUrl: `${appUrl}/crm?lead=${newLead.id}`,
               },
-            }).catch(() => {})
+            }).catch((err) => console.error('Notification error (new lead):', err))
           }
 
           processed++

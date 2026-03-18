@@ -467,7 +467,7 @@ export async function POST(request: NextRequest) {
     if (triageResult.heat_score >= HOT_LEAD_THRESHOLD) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-      createNotification({
+      await createNotification({
         type: NotificationType.HotLead,
         leadId: lead.id,
         conversationId: conversation.id,
@@ -477,7 +477,7 @@ export async function POST(request: NextRequest) {
           heatScore: triageResult.heat_score,
           conversationUrl: `${appUrl}/inbox/${conversation.id}`,
         },
-      }).catch(() => {})
+      }).catch((err) => console.error('Notification error (hot lead):', err))
     }
 
     // ═══════════════════════════════════════
@@ -514,14 +514,14 @@ export async function POST(request: NextRequest) {
       console.log(`[Process] Keyword trigger fired for "${keywordUsed}" — waiting for lead reply`)
     } else if (assignedTo) {
       // Setter assigned — push notification
-      createNotification({
+      await createNotification({
         type: NotificationType.HotLead,
         leadId: lead.id,
         conversationId: conversation.id,
         userId: assignedTo,
         message: `New message from @${username}`,
         metadata: { username },
-      }).catch(() => {})
+      }).catch((err) => console.error('Notification error (setter):', err))
     } else {
       // Unassigned — waiting for manual assignment from inbox
       console.log(`[Process] @${username} — unassigned, waiting for manual assignment`)

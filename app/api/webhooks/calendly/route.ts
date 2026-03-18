@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           .eq('id', conversation.id)
       }
 
-      createNotification({
+      await createNotification({
         type: NotificationType.CallBooked,
         leadId,
         conversationId: conversation?.id || null,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           leadUrl: `${appUrl}/crm?lead=${leadId}`,
           conversationUrl: conversation ? `${appUrl}/inbox/${conversation.id}` : undefined,
         },
-      }).catch(() => {})
+      }).catch((err) => console.error('Notification error (matched):', err))
     } else {
       // No existing lead — create one from Calendly data
       const syntheticId = `calendly_${email || name || 'unknown'}_${Date.now()}`
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       if (newLead) {
         leadId = newLead.id
 
-        createNotification({
+        await createNotification({
           type: NotificationType.CallBooked,
           leadId: newLead.id,
           conversationId: null,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
             scheduledAt,
             leadUrl: `${appUrl}/crm?lead=${newLead.id}`,
           },
-        }).catch(() => {})
+        }).catch((err) => console.error('Notification error (new lead):', err))
       }
     }
 

@@ -289,10 +289,14 @@ function buildBlocksForType(payload: SlackNotificationPayload): SlackBlock[] {
  */
 export async function sendNotification(payload: SlackNotificationPayload): Promise<boolean> {
   const webhookUrl = await getWebhookForType(payload.type)
-  if (!webhookUrl) return false
+  if (!webhookUrl) {
+    console.error(`Slack: no webhook URL found for type "${payload.type}"`)
+    return false
+  }
 
   // Rate limit per lead
   if (payload.leadId && isRateLimited(payload.leadId)) {
+    console.log(`Slack: rate limited for lead ${payload.leadId}`)
     return false
   }
 
