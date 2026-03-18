@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "vector";
 
 CREATE TYPE user_role AS ENUM ('admin', 'setter', 'viewer');
 CREATE TYPE user_status AS ENUM ('online', 'offline', 'away');
-CREATE TYPE lead_source AS ENUM ('dm', 'story_reply', 'comment', 'follow', 'keyword');
+CREATE TYPE lead_source AS ENUM ('dm', 'story_reply', 'comment', 'follow', 'keyword', 'calendly');
 CREATE TYPE lead_stage AS ENUM (
   'new', 'contacted', 'qualifying', 'call_offered', 'call_booked',
   'showed', 'no_show', 'won', 'lost', 'disqualified'

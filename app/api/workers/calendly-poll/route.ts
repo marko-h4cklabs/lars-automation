@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyQStashSignature } from '@/lib/qstash-verify'
 import { createAdminClient } from '@/lib/supabase'
 import { createNotification } from '@/lib/notifications'
-import { LeadStage, NotificationType } from '@/types'
+import { LeadSource, LeadStage, NotificationType } from '@/types'
 
 export const maxDuration = 30
 
@@ -147,8 +147,10 @@ export async function POST(request: NextRequest) {
           username = lead?.username || null
         }
 
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
         if (leadId) {
-          // Update lead
+          // Update existing lead
           await supabase
             .from('leads')
             .update({
@@ -175,8 +177,6 @@ export async function POST(request: NextRequest) {
               .eq('id', conversation.id)
           }
 
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
           createNotification({
             type: NotificationType.CallBooked,
             leadId,
@@ -194,10 +194,39 @@ export async function POST(request: NextRequest) {
 
           processed++
         } else {
-          // No lead matched — still mark this event URI so we don't re-check it
-          // Store in a lightweight way: insert a tracking record
-          // For now just skip — the event will be re-checked next poll but won't match again
-          skipped++
+          // No existing lead — create one from Calendly data
+          const email = invitee.email
+          const syntheticId = `calendly_${email || eventUuid}`
+
+          const { data: newLead } = await supabase
+            .from('leads')
+            .insert({
+              instagram_user_id: syntheticId,
+              username: email || name || 'unknown',
+              full_name: name || null,
+              source: LeadSource.Calendly,
+              stage: LeadStage.CallBooked,
+              calendly_booked_at: scheduledAt || new Date().toISOString(),
+              calendly_event_uri: event.uri,
+            })
+            .select('id')
+            .single()
+
+          if (newLead) {
+            createNotification({
+              type: NotificationType.CallBooked,
+              leadId: newLead.id,
+              conversationId: null,
+              message: `📅 Call booked! ${name || email || 'Someone'} scheduled via Calendly${scheduledAt ? ` for ${new Date(scheduledAt).toLocaleDateString()}` : ''}`,
+              metadata: {
+                username: name || email || undefined,
+                scheduledAt,
+                leadUrl: `${appUrl}/crm?lead=${newLead.id}`,
+              },
+            }).catch(() => {})
+          }
+
+          processed++
         }
       }
     }

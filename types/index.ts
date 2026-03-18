@@ -20,6 +20,7 @@ export enum LeadSource {
   Comment = 'comment',
   Follow = 'follow',
   Keyword = 'keyword',
+  Calendly = 'calendly',
 }
 
 export enum LeadStage {

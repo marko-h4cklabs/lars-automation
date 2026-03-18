@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateCalendlySignature, logWebhookEvent } from '@/lib/webhooks/security'
 import { createAdminClient } from '@/lib/supabase'
 import { createNotification } from '@/lib/notifications'
-import { LeadStage, NotificationType } from '@/types'
+import { LeadSource, LeadStage, NotificationType } from '@/types'
 
 export async function POST(request: NextRequest) {
   const bodyText = await request.text()
@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       username = lead?.username || null
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
     if (leadId) {
       // Update lead stage to call_booked
       await supabase
@@ -88,9 +90,6 @@ export async function POST(request: NextRequest) {
           .eq('id', conversation.id)
       }
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-      // Create CALL_BOOKED notification via centralized system (handles in-app + Slack)
       createNotification({
         type: NotificationType.CallBooked,
         leadId,
@@ -103,6 +102,39 @@ export async function POST(request: NextRequest) {
           conversationUrl: conversation ? `${appUrl}/inbox/${conversation.id}` : undefined,
         },
       }).catch(() => {})
+    } else {
+      // No existing lead — create one from Calendly data
+      const syntheticId = `calendly_${email || name || 'unknown'}_${Date.now()}`
+
+      const { data: newLead } = await supabase
+        .from('leads')
+        .insert({
+          instagram_user_id: syntheticId,
+          username: email || name || 'unknown',
+          full_name: name || null,
+          source: LeadSource.Calendly,
+          stage: LeadStage.CallBooked,
+          calendly_booked_at: scheduledAt || new Date().toISOString(),
+          calendly_event_uri: eventUri || null,
+        })
+        .select('id')
+        .single()
+
+      if (newLead) {
+        leadId = newLead.id
+
+        createNotification({
+          type: NotificationType.CallBooked,
+          leadId: newLead.id,
+          conversationId: null,
+          message: `📅 Call booked! ${name || email || 'Someone'} scheduled via Calendly${scheduledAt ? ` for ${new Date(scheduledAt).toLocaleDateString()}` : ''}`,
+          metadata: {
+            username: name || email || undefined,
+            scheduledAt,
+            leadUrl: `${appUrl}/crm?lead=${newLead.id}`,
+          },
+        }).catch(() => {})
+      }
     }
 
     logWebhookEvent('webhook.calendly.invitee_created', 'lead', leadId || 'unknown', {
